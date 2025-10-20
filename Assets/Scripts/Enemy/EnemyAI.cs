@@ -1,3 +1,4 @@
+
 // EnemyAI.cs  (chase + leash + return)
 using UnityEngine;
 using System.Collections;
@@ -5,30 +6,40 @@ using System.Collections;
 public class EnemyAI : MonoBehaviour
 {
     [Header("Refs")]
-    [SerializeField] Rigidbody2D rb;
+    private Rigidbody2D rb;
     [SerializeField] Transform player;
-    [SerializeField] EnemyAnimDriver animDrv;
-    [SerializeField] public LayerMask enemyMask;
-    [SerializeField] Collider2D col;   // kéo Collider2D của Enemy vào
+    private EnemyAnimDriver animDrv;
+    public LayerMask enemyMask;
+    private Collider2D col;   // kéo Collider2D của Enemy vào
     [Header("Khu vực tuần tra")]
     public Transform center;
     public float radius = 5f;
-    public float edgeBuffer = 0.3f;
-    public float edgeSteer = 0.7f;
+    private float edgeBuffer = 0.3f;
+    private float edgeSteer = 0.7f;
 
     [Header("Di chuyển")]
     public float speed = 2f;
-    public Vector2 changeDirEvery = new Vector2(0.8f, 1.6f);
-    
+    private Vector2 changeDirEvery = new Vector2(0.8f, 1.6f);
+
+    [Header("Wander")]
+    public Vector2 waypointTime = new Vector2(1.2f, 5f); // thời gian sẽ "đổi ý" sớm
+    public float waypointReach = 0.25f;                   // coi như tới đích
+    private float turnAccel = 4f;                          // độ nhạy đổi hướng
+    private float wanderJitter = 0.5f;                     // nhiễu đường đi
+    private float avoidProbe = 0.8f;                       // tầm dò tránh vật cản
+    private float avoidSideOffset = 0.35f;                 // đẩy đầu dò ra trước
+    Vector2 waypoint;
+    float nextReplan;
+
     [Header("Phát hiện & Đuổi theo")]
     public float detectRadius = 3f;
     public LayerMask playerMask;
-    public bool requireLOS = true;
+    private bool requireLOS = true;
     public LayerMask obstacleMask;   // tường
-    public float chaseSpeedMul = 1.6f;
-    public float loseSightTime = 0.6f;
+    private float chaseSpeedMul = 1.6f;
+    private float loseSightTime = 0.6f;
 
-    [Header("Attack (debug)")]
+    [Header("Attack")]
     public float attackRange = 0.8f;
     public int attackDamage = 5;
     public float attackCooldown = 0.6f;
@@ -38,8 +49,8 @@ public class EnemyAI : MonoBehaviour
     [Header("Leash/Return")]
     public float leashOut = 8f;   // ra quá => Return
     public float leashIn = 7.4f; // vào tới đây mới thôi Return (nhỏ hơn leashOut)
-    public float leashCooldown = 0.3f;
-    public float returnSpeedMul = 1.2f; // thêm
+    private float leashCooldown = 0.3f;
+    private float returnSpeedMul = 1.2f; // thêm
 
     [Header("Retreat / Standoff")]
     public float standoffRadius = 1.6f;   // khoảng đứng vờn quanh player
@@ -74,6 +85,7 @@ public class EnemyAI : MonoBehaviour
         dir = Random.insideUnitCircle.normalized;
         tChange = Random.Range(changeDirEvery.x, changeDirEvery.y);
         prevPos = rb.position;
+        PickWaypoint();
     }
 
     void Update()
@@ -81,14 +93,15 @@ public class EnemyAI : MonoBehaviour
         switch (state)
         {
             case State.Wander:
-                tChange -= Time.deltaTime;
-                if (tChange <= 0f)
                 {
-                    dir = (dir + Random.insideUnitCircle * 0.8f).normalized; // hướng ngẫu nhiên
-                    tChange = Random.Range(changeDirEvery.x, changeDirEvery.y);
+                    // đổi sớm theo timer hoặc khi đã chạm waypoint
+                    if (Time.time >= nextReplan || 
+                        (rb.position - waypoint).sqrMagnitude <= waypointReach * waypointReach)
+                        PickWaypoint();
+
+                    if (SeePlayer()) { state = State.Chase; loseTimer = 0f; }
+                    break;
                 }
-                if (SeePlayer()) { state = State.Chase; loseTimer = 0f; }
-                break;
 
             case State.Chase:
                 if (Vector2.Distance(rb.position, centerPos) >= leashOut)
@@ -154,19 +167,41 @@ public class EnemyAI : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (attacking){ rb.velocity = Vector2.zero; return; } // vẫn nên giữ
+        if (attacking || (animDrv && animDrv.IsHitstun)) { rb.velocity = Vector2.zero; return; }
         Vector2 next = rb.position;
         switch (state)
         {
             case State.Wander:
                 {
+                    // hướng mong muốn: tới waypoint, hơi kéo về tâm khi gần mép
+                    Vector2 toWP = waypoint - rb.position;
+                    Vector2 desired = toWP;
                     Vector2 toC = centerPos - rb.position;
-                    float dist = toC.magnitude;
-                    if (dist > radius) dir = Vector2.Lerp(dir, toC.normalized, 1f).normalized;
-                    else if (dist > radius - edgeBuffer) dir = Vector2.Lerp(dir, toC.normalized, edgeSteer).normalized;
+                    float distC = toC.magnitude;
+                    if (distC > radius - edgeBuffer) desired += toC.normalized * 2f;
+
+                    Vector2 desiredDir = desired.sqrMagnitude > 1e-4f ? desired.normalized : dir;
+
+                    // tránh vật cản bằng CircleCast phía trước
+                    float colRad = 0.18f;
+                    if (col) colRad = Mathf.Max(0.1f, Mathf.Min(col.bounds.extents.x, col.bounds.extents.y));
+                    var hit = Physics2D.CircleCast(
+                        rb.position + desiredDir * avoidSideOffset,
+                        colRad, desiredDir, avoidProbe, obstacleMask);
+                    if (hit.collider)
+                    {
+                        // phản xạ theo normal để quẹo né
+                        desiredDir = Vector2.Reflect(desiredDir, hit.normal).normalized;
+                    }
+
+                    // thêm chút nhiễu để đường đi "tự nhiên" và đổi hướng mượt
+                    desiredDir = (desiredDir + Random.insideUnitCircle * (wanderJitter * Time.fixedDeltaTime)).normalized;
+                    dir = Vector2.Lerp(dir, desiredDir, 1f - Mathf.Exp(-turnAccel * Time.fixedDeltaTime));
+
                     next = rb.position + dir * speed * Time.fixedDeltaTime;
                     break;
                 }
+
             case State.Chase:
                 {
                     if (player)
@@ -215,6 +250,14 @@ public class EnemyAI : MonoBehaviour
         // kiểm tra line of sight với tường
         var hitWall = Physics2D.Linecast(rb.position, player.position, obstacleMask);
         return hitWall.collider == null;
+    }
+
+    void PickWaypoint()
+    {
+        // chọn 1 điểm bất kỳ trong vùng, trừ mép
+        float r = Mathf.Max(0f, radius - edgeBuffer);
+        waypoint = centerPos + (Random.insideUnitCircle * r);
+        nextReplan = Time.time + Random.Range(waypointTime.x, waypointTime.y);
     }
    
     

@@ -1,4 +1,5 @@
 ﻿
+﻿
 ﻿﻿// PlayerCombat.cs (tối giản cho kiếm)
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -142,8 +143,8 @@ Vector2 BowSpawnPos(Vector2 dir)
     void OnDrawGizmosSelected(){
         if (!Application.isPlaying) return;
         var it = inv?.CurrentItem; if (it == null) return;
-        float dist = it.range > 0 ? it.range : 0.6f;
-        float rad  = 0.35f;
+        float dist = it.range > 0 ? it.range : 0.5f;
+        float rad  = 0.5f;
         Vector2 origin = (Vector2)transform.position;
         Vector2 dir = (Mathf.Abs(lastFacing.x)>=Mathf.Abs(lastFacing.y)) ? new Vector2(Mathf.Sign(lastFacing.x),0) : new Vector2(0,Mathf.Sign(lastFacing.y));
         Vector2 center = origin + dir * dist;
