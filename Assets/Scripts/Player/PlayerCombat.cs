@@ -28,7 +28,12 @@ public class PlayerCombat : MonoBehaviour
 
     Rigidbody2D rb; Vector2 move, lastFacing = Vector2.down; float cd;
 
-    void Awake() { rb = GetComponent<Rigidbody2D>(); if (!sprite) sprite = GetComponentInChildren<SpriteRenderer>(); }
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        if (!sprite) sprite = GetComponentInChildren<SpriteRenderer>(); 
+        if (!inv) inv = GetComponent<PlayerInventory>();
+    }
     void Update(){
     if (cd > 0) cd -= Time.deltaTime;
 
