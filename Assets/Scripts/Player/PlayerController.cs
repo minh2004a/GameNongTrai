@@ -18,7 +18,12 @@ public class PlayerController : MonoBehaviour
     public void SetMoveLock(bool locked)
     {
         MoveLocked = locked;
-        if (locked) rb.velocity = Vector2.zero;
+        if (locked){
+            rb.velocity = Vector2.zero;
+            if (pendingMoveInput.sqrMagnitude <= 1e-4f)   // giữ phím thì lưu lại
+                pendingMoveInput = moveInput;
+            moveInput = Vector2.zero;                      // ngắt trôi
+        }
     }
 
     void Awake()
@@ -50,11 +55,13 @@ public class PlayerController : MonoBehaviour
 
 
     public void ApplyPendingMove(){
-            if (pendingMoveInput.sqrMagnitude > 0.0001f){
-            moveInput = pendingMoveInput;
-            UpdateFacingFrom(moveInput);
-        }
-        pendingMoveInput = Vector2.zero;
+       if (pendingMoveInput.sqrMagnitude > 1e-4f){
+        moveInput = pendingMoveInput;
+        UpdateFacingFrom(moveInput);
+    } else {
+        moveInput = Vector2.zero;      // không còn “hướng cũ”
+    }
+    pendingMoveInput = Vector2.zero;
     }
 
     public void OnMove(InputValue v)

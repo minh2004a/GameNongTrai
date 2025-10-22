@@ -1,10 +1,8 @@
 ﻿
-﻿
-﻿﻿// PlayerCombat.cs (tối giản cho kiếm)
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerCombat : MonoBehaviour
+public class PlayerUse : MonoBehaviour
 {
     [SerializeField] Transform bowOrigin;                // drag BowOrigin vào đây
     [SerializeField] Vector2 offsetSide = new(0.25f, 0.08f); // phải/trái
@@ -142,8 +140,6 @@ Vector2 BowSpawnPos(Vector2 dir)
         Vector2 center = rb.position + dir * (it.range > 0f ? it.range : 0.6f);
         var hits = Physics2D.OverlapCircleAll(center, defaultHitRadius, enemyMask);
         foreach (var c in hits) c.GetComponentInParent<IDamageable>()?.TakeHit(it.power);
-
-        Debug.Log($"Hit with {it.name} | range={it.range} | usedDist={dist} | hits={hits.Length}");
     }
     void OnDrawGizmosSelected(){
         if (!Application.isPlaying) return;
@@ -162,11 +158,10 @@ Vector2 BowSpawnPos(Vector2 dir)
        // nếu người chơi vừa nhấn ngược chiều khi đang bị khóa → lấy hướng đó
         var pf = controller ? controller.PendingFacing4() : Vector2.zero;
         if (pf != Vector2.zero) lastFacing = pf;
-
-        controller?.ApplyPendingMove();   // khôi phục input đang giữ
         ApplyFacingAndFlip(lastFacing);   // FLIP NGAY lúc end
         swordLocked = false;
-            LockMove(false);
+        controller?.ApplyPendingMove();   // hoặc sau LockMove(false) đều được
+        LockMove(false);
     
     }
 

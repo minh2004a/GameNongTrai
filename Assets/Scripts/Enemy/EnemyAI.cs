@@ -15,7 +15,7 @@ public class EnemyAI : MonoBehaviour
     public Transform center;
     public float radius = 5f;
     private float edgeBuffer = 0.3f;
-    private float edgeSteer = 0.7f;
+    private float edgeSteer;
 
     [Header("Di chuyển")]
     public float speed = 2f;
@@ -59,9 +59,6 @@ public class EnemyAI : MonoBehaviour
     public float strafeBlend = 0.25f;     // 0..1: tỉ lệ liếc vòng
     int strafeDir;                        // +1 hoặc -1
     float retreatUntil;                   // Time.time tới khi cho phép vào lại
-
-
-
     float leashLockUntil;
     bool attacking;
     public void SetAttacking(bool v) { attacking = v; }
