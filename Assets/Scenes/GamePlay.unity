@@ -855,18 +855,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bowOrigin: {fileID: 1995730655}
-  offsetSide: {x: 0.25, y: -0.25}
-  offsetUp: {x: 0, y: 0.3}
-  offsetDown: {x: 0, y: -0.05}
   inv: {fileID: 647645683}
   controller: {fileID: 647645678}
   anim: {fileID: 647645675}
+  arrowMuzzle: {fileID: 1995730655}
   sprite: {fileID: 647645676}
   enemyMask:
     serializedVersion: 2
     m_Bits: 64
   bowFailSafe: 10
-  swordFailSafe: 10
   defaultHitRadius: 0.45
   minCooldown: 0.15
 --- !u!114 &647645685
@@ -2306,7 +2303,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1995730655}
   m_Layer: 3
-  m_Name: BowOrigin
+  m_Name: ArrowMuzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2321,7 +2318,7 @@ Transform:
   m_GameObject: {fileID: 1995730654}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

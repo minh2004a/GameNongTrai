@@ -4,17 +4,17 @@ using UnityEngine.InputSystem;
 
 public class PlayerUse : MonoBehaviour
 {
-    [SerializeField] Transform bowOrigin;                // drag BowOrigin vào đây
-    [SerializeField] Vector2 offsetSide = new(0.25f, 0.08f); // phải/trái
-    [SerializeField] Vector2 offsetUp   = new(0.00f, 0.30f); // bắn lên
-    [SerializeField] Vector2 offsetDown = new(0.00f,-0.05f); // bắn xuống
+    [SerializeField] Transform ArrowMuzzle;            
     [SerializeField] PlayerInventory inv;
     [SerializeField] PlayerController controller;
     [SerializeField] Animator anim;
+    [SerializeField] Transform arrowMuzzle;
     [SerializeField] SpriteRenderer sprite;
     [SerializeField] LayerMask enemyMask;
     // [SerializeField] bool bowAimWithMouse = true;
     [SerializeField] float bowFailSafe = 0.6f; // thời gian khóa tối đa 1 phát
+    
+    
     bool bowLocked;
     Vector2 bowFacing;
     [SerializeField] float swordFailSafe = 0.5f;
@@ -34,7 +34,13 @@ public class PlayerUse : MonoBehaviour
     }
     void Update(){
     if (cd > 0) cd -= Time.deltaTime;
-
+    if (bowLocked) {
+    var nf = MouseFacing4();
+    if (nf != bowFacing) {
+        bowFacing = nf;
+        ApplyFacingAndFlip(bowFacing);
+    }
+}
     if (bowLocked){ bowTimer -= Time.deltaTime; if (bowTimer <= 0f) BowEnd(); }
     if (swordLocked){ swordTimer -= Time.deltaTime; if (swordTimer <= 0f) AttackEnd(); }
 
@@ -61,15 +67,42 @@ public class PlayerUse : MonoBehaviour
             ? new Vector2(Mathf.Sign(lastFacing.x), 0)
             : new Vector2(0, Mathf.Sign(lastFacing.y));
     }
+
+    Vector2 MouseFacing4()
+    {
+        if (!Camera.main || Mouse.current == null) return Facing4();
+        Vector3 wp = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector2 v = (Vector2)wp - rb.position;
+        if (v.sqrMagnitude < 1e-4f) return Facing4();
+        return (Mathf.Abs(v.x) >= Mathf.Abs(v.y))
+            ? new Vector2(Mathf.Sign(v.x), 0)
+            : new Vector2(0, Mathf.Sign(v.y));
+    }
+    Vector2 Facing4FromDir(Vector2 d){
+    if (Mathf.Abs(d.x) >= Mathf.Abs(d.y)) return d.x >= 0 ? Vector2.right : Vector2.left;
+    return d.y >= 0 ? Vector2.up : Vector2.down;
+    }
+    Vector2 AimDirToMouse(){
+    Vector3 mp = Mouse.current.position.ReadValue();
+    Vector3 mw = Camera.main.ScreenToWorldPoint(mp);
+    mw.z = 0f;
+    return ((Vector2)mw - (Vector2)arrowMuzzle.position).normalized;
+    }
+
     public void OnUse(InputValue v){
     if (!v.isPressed || cd>0 || swordLocked || bowLocked) return;
     var it = inv?.CurrentItem; if (it==null || it.category!=ItemCategory.Weapon) return;
 
-    if (it.weaponType == WeaponType.Bow){
-        anim?.ResetTrigger("Shoot"); anim?.SetTrigger("Shoot");
-        cd = Mathf.Max(minCooldown, it.cooldown);
-        return;
-    }
+   if (it.weaponType == WeaponType.Bow){
+    var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
+    lastFacing = face;                   // quay mặt trước
+    bowFacing  = face;                   // lưu hướng khóa
+    ApplyFacingAndFlip(face);            // cập nhật Animator + flip
+    anim?.ResetTrigger("Shoot");
+    anim?.SetTrigger("Shoot");
+    cd = Mathf.Max(minCooldown, it.cooldown);
+    return;
+}
     if (it.weaponType == WeaponType.Sword){
         anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
         cd = Mathf.Max(minCooldown, it.cooldown);
@@ -86,36 +119,45 @@ public class PlayerUse : MonoBehaviour
     }
 
     public void ShootArrow()
-{
-    var it = inv?.CurrentItem; if (it == null || it.weaponType != WeaponType.Bow) return;
-    Vector2 dir = bowFacing;                  // dùng hướng đã CHỐT
-    Vector2 spawn = BowSpawnPos(dir);         // nếu có hàm offset điểm bắn
+    {
+        var it = inv?.CurrentItem; 
+        if (it == null || it.weaponType != WeaponType.Bow) return;
+
+        // hướng bay TỚI CHUỘT
+        Vector2 dir = AimDirToMouse();
+
+        // vẫn snap hướng nhân vật cho animator/flip
+        bowFacing = Facing4FromDir(dir);
+        ApplyFacingAndFlip(bowFacing); // giữ nếu bạn đang dùng
+
+        // điểm spawn
+        Vector2 spawn = arrowMuzzle ? (Vector2)arrowMuzzle.position : (Vector2)transform.position;
+        // nếu bạn có BowSpawnPos(dir) thì dùng:
+        // spawn = BowSpawnPos(dir);
+
         var go = Instantiate(it.projectilePrefab, spawn, Quaternion.identity);
+
+        // xoay đầu mũi tên theo vector bay
         go.transform.right = dir;
+
         var proj = go.GetComponent<ArrowProjectile>() ?? go.AddComponent<ArrowProjectile>();
-        proj.Init(it.power, dir, it.projectileSpeed, enemyMask, life: 3f, 
-        maxDist: it.projectileMaxDistance, hitVFXPrefab: it.projectileHitVFX);
-        go.transform.right = dir;
-    // tùy chọn: đồng bộ sorting
-    var sr = go.GetComponent<SpriteRenderer>();
-    if (sr && sprite){
-        sr.sortingLayerID = sprite.sortingLayerID;
-        sr.sortingOrder   = sprite.sortingOrder + (dir.y < 0 ? +1 : -1);
+        proj.Init(
+            it.power, 
+            dir, 
+            it.projectileSpeed, 
+            enemyMask, 
+            life: 3f, 
+            maxDist: it.projectileMaxDistance, 
+            hitVFXPrefab: it.projectileHitVFX
+        );
+
+        // đồng bộ sorting nếu cần
+        var sr = go.GetComponent<SpriteRenderer>();
+        if (sr && sprite){
+            sr.sortingLayerID = sprite.sortingLayerID;
+            sr.sortingOrder   = sprite.sortingOrder + (dir.y < 0 ? +1 : -1);
+        }
     }
-}
-
-Vector2 BowSpawnPos(Vector2 dir)
-{
-    Vector2 basePos = bowOrigin ? (Vector2)bowOrigin.position : rb.position;
-    Vector2 face = (Mathf.Abs(dir.x) >= Mathf.Abs(dir.y))
-        ? new Vector2(Mathf.Sign(dir.x), 0)
-        : new Vector2(0, Mathf.Sign(dir.y));
-
-    if (face.x != 0) return basePos + new Vector2(Mathf.Sign(face.x) * Mathf.Abs(offsetSide.x), offsetSide.y);
-    if (face.y > 0)  return basePos + offsetUp;
-    return offsetDown + basePos;
-}
-
     // Animation Events trên clip Attack:
     public void AttackStart(){
         swordTimer = swordFailSafe;
@@ -123,10 +165,12 @@ Vector2 BowSpawnPos(Vector2 dir)
         LockMove(true);
         }
     public void BowStart(){
-        bowTimer = bowFailSafe;
-        bowLocked = true; bowFacing = Facing4();
-        LockMove(true);
-    }
+    bowTimer = bowFailSafe;
+    bowLocked = true;
+    bowFacing = MouseFacing4();          // chốt theo chuột
+    ApplyFacingAndFlip(bowFacing);       // đảm bảo hướng Animator đúng
+    LockMove(true);
+}
 
     public void AttackHit() // gọi bằng Animation Event
     {
