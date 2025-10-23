@@ -84,6 +84,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         hp = 0;
         if (IsDead) return;
         IsDead = true;
+        GetComponent<DropLootOnDeath>()?.Drop();
         animDrv?.CancelKnockback();   
         animator.ResetTrigger("Hit");
         animator.SetBool("Dead", true);                    

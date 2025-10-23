@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum ItemCategory { Tool, Weapon }
+public enum ItemCategory { Tool, Weapon, Resource, Consumable, Currency } // thêm loại
 public enum ToolType { None, Axe, Hoe, Sickle, Shovel }
 public enum WeaponType { None, Sword, Bow }
 public interface IToolTarget
@@ -14,6 +14,9 @@ public class ItemSO : ScriptableObject
     public string id;
     public Sprite icon;
     public ItemCategory category;
+    public bool stackable = true;   // thêm
+    public int maxStack = 999;      // thêm
+
     public ToolType toolType;           // dùng khi category = Tool
     public WeaponType weaponType;       // dùng khi category = Weapon
 
