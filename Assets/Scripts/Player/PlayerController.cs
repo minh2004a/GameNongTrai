@@ -13,17 +13,17 @@ public class PlayerController : MonoBehaviour
     Vector2 moveInput;
     Vector2 lastFacing = Vector2.right;
     Vector2 pendingMoveInput;
-
     public bool MoveLocked { get; private set; }
+    public Vector2 Facing4 => lastFacing;
     public void SetMoveLock(bool locked)
     {
-        MoveLocked = locked;
-        if (locked){
-            rb.velocity = Vector2.zero;
-            if (pendingMoveInput.sqrMagnitude <= 1e-4f)   // giữ phím thì lưu lại
-                pendingMoveInput = moveInput;
-            moveInput = Vector2.zero;                      // ngắt trôi
-        }
+         MoveLocked = locked;
+    canMove = !locked;                // CHỐT: tắt input khi lock
+    if (locked){
+        rb.velocity = Vector2.zero;
+        if (pendingMoveInput.sqrMagnitude <= 1e-4f) pendingMoveInput = moveInput;
+        moveInput = Vector2.zero;
+    }
     }
 
     void Awake()
@@ -52,8 +52,7 @@ public class PlayerController : MonoBehaviour
             ? new Vector2(Mathf.Sign(v.x), 0)
             : new Vector2(0, Mathf.Sign(v.y));
     }
-
-
+    
     public void ApplyPendingMove(){
        if (pendingMoveInput.sqrMagnitude > 1e-4f){
         moveInput = pendingMoveInput;
@@ -66,15 +65,19 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue v)
     {
-       var input = v.Get<Vector2>();
-    if (!canMove){ pendingMoveInput = input; return; } // chỉ lưu, không áp
-    moveInput = input;
-    UpdateFacingFrom(moveInput);
+         var input = v.Get<Vector2>();
+        if (!canMove || MoveLocked){          // giữ hướng, không áp vào rb
+            pendingMoveInput = input;
+            return;
+        }
+        moveInput = input;
+        UpdateFacingFrom(moveInput);
     }
 
 
     void Update()
     {
+        if (!MoveLocked) { anim.SetFloat("Horizontal", lastFacing.x); anim.SetFloat("Vertical", lastFacing.y); }
         if (sprite) sprite.flipX = lastFacing.x < 0f;
         if (anim)
         {
@@ -85,6 +88,6 @@ public class PlayerController : MonoBehaviour
     }
 
    void FixedUpdate(){
-    rb.velocity = canMove ? moveInput.normalized * moveSpeed : Vector2.zero;
+    rb.velocity = (canMove && !MoveLocked) ? moveInput.normalized * moveSpeed : Vector2.zero;
 }
 }

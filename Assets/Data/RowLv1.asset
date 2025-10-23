@@ -19,8 +19,8 @@ MonoBehaviour:
   weaponType: 2
   power: 1
   range: 0.5
-  cooldown: 1
+  cooldown: 3
   projectilePrefab: {fileID: 410255017714095588, guid: fef98256d8fc7c54fba9207cc68d023d, type: 3}
   projectileSpeed: 15
-  projectileMaxDistance: 10
+  projectileMaxDistance: 15
   projectileHitVFX: {fileID: 7744799907222207324, guid: 4edb50995162dfa4fbb6e9573316233e, type: 3}

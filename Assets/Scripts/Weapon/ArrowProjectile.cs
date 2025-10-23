@@ -11,7 +11,7 @@ public class ArrowProjectile : MonoBehaviour {
         dmg = damage; dir = direction.normalized; speed = spd; mask = enemyMask;
         startPos = transform.position; maxDistSqr = maxDist * maxDist; hitVFX = hitVFXPrefab;
 
-        var rb = GetComponent<Rigidbody2D>(); rb.isKinematic = true; rb.gravityScale = 0f;
+        var rb = GetComponent<Rigidbody2D>(); rb.gravityScale = 0f;
         // Có thể dùng CapsuleCollider2D/CircleCollider2D đặt IsTrigger = true trên prefab
         Destroy(gameObject, life); // dự phòng
     }

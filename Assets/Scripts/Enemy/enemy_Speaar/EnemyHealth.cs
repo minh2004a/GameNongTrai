@@ -63,6 +63,19 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         if (hp <= 0) return;
         hp = Mathf.Min(maxHp, hp + Mathf.Max(0, amount));
     }
+    public void SetMaxHp(int v){
+    int nv = Mathf.Max(1, v);
+    // nếu đã khởi tạo rồi thì giữ % máu hiện tại khi đổi data trong Editor
+    if (hp > 0 && maxHp > 0){
+        float ratio = hp / (float)maxHp;
+        maxHp = nv;
+        hp = Mathf.Clamp(Mathf.RoundToInt(maxHp * ratio), 1, maxHp);
+    }else{
+        maxHp = nv;
+        hp = maxHp;
+    }
+}
+
 
     public void Kill() { if (hp > 0) Die(); }
 

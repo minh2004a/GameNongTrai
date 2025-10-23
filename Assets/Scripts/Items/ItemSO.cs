@@ -3,7 +3,11 @@ using UnityEngine;
 public enum ItemCategory { Tool, Weapon }
 public enum ToolType { None, Axe, Hoe, Sickle, Shovel }
 public enum WeaponType { None, Sword, Bow }
-
+public interface IToolTarget
+{
+    void Hit(ToolType tool, int power, Vector2 hitDir);
+}
+public interface IDamageable { void TakeHit(int dmg); }
 [CreateAssetMenu(menuName = "Items/Item")]
 public class ItemSO : ScriptableObject
 {
@@ -15,6 +19,7 @@ public class ItemSO : ScriptableObject
 
     public int power = 1;
     public float range = 1f;
+    // public float radius = 0.35f;
     public float cooldown = 0.2f;
 
     // cho Bow (để null với vũ khí/công cụ khác)

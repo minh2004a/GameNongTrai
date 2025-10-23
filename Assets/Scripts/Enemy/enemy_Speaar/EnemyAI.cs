@@ -18,7 +18,7 @@ public class EnemyAI : MonoBehaviour
     private float edgeSteer;
 
     [Header("Di chuyển")]
-    public float speed = 2f;
+    public float speed;
     private Vector2 changeDirEvery = new Vector2(0.8f, 1.6f);
 
     [Header("Wander")]
@@ -49,7 +49,7 @@ public class EnemyAI : MonoBehaviour
     [Header("Leash/Return")]
     public float leashOut = 8f;   // ra quá => Return
     public float leashIn = 7.4f; // vào tới đây mới thôi Return (nhỏ hơn leashOut)
-    private float leashCooldown = 0.3f;
+    private float leashCooldown = 1f;
     private float returnSpeedMul = 1.2f; // thêm
 
     [Header("Retreat / Standoff")]

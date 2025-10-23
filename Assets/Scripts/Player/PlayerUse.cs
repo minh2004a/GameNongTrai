@@ -4,26 +4,24 @@ using UnityEngine.InputSystem;
 
 public class PlayerUse : MonoBehaviour
 {
-    [SerializeField] Transform ArrowMuzzle;            
+    [SerializeField] Transform arrowMuzzle;            
     [SerializeField] PlayerInventory inv;
     [SerializeField] PlayerController controller;
     [SerializeField] Animator anim;
-    [SerializeField] Transform arrowMuzzle;
     [SerializeField] SpriteRenderer sprite;
     [SerializeField] LayerMask enemyMask;
     // [SerializeField] bool bowAimWithMouse = true;
-    [SerializeField] float bowFailSafe = 0.6f; // thời gian khóa tối đa 1 phát
+    private float bowFailSafe = 10f; // thời gian khóa tối đa 1 phát
     
     
     bool bowLocked;
     Vector2 bowFacing;
-    [SerializeField] float swordFailSafe = 0.5f;
+    private float swordFailSafe = 10f;
     bool swordLocked; float swordTimer;
     Vector2 swordFacing;
     float bowTimer;
     [SerializeField] float defaultHitRadius = 0.35f; // giữ bán kính mặc định
     [SerializeField] float minCooldown = 0.15f;
-
     Rigidbody2D rb; Vector2 move, lastFacing = Vector2.down; float cd;
 
     void Awake()
@@ -103,11 +101,13 @@ public class PlayerUse : MonoBehaviour
     cd = Mathf.Max(minCooldown, it.cooldown);
     return;
 }
-    if (it.weaponType == WeaponType.Sword){
-        anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
-        cd = Mathf.Max(minCooldown, it.cooldown);
-        return;
-    }
+        if (it.weaponType == WeaponType.Sword)
+        {
+            anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
+            cd = Mathf.Max(minCooldown, it.cooldown);
+            return;
+        }
+    // Rìu
 }
 
     void ApplyFacingAndFlip(Vector2 face)
@@ -228,5 +228,7 @@ public void BowEnd(){
         rb.velocity = Vector2.zero;
     }
 
+    
 
+    
 }

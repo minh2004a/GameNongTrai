@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: AxeLv1
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: -1677888833, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  icon: {fileID: 1966405731, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
   category: 0
   toolType: 1
   weaponType: 0
   power: 1
-  range: 0.5
+  range: 0.45
   cooldown: 1
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10

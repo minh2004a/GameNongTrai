@@ -15,11 +15,13 @@ public class PlayerInventory : MonoBehaviour
     public ItemSO CurrentItem =>
         (selected >= 0 && selected < hotbar.Length) ? hotbar[selected].item : null;
 
-    public void SelectSlot(int i){
+    public void SelectSlot(int i)
+    {
         if ((uint)i >= (uint)hotbar.Length || i == selected) return;
         selected = i;
         SelectedChanged?.Invoke(i);
     }
+    
     public void CycleSlot(int d){
         int n = hotbar.Length; if (n == 0) return;
         SelectSlot((selected + ((d % n + n) % n)) % n);
