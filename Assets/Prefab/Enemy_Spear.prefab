@@ -33,7 +33,7 @@ Transform:
   m_GameObject: {fileID: 1094077757790412357}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.6313362, y: 6.975544, z: 16.19305}
+  m_LocalPosition: {x: 1.37, y: 6.13, z: 16.19305}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47309783b9723624f86bf14ae7b04ae6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  player: {fileID: 8600441533436656489, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
   enemyMask:
     serializedVersion: 2
     m_Bits: 64
@@ -195,7 +195,7 @@ MonoBehaviour:
   speed: 2
   waypointTime: {x: 1.2, y: 5}
   waypointReach: 0.25
-  detectRadius: 3
+  detectRadius: 6
   playerMask:
     serializedVersion: 2
     m_Bits: 8
@@ -203,9 +203,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   attackRange: 0.8
-  attackDamage: 5
+  attackDamage: 1
   attackCooldown: 0.6
-  leashOut: 8
+  leashOut: 10
   leashIn: 7.4
   standoffRadius: 1.6
   retreatSpeedMul: 1.31
@@ -263,6 +263,6 @@ MonoBehaviour:
   drops:
   - item: {fileID: 11400000, guid: 9c4d5aa95aed93146ae6f48eb02af92f, type: 2}
     countRange: {x: 1, y: 5}
-    chance: 0
+    chance: 1
   scatterSpeed: {x: 0.8, y: 6}
   scatterAngle: 35

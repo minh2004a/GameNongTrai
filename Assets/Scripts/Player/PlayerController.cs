@@ -75,19 +75,26 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    void Update()
-    {
-        if (!MoveLocked) { anim.SetFloat("Horizontal", lastFacing.x); anim.SetFloat("Vertical", lastFacing.y); }
-        if (sprite) sprite.flipX = lastFacing.x < 0f;
-        if (anim)
-        {
-            anim.SetFloat("Horizontal", Mathf.Abs(lastFacing.x));
-            anim.SetFloat("Vertical",   lastFacing.y);
-            anim.SetFloat("Speed",      MoveLocked ? 0f : moveInput.sqrMagnitude);
-        }
+    void Update(){
+    // Speed luôn cập nhật
+    if (anim){
+        anim.SetFloat("Speed", moveInput.sqrMagnitude);
     }
 
-   void FixedUpdate(){
+    // Cách 3: chỉ cập nhật hướng khi KHÔNG lock và đang có input di chuyển
+    if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f){
+        if (anim){
+            anim.SetFloat("Horizontal", lastFacing.x);
+            anim.SetFloat("Vertical",   lastFacing.y);
+        }
+        if (sprite){
+            sprite.flipX = lastFacing.x < 0f;
+        }
+    }
+}
+
+
+    void FixedUpdate(){
     rb.velocity = (canMove && !MoveLocked) ? moveInput.normalized * moveSpeed : Vector2.zero;
 }
 }

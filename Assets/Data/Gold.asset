@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Gold
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: 0}
-  category: 0
+  icon: {fileID: 1327782269, guid: 6613522ba3a7c2643b4e6f83dcce388f, type: 3}
+  category: 4
   stackable: 1
   maxStack: 999
   toolType: 0

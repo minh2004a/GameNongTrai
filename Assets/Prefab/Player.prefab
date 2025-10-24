@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 1845909153704676813}
   - component: {fileID: 1118344859087931616}
   - component: {fileID: 2944587308785528253}
-  - component: {fileID: 4624846266624754880}
+  - component: {fileID: 8069884629022415873}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -255,22 +255,71 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
     count: 1
   - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
-    count: 2
+    count: 1
   - item: {fileID: 11400000, guid: f5cdcfe9cbdc69b4d872aff35b005ba5, type: 2}
-    count: 3
-  - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
-    count: 4
+    count: 1
   - item: {fileID: 0}
-    count: 5
+    count: 1
   - item: {fileID: 0}
-    count: 6
+    count: 1
   - item: {fileID: 0}
-    count: 7
+    count: 1
   - item: {fileID: 0}
-    count: 8
+    count: 1
   - item: {fileID: 0}
-    count: 9
+    count: 1
+  - item: {fileID: 0}
+    count: 1
   selected: 0
+  bag:
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
 --- !u!114 &1118344859087931616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,7 +356,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHP: 5
   currentHP: 0
---- !u!114 &4624846266624754880
+--- !u!114 &8069884629022415873
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -316,18 +365,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 936923126784610755}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 660870a40b50e864596482648182e5eb, type: 3}
+  m_Script: {fileID: 11500000, guid: f01a8811b4dfbe344897318fbd2a02d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inv: {fileID: 1845909153704676813}
-  controller: {fileID: 5362268058865736135}
-  anim: {fileID: 2327405225107318857}
-  hitOrigin: {fileID: 6044478509660338191}
-  targetMask:
+  radius: 2.5
+  pullForce: 25
+  maxSpeed: 25
+  pickupMask:
     serializedVersion: 2
-    m_Bits: 256
-  hitRadius: 0.45
-  toolFailSafe: 10
+    m_Bits: 1024
 --- !u!1 &3900807971405855068
 GameObject:
   m_ObjectHideFlags: 0

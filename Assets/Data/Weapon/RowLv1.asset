@@ -10,17 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SwordLv1
+  m_Name: RowLv1
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: 1044218959, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  icon: {fileID: -312610671, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
   category: 1
+  stackable: 1
+  maxStack: 999
   toolType: 0
-  weaponType: 1
-  power: 2
+  weaponType: 2
+  Dame: 1
   range: 0.5
-  cooldown: 0.5
-  projectilePrefab: {fileID: 0}
-  projectileSpeed: 10
-  projectileMaxDistance: 8
-  projectileHitVFX: {fileID: 0}
+  cooldown: 1
+  projectilePrefab: {fileID: 410255017714095588, guid: fef98256d8fc7c54fba9207cc68d023d, type: 3}
+  projectileSpeed: 15
+  projectileMaxDistance: 15
+  projectileHitVFX: {fileID: 7744799907222207324, guid: 4edb50995162dfa4fbb6e9573316233e, type: 3}

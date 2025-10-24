@@ -1,13 +1,20 @@
-// ChopTree.cs
 using UnityEngine;
 
 public class ChopTree : MonoBehaviour, IToolTarget
 {
     public int hp = 3;
+    public DropLootOnDeath dropper; // kéo từ Inspector
 
-    public void Hit(ToolType tool, int power, Vector2 hitDir){
+    void Reset(){ dropper = GetComponent<DropLootOnDeath>(); }
+
+    public void Hit(ToolType tool, int power, Vector2 hitDir)
+    {
         if (tool != ToolType.Axe) return;
-        hp -= power;
-        if (hp <= 0) Destroy(gameObject); // sau này thay bằng rơi loot
+        hp -= Mathf.Max(1, power);
+        if (hp <= 0)
+        {
+            if (dropper) dropper.Drop(); // rơi gỗ
+            Destroy(gameObject);
+        }
     }
 }

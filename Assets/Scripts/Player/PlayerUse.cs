@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,9 +13,9 @@ public class PlayerUse : MonoBehaviour
     // [SerializeField] bool bowAimWithMouse = true;
     private float bowFailSafe = 10f; // thời gian khóa tối đa 1 phát
     
-    
     bool bowLocked;
     Vector2 bowFacing;
+    Vector2 bowDirLocked;
     private float swordFailSafe = 10f;
     bool swordLocked; float swordTimer;
     Vector2 swordFacing;
@@ -32,13 +32,7 @@ public class PlayerUse : MonoBehaviour
     }
     void Update(){
     if (cd > 0) cd -= Time.deltaTime;
-    if (bowLocked) {
-    var nf = MouseFacing4();
-    if (nf != bowFacing) {
-        bowFacing = nf;
-        ApplyFacingAndFlip(bowFacing);
-    }
-}
+   
     if (bowLocked){ bowTimer -= Time.deltaTime; if (bowTimer <= 0f) BowEnd(); }
     if (swordLocked){ swordTimer -= Time.deltaTime; if (swordTimer <= 0f) AttackEnd(); }
 
@@ -118,46 +112,28 @@ public class PlayerUse : MonoBehaviour
         if (sprite) sprite.flipX = face.x < 0f;   // chỉ lật render, không đổi collider :contentReference[oaicite:0]{index=0}
     }
 
-    public void ShootArrow()
-    {
-        var it = inv?.CurrentItem; 
-        if (it == null || it.weaponType != WeaponType.Bow) return;
+    public void ShootArrow(){
+    var it = inv?.CurrentItem; 
+    if (it == null || it.weaponType != WeaponType.Bow) return;
 
-        // hướng bay TỚI CHUỘT
-        Vector2 dir = AimDirToMouse();
+    Vector2 dir = bowLocked ? bowDirLocked : AimDirToMouse();   // <— SỬA
+    // KHÔNG cập nhật lại bowFacing theo chuột ở đây
 
-        // vẫn snap hướng nhân vật cho animator/flip
-        bowFacing = Facing4FromDir(dir);
-        ApplyFacingAndFlip(bowFacing); // giữ nếu bạn đang dùng
+    Vector2 spawn = arrowMuzzle ? (Vector2)arrowMuzzle.position : (Vector2)transform.position;
+    var go = Instantiate(it.projectilePrefab, spawn, Quaternion.identity);
+    go.transform.right = dir;
 
-        // điểm spawn
-        Vector2 spawn = arrowMuzzle ? (Vector2)arrowMuzzle.position : (Vector2)transform.position;
-        // nếu bạn có BowSpawnPos(dir) thì dùng:
-        // spawn = BowSpawnPos(dir);
+    var proj = go.GetComponent<ArrowProjectile>() ?? go.AddComponent<ArrowProjectile>();
+    proj.Init(it.Dame, dir, it.projectileSpeed, enemyMask, life: 3f,
+              maxDist: it.projectileMaxDistance, hitVFXPrefab: it.projectileHitVFX);
 
-        var go = Instantiate(it.projectilePrefab, spawn, Quaternion.identity);
-
-        // xoay đầu mũi tên theo vector bay
-        go.transform.right = dir;
-
-        var proj = go.GetComponent<ArrowProjectile>() ?? go.AddComponent<ArrowProjectile>();
-        proj.Init(
-            it.power, 
-            dir, 
-            it.projectileSpeed, 
-            enemyMask, 
-            life: 3f, 
-            maxDist: it.projectileMaxDistance, 
-            hitVFXPrefab: it.projectileHitVFX
-        );
-
-        // đồng bộ sorting nếu cần
-        var sr = go.GetComponent<SpriteRenderer>();
-        if (sr && sprite){
-            sr.sortingLayerID = sprite.sortingLayerID;
-            sr.sortingOrder   = sprite.sortingOrder + (dir.y < 0 ? +1 : -1);
-        }
+    var sr = go.GetComponent<SpriteRenderer>();
+    if (sr && sprite){
+        sr.sortingLayerID = sprite.sortingLayerID;
+        sr.sortingOrder   = sprite.sortingOrder + (dir.y < 0 ? +1 : -1);
     }
+}
+
     // Animation Events trên clip Attack:
     public void AttackStart(){
         swordTimer = swordFailSafe;
@@ -165,12 +141,13 @@ public class PlayerUse : MonoBehaviour
         LockMove(true);
         }
     public void BowStart(){
-    bowTimer = bowFailSafe;
-    bowLocked = true;
-    bowFacing = MouseFacing4();          // chốt theo chuột
-    ApplyFacingAndFlip(bowFacing);       // đảm bảo hướng Animator đúng
-    LockMove(true);
-}
+        bowTimer = bowFailSafe;
+        bowLocked = true;
+        bowFacing = MouseFacing4();        // chốt 4 hướng cho animator
+        bowDirLocked = AimDirToMouse();    // chốt vector bay của mũi tên 1 lần  <— THÊM
+        ApplyFacingAndFlip(bowFacing);
+        LockMove(true);
+    }
 
     public void AttackHit() // gọi bằng Animation Event
     {
@@ -183,7 +160,7 @@ public class PlayerUse : MonoBehaviour
         Vector2 dir = swordLocked ? swordFacing : Facing4();
         Vector2 center = rb.position + dir * (it.range > 0f ? it.range : 0.6f);
         var hits = Physics2D.OverlapCircleAll(center, defaultHitRadius, enemyMask);
-        foreach (var c in hits) c.GetComponentInParent<IDamageable>()?.TakeHit(it.power);
+        foreach (var c in hits) c.GetComponentInParent<IDamageable>()?.TakeHit(it.Dame);
     }
     void OnDrawGizmosSelected(){
         if (!Application.isPlaying) return;
@@ -209,15 +186,14 @@ public class PlayerUse : MonoBehaviour
     
     }
 
-public void BowEnd(){
-        var pf = controller ? controller.PendingFacing4() : Vector2.zero;
-        if (pf != Vector2.zero) lastFacing = pf;
-
-        controller?.ApplyPendingMove();
+    public void BowEnd(){
+        lastFacing = bowFacing;            // giữ hướng vừa aim
         ApplyFacingAndFlip(lastFacing);
         bowLocked = false;
         LockMove(false);
+        controller?.ApplyPendingMove();    // áp input sau khi mở khoá
     }
+
     void LockMove(bool on)
     {
         if (controller)
