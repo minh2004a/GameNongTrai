@@ -33,25 +33,21 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         if (rootCanvas) rootCanvas = rootCanvas.rootCanvas;
     }
 
-    void Update(){
-        if (!pointerDown || dragging) return;
+   void Update(){
+    if (dragging && ghost) ghost.rectTransform.position = Input.mousePosition;
+    if (!pointerDown) return;
 
-        if (pointerDown && Time.time - pressTime >= holdSeconds){
-            // chỉ cho kéo khi có item
-            if (icon && icon.enabled && icon.sprite){
-                StartDragGhost();
-                dragging = true;
-                suppressClick = true;
-            }else{
-                // không có item thì không vào kéo
-                pointerDown = false;
-            }
-        }
-
-        if (dragging && ghost){
-            ghost.rectTransform.position = Input.mousePosition;
+    if (!dragging && Time.time - pressTime >= holdSeconds){
+        if (icon && icon.enabled && icon.sprite){
+            StartDragGhost();
+            dragging = true;
+            suppressClick = true;
+        } else {
+            pointerDown = false;
         }
     }
+}
+
 
     public void Render(ItemStack st, bool selected, int index, HotbarUI ui){
         idx = index; owner = ui;
@@ -72,37 +68,65 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         btn.onClick.AddListener(()=> { if (!suppressClick) owner.OnClickSlot(idx); });
     }
 
-    public void OnPointerDown(PointerEventData eventData){
+    public void OnPointerDown(PointerEventData e)
+    {
         pointerDown = true;
         pressTime = Time.time;
-        suppressClick = false; // cho phép click nếu không vào kéo
+        suppressClick = false;
     }
 
-    public void OnPointerUp(PointerEventData eventData){
-        if (dragging){
-            // kết thúc kéo: tìm slot dưới con trỏ
-            FinishDragAndSwap();
-        }
+    public void OnPointerUp(PointerEventData e)
+    {
         pointerDown = false;
-        dragging = false;
-        DestroyGhost();
-        // click sẽ bị chặn nếu đã kéo (suppressClick=true). Nếu không kéo, onClick vẫn chạy bình thường.
+
+        if (dragging)
+        {
+            dragging = false;
+            if (ghost) Destroy(ghost.gameObject);
+
+            // Raycast tìm ô đích dưới con trỏ rồi hoán đổi/gộp
+            var results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(e, results);
+            HotbarSlotUI target = null;
+            foreach (var r in results)
+            {
+                target = r.gameObject.GetComponentInParent<HotbarSlotUI>();
+                if (target) break;
+            }
+            if (target && owner) owner.RequestMoveOrMerge(idx, target.Index);
+            return;
+        }
+
+        if (!suppressClick)
+        {
+            if (owner) owner.OnClickSlot(idx);
+        }
+
+    }
+    void OnDisable()
+    {
+        if (ghost) Destroy(ghost.gameObject);
+        dragging = false; pointerDown = false; suppressClick = false;
     }
 
-    void StartDragGhost(){
-        if (!rootCanvas) rootCanvas = GetComponentInParent<Canvas>()?.rootCanvas;
-        if (!rootCanvas) return;
-
-        var go = new GameObject("HotbarDragGhost", typeof(Image), typeof(CanvasGroup));
-        go.transform.SetParent(rootCanvas.transform, false);
-        ghost = go.GetComponent<Image>();
+    void StartDragGhost()
+    {
+        ghost = new GameObject("DragGhost", typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
+        ghost.transform.SetParent(rootCanvas.transform, false);
+        ghost.transform.SetAsLastSibling();
+        ghost.sprite = icon.sprite;
+        ghost.preserveAspect = true;
         ghost.raycastTarget = false;
-        ghost.sprite = icon ? icon.sprite : null;
-        ghost.SetNativeSize();
-        go.GetComponent<CanvasGroup>().alpha = 0.8f;
+        var cg = ghost.gameObject.AddComponent<CanvasGroup>();
+        cg.blocksRaycasts = false;
+        cg.alpha = 0.85f;
+
+        // kích thước giống icon gốc
+        ghost.rectTransform.sizeDelta = (icon ? icon.rectTransform.rect.size : new Vector2(48, 48));
         ghost.rectTransform.pivot = new Vector2(0.5f, 0.5f);
         ghost.rectTransform.position = Input.mousePosition;
     }
+
 
     void DestroyGhost(){
         if (ghost){

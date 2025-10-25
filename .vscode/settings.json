@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "NongTrai22.slnx"
+    "dotnet.defaultSolution": "NongTrai.slnx"
 }

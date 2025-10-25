@@ -1,17 +1,22 @@
-﻿// PlayerHealth.cs
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerHealth : MonoBehaviour
 {
     public int maxHP = 100;
-    public int currentHP;
+    public int hp;
 
-    void Awake() { currentHP = maxHP; }
+    public UnityEvent<float> OnHpPercent; // giá trị 0..1
 
-    public void TakeDamage(int dmg)
-    {
-        currentHP = Mathf.Max(0, currentHP - dmg);
-        Debug.Log($"Player HP: {currentHP}");
-        // TODO: thêm flash/knockback/ chết...
+    void Awake(){ hp = maxHP; OnHpPercent?.Invoke(1f); }
+
+    public void TakeDamage(int dmg){
+        hp = Mathf.Max(0, hp - dmg);
+        OnHpPercent?.Invoke((float)hp / maxHP);
+    }
+
+    public void Heal(int v){
+        hp = Mathf.Min(maxHP, hp + v);
+        OnHpPercent?.Invoke((float)hp / maxHP);
     }
 }
