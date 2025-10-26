@@ -10,9 +10,13 @@ public class PickupItem2D : MonoBehaviour
     void Reset(){ iconRenderer = GetComponentInChildren<SpriteRenderer>(); }
     public void Set(ItemSO i, int c){ item = i; count = Mathf.Max(1,c); if (iconRenderer) iconRenderer.sprite = i ? i.icon : null; }
 
-    void OnTriggerEnter2D(Collider2D other){
-        var inv = other.GetComponent<PlayerInventory>();
-        if (!inv || !item) return;
-        if (InventoryUtil.TryAddToHotbar(inv, item, count)) Destroy(gameObject);
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+        var inv = other.GetComponent<PlayerInventory>(); if (!inv) return;
+
+        int left = inv.AddItem(item, count);
+        if (left == 0) Destroy(gameObject);
+        else count = left; // kho còn dư chỗ → giữ lại phần chưa nhét được
     }
 }

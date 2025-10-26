@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SwordLv1
+  m_Name: Axe
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: 1044218959, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
-  category: 1
-  stackable: 1
+  icon: {fileID: 1966405731, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  category: 0
+  stackable: 0
   maxStack: 999
-  toolType: 0
-  weaponType: 1
-  Dame: 8
+  toolType: 1
+  weaponType: 0
+  Dame: 1
   range: 0.45
   cooldown: 0.4
   projectilePrefab: {fileID: 0}

@@ -4,7 +4,7 @@ public class AttackUnlockSMB : StateMachineBehaviour
 {
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        var pc = animator.GetComponentInParent<PlayerUse>();
+        var pc = animator.GetComponentInParent<PlayerUseWeapon>();
         if (pc) pc.AttackEnd();
     }
 }

@@ -53,7 +53,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public void TakeHit(int dmg)
     {
-        var p = FindObjectOfType<PlayerUse>(); // lấy vị trí player làm hướng knockback
+        var p = FindObjectOfType<PlayerUseWeapon>(); // lấy vị trí player làm hướng knockback
         Vector2 from = p ? (Vector2)p.transform.position : (Vector2)transform.position;
         TakeDamage(dmg, from);
     }

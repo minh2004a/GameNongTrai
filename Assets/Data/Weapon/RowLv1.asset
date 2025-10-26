@@ -19,7 +19,7 @@ MonoBehaviour:
   maxStack: 999
   toolType: 0
   weaponType: 2
-  Dame: 1
+  Dame: 5
   range: 0.5
   cooldown: 1
   projectilePrefab: {fileID: 410255017714095588, guid: fef98256d8fc7c54fba9207cc68d023d, type: 3}

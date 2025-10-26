@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerUse : MonoBehaviour
+public class PlayerUseWeapon : MonoBehaviour
 {
     [SerializeField] Transform arrowMuzzle;            
     [SerializeField] PlayerInventory inv;
@@ -20,7 +20,7 @@ public class PlayerUse : MonoBehaviour
     bool swordLocked; float swordTimer;
     Vector2 swordFacing;
     float bowTimer;
-    [SerializeField] float defaultHitRadius = 0.35f; // giữ bán kính mặc định
+    [SerializeField] float defaultForward = 0.6f;   // NEW: khoảng cách tâm hitbox mặc định cho kiếm
     [SerializeField] float minCooldown = 0.15f;
     Rigidbody2D rb; Vector2 move, lastFacing = Vector2.down; float cd;
 
@@ -149,31 +149,20 @@ public class PlayerUse : MonoBehaviour
         LockMove(true);
     }
 
-    public void AttackHit() // gọi bằng Animation Event
+    public void AttackHit()
     {
         var it = inv?.CurrentItem; if (it == null) return;
 
-        float dist = it.range > 0f ? it.range : 0.6f;      // lấy từ ItemSO
-        float rad = defaultHitRadius;
-
-        Vector2 origin = rb.position;
         Vector2 dir = swordLocked ? swordFacing : Facing4();
-        Vector2 center = rb.position + dir * (it.range > 0f ? it.range : 0.6f);
-        var hits = Physics2D.OverlapCircleAll(center, defaultHitRadius, enemyMask);
+
+        float fwd = (it.hitboxForward >= 0f) ? it.hitboxForward : defaultForward;
+        float rad = Mathf.Max(0.01f, it.range) * Mathf.Max(0.01f, it.hitboxScale);
+
+        Vector2 center = rb.position + dir * fwd + new Vector2(0f, it.hitboxYOffset);
+
+        var hits = Physics2D.OverlapCircleAll(center, rad, enemyMask);
         foreach (var c in hits) c.GetComponentInParent<IDamageable>()?.TakeHit(it.Dame);
     }
-    void OnDrawGizmosSelected(){
-        if (!Application.isPlaying) return;
-        var it = inv?.CurrentItem; if (it == null) return;
-        float dist = it.range > 0 ? it.range : 0.5f;
-        float rad  = 0.5f;
-        Vector2 origin = (Vector2)transform.position;
-        Vector2 dir = (Mathf.Abs(lastFacing.x)>=Mathf.Abs(lastFacing.y)) ? new Vector2(Mathf.Sign(lastFacing.x),0) : new Vector2(0,Mathf.Sign(lastFacing.y));
-        Vector2 center = origin + dir * dist;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(center, rad);
-    }
-
     public void AttackEnd()
     {
        // nếu người chơi vừa nhấn ngược chiều khi đang bị khóa → lấy hướng đó
@@ -203,8 +192,22 @@ public class PlayerUse : MonoBehaviour
         }
         rb.velocity = Vector2.zero;
     }
+    void OnDrawGizmosSelected()
+    {
+        if (!Application.isPlaying) return;
+        var it = inv?.CurrentItem; if (it == null) return;
 
-    
+        Vector2 dir = (Mathf.Abs(lastFacing.x) >= Mathf.Abs(lastFacing.y))
+            ? new Vector2(Mathf.Sign(lastFacing.x), 0)
+            : new Vector2(0, Mathf.Sign(lastFacing.y));
+
+        float fwd = (it.hitboxForward >= 0f) ? it.hitboxForward : defaultForward;
+        float rad = Mathf.Max(0.01f, it.range) * Mathf.Max(0.01f, it.hitboxScale);
+        Vector2 center = (Vector2)transform.position + dir * fwd + new Vector2(0f, it.hitboxYOffset);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(center, rad);
+    }
 
     
 }

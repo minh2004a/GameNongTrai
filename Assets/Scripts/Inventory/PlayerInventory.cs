@@ -23,7 +23,10 @@ public class PlayerInventory : MonoBehaviour
         selected = i;
         SelectedChanged?.Invoke(i);
     }
-
+    public int AddItem(ItemSO item, int count)
+    {
+        return InventoryUtil.AddAuto(this, item, count); // 0 = ok, >0 = còn dư
+    }
     public void CycleSlot(int d)
     {
         int n = hotbar.Length; if (n == 0) return;
