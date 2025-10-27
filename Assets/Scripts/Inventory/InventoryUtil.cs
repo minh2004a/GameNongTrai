@@ -1,5 +1,5 @@
 using UnityEngine;
-
+// Quản lý các tiện ích liên quan đến kho đồ của người chơi
 public static class InventoryUtil
 {
     // trả về: số còn dư chưa nhét được

@@ -1,7 +1,7 @@
 // PlantSystem.cs
 using UnityEngine;
 using UnityEngine.EventSystems;
-
+// Hệ thống trồng cây từ hạt giống
 public class PlantSystem : MonoBehaviour
 {
     [Header("Prefab gốc chứa PlantGrowth")]
@@ -14,7 +14,8 @@ public class PlantSystem : MonoBehaviour
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
 
         // Snap lưới nếu bật
-        if (seed.snapToGrid){
+        if (seed.snapToGrid)
+        {
             float s = Mathf.Max(0.01f, seed.gridSize);
             worldPos = new Vector2(Mathf.Round(worldPos.x / s) * s, Mathf.Round(worldPos.y / s) * s);
         }
@@ -27,4 +28,22 @@ public class PlantSystem : MonoBehaviour
         plant.Init(seed);
         return true;
     }
+    public bool CanPlantAt(Vector2 mouseWorld, Vector2 playerPos, float maxRangeWorld,
+                       SeedSO seed, out Vector2 snapped, out bool blocked, out bool tooFar)
+    {
+        // snap lưới
+        snapped = seed.snapToGrid ? new Vector2(
+            Mathf.Round(mouseWorld.x / seed.gridSize) * seed.gridSize,
+            Mathf.Round(mouseWorld.y / seed.gridSize) * seed.gridSize)
+            : mouseWorld;
+
+        // cản bởi layer
+        blocked = Physics2D.OverlapCircle(snapped, seed.blockCheckRadius, seed.blockMask);
+
+        // quá xa player
+        tooFar = Vector2.Distance(playerPos, snapped) > maxRangeWorld;
+
+        return !blocked && !tooFar;
+    }
+
 }

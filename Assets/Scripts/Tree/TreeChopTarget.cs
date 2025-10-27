@@ -1,6 +1,6 @@
 // TreeChopTarget.cs
 using UnityEngine;
-
+// Xử lý chặt cây bằng rìu, bao gồm HP, hiệu ứng chặt, và chuyển đổi thành gốc cây
 public class TreeChopTarget : MonoBehaviour, IToolTarget
 {
     [Header("HP & Drop")]

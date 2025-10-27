@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-
+// Quản lý việc chọn ô trên thanh công cụ (hotbar) của người chơi
 public class HotbarSelect : MonoBehaviour
 {
     [SerializeField] PlayerInventory inv;

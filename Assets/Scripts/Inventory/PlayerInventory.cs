@@ -1,7 +1,7 @@
 // PlayerInventory.cs
 using System;
 using UnityEngine;
-
+// Quản lý kho đồ của người chơi, bao gồm hotbar và túi đồ
 [Serializable] public struct ItemStack { public ItemSO item; public int count; }
 
 public class PlayerInventory : MonoBehaviour

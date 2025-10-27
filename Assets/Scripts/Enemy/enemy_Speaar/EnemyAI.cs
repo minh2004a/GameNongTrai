@@ -2,7 +2,7 @@
 // EnemyAI.cs  (chase + leash + return)
 using UnityEngine;
 using System.Collections;
-
+// Quản lý AI của kẻ địch: tuần tra, phát hiện, đuổi theo, tấn công, leash và lùi
 public class EnemyAI : MonoBehaviour
 {
     [Header("Refs")]

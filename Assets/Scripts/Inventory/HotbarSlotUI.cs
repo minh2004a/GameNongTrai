@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-
+// Giao diện cho một ô trên thanh công cụ (hotbar) của người chơi
 [RequireComponent(typeof(Button))]
 public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {

@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-
+// Làm mờ các SpriteRenderer khi player đi vào vùng trigger 2D
 [RequireComponent(typeof(Collider2D))]
 public class FadeOnPlayerTrigger2D : MonoBehaviour
 {

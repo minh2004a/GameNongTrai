@@ -1,6 +1,6 @@
 // PlantGrowth.cs
 using UnityEngine;
-
+// Quản lý sự phát triển của cây trồng qua các giai đoạn
 public class PlantGrowth : MonoBehaviour
 {
     public SeedSO data;

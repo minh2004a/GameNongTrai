@@ -1,6 +1,6 @@
 // PlayerPlanting.cs
 using UnityEngine;
-
+// Quản lý việc trồng cây của người chơi từ hạt giống
 [RequireComponent(typeof(PlayerInventory))]
 public class PlayerPlanting : MonoBehaviour
 {
@@ -19,16 +19,18 @@ public class PlayerPlanting : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) TryPlantFromSelected();
     }
 
+    // PlayerPlanting.cs — sửa TryPlantFromSelected()
     void TryPlantFromSelected()
     {
-        var item = inv.CurrentItem;
-        if (!item || !item.seedData) return;                 // chỉ xử lý item là hạt
-        Vector3 wp = cam.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 pos = new Vector2(wp.x, wp.y);
+        var it = inv.CurrentItem; var seed = it ? it.seedData : null;
+        if (!seed) return;
 
-        if (plantSystem && plantSystem.TryPlantAt(pos, item.seedData, out _))
-        {
-            inv.ConsumeSelected(1);                          // trừ 1 hạt sau khi trồng
-        }
+        Vector3 wp3 = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 wp = new Vector2(wp3.x, wp3.y);
+
+        if (!plantSystem.CanPlantAt(wp, transform.position, seed.gridSize * 1f,
+            seed, out var snapped, out var blocked, out var tooFar)) return;
+
+        if (plantSystem.TryPlantAt(snapped, seed, out _)) inv.ConsumeSelected(1);
     }
 }

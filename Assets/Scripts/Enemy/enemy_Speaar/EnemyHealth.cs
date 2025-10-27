@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
-
+// Quản lý sức khỏe của kẻ địch, nhận sát thương và chết
 [RequireComponent(typeof(Collider2D))]
 public class EnemyHealth : MonoBehaviour, IDamageable
 {

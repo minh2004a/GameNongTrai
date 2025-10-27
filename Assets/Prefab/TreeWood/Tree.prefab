@@ -117,8 +117,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.012553227, y: -0.0876366}
-  m_Size: {x: 1.1660844, y: 0.31661674}
+  m_Offset: {x: 0.00003449939, y: -0.09818433}
+  m_Size: {x: 0.70848423, y: 0.25772056}
   m_Direction: 1
 --- !u!1 &5913987706290959712
 GameObject:
@@ -241,8 +241,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.032105077, y: -0.13128449}
-  m_Size: {x: 1.1300652, y: 0.26201037}
+  m_Offset: {x: 0.022272812, y: -0.13374244}
+  m_Size: {x: 0.71713686, y: 0.26692632}
   m_Direction: 1
 --- !u!114 &7895382378436073937
 MonoBehaviour:
@@ -282,7 +282,7 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 533ff0872f85ce34eb3495758e732ca4, type: 2}
     countRange: {x: 1, y: 2}
     chance: 0.4
-  scatterSpeed: {x: 20, y: 25}
+  scatterSpeed: {x: 10, y: 15}
   scatterAngle: 90
 --- !u!1 &8897804468038630154
 GameObject:

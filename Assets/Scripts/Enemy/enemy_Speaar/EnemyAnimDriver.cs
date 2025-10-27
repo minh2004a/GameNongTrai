@@ -1,6 +1,7 @@
 // EnemyAnimDriver.cs
 using UnityEngine;
 using System.Collections;
+// Quản lý hoạt ảnh của kẻ địch, bao gồm di chuyển, tấn công và bị hất lùi
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyAnimDriver : MonoBehaviour
 {

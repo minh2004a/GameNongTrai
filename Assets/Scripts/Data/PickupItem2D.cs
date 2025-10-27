@@ -1,6 +1,6 @@
 // PickupItem2D.cs
 using UnityEngine;
-
+// Quản lý vật phẩm có thể nhặt được trong thế giới 2D
 public class PickupItem2D : MonoBehaviour
 {
     [SerializeField] SpriteRenderer iconRenderer;

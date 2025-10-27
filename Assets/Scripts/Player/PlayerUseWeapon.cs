@@ -1,7 +1,7 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+// Quản lý việc sử dụng vũ khí của người chơi, bao gồm bắn cung và chém kiếm
 public class PlayerUseWeapon : MonoBehaviour
 {
     [SerializeField] Transform arrowMuzzle;            

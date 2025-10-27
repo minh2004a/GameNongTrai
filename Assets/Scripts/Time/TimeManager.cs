@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System;
+// Quản lý thời gian trong game, bao gồm ngày, giờ, và hiển thị UI
 public class TimeManager : MonoBehaviour
 {
     [SerializeField] RectTransform arrowRoot;

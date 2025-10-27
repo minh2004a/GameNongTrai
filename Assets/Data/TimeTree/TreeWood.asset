@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
-  m_Name: TimeTreeWood
+  m_Name: TreeWood
   m_EditorClassIdentifier: 
   seedId: 
   stagePrefabs:
@@ -24,4 +24,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   snapToGrid: 1
-  gridSize: 1
+  gridSize: 2

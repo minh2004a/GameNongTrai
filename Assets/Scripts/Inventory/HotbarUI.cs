@@ -1,7 +1,7 @@
 // HotbarUI.cs
 using System.Linq;
 using UnityEngine;
-
+// Quản lý giao diện thanh công cụ (hotbar) của người chơi
 public class HotbarUI : MonoBehaviour
 {
     [SerializeField] PlayerInventory inv;

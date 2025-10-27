@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+// Quản lý việc sử dụng công cụ của người chơi, bao gồm hướng và va chạm
 public class ToolUser : MonoBehaviour
 {
     [SerializeField] PlayerInventory inv;

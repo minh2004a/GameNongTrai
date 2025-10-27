@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+// Quản lý trạng thái tấn công của kẻ địch trong Animator
 public class AttackEnemySMB : StateMachineBehaviour
 {
     EnemyAI ai; Rigidbody2D rb; Collider2D selfCol;

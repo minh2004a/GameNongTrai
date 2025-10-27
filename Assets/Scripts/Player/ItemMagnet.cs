@@ -1,6 +1,6 @@
 // ItemMagnet.cs (gắn lên Player)
 using UnityEngine;
-
+// Hút các PickupItem2D gần đó về phía người chơi
 public class ItemMagnet : MonoBehaviour
 {
     [SerializeField] float radius = 2.5f;

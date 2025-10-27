@@ -1,6 +1,6 @@
 // SeedSO.cs
 using UnityEngine;
-
+// Dữ liệu ScriptableObject cho hạt giống và cây trồng
 [CreateAssetMenu(menuName = "Plants/Seed")]
 public class SeedSO : ScriptableObject
 {
