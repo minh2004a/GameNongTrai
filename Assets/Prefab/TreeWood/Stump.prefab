@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 1816410381763513309}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.005, y: 0.905, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -119,8 +119,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.004255068, y: -0.09475563}
-  m_Size: {x: 1.1944256, y: 0.31656167}
+  m_Offset: {x: -0.0042550666, y: -0.08291582}
+  m_Size: {x: 1.1944264, y: 0.33403724}
   m_Direction: 1
 --- !u!114 &-2747061444438533377
 MonoBehaviour:
@@ -151,11 +151,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnSingles: 1
   maxSinglesPerDrop: 12
-  fullCircle: 0
+  fullCircle: 1
   pickupPrefab: {fileID: 4013689041040459867, guid: 838a5b6740444f646bd554f3877a34d3, type: 3}
   drops:
   - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
     countRange: {x: 3, y: 5}
     chance: 1
-  scatterSpeed: {x: 10, y: 15}
+  scatterSpeed: {x: 15, y: 20}
   scatterAngle: 35

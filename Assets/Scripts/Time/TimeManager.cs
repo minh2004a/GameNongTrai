@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-
+using System;
 public class TimeManager : MonoBehaviour
 {
     [SerializeField] RectTransform arrowRoot;
@@ -9,7 +9,8 @@ public class TimeManager : MonoBehaviour
     // 0=Thứ 2, 1=Thứ 3, … 6=Chủ nhật
     [SerializeField] RectTransform arrow;     // chính cái Image mũi tên
 
-
+    public event Action OnNewDay;
+    public event Action OnNewMinute; // nếu cần
     [Header("Game Time")]
     public int day = 1;
     public int hour = 6;
@@ -33,10 +34,10 @@ public class TimeManager : MonoBehaviour
         acc += Time.deltaTime * minutesPerRealSecond;
         while (acc >= 1f)
         {
-            minute++;
-            acc -= 1f;
+            minute++; acc -= 1f;
+            OnNewMinute?.Invoke();
             if (minute >= 60) { minute = 0; hour++; }
-            if (hour >= 24)   { hour = 0; day++; }
+            if (hour >= 24) { hour = 0; day++; OnNewDay?.Invoke(); } // phát sự kiện
         }
         UpdateUI();
     }

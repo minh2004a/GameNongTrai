@@ -15,8 +15,11 @@ MonoBehaviour:
   id: 
   icon: {fileID: 1044218959, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
   category: 1
-  stackable: 1
+  stackable: 0
   maxStack: 999
+  hitboxScale: 1.2
+  hitboxYOffset: -0.06
+  hitboxForward: -1
   toolType: 0
   weaponType: 1
   Dame: 8

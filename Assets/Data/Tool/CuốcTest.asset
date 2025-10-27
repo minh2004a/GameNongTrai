@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: "Cu\u1ED1cTest"
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: 0}
+  icon: {fileID: -1677888833, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
   category: 0
   stackable: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0
   hitboxForward: -1
-  toolType: 0
+  toolType: 2
   weaponType: 0
   Dame: 1
   range: 1

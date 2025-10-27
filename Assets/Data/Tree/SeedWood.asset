@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SworDimon
+  m_Name: SeedWood
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: 641960943, guid: 6613522ba3a7c2643b4e6f83dcce388f, type: 3}
-  category: 1
+  icon: {fileID: 367556941, guid: 1c988d5ed3bd414498bc7831be2a523c, type: 3}
+  seedData: {fileID: 11400000, guid: 75f582d2f1f229241b1502a7028adf5c, type: 2}
+  category: 0
+  toolType: 0
   stackable: 1
+  weaponType: 0
   maxStack: 999
-  hitboxScale: 1.2
+  hitboxScale: 1
   hitboxYOffset: 0
   hitboxForward: -1
-  toolType: 0
-  weaponType: 1
-  Dame: 50
-  range: 0.45
-  cooldown: 0.4
+  Dame: 1
+  range: 1
+  cooldown: 0.2
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10
   projectileMaxDistance: 8

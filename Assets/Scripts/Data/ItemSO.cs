@@ -13,9 +13,12 @@ public class ItemSO : ScriptableObject
 {
     public string id;
     public Sprite icon;
+    public SeedSO seedData; // dùng khi type == Seed
     public ItemCategory category;
-    public bool stackable = true;   // thêm
-    public int maxStack = 999;      // thêm
+    public ToolType toolType;
+    public bool stackable = true; 
+    public WeaponType weaponType;  
+    public int maxStack = 999;   
     [Header("Hitbox Tuning")]
     [Tooltip("Nhân với range để phóng to/thu nhỏ hitbox")]
     public float hitboxScale = 1f;
@@ -25,9 +28,8 @@ public class ItemSO : ScriptableObject
 
     [Tooltip("Khoảng cách từ người chơi tới TÂM hitbox; -1 = dùng mặc định của vũ khí/công cụ")]
     public float hitboxForward = -1f;   // NEW
-    public ToolType toolType;           // dùng khi category = Tool
-    public WeaponType weaponType;       // dùng khi category = Weapon
-
+           // dùng khi category = Tool
+           // dùng khi category = Weapon
     public int Dame = 1;
     public float range = 1f;
     // public float radius = 0.35f;

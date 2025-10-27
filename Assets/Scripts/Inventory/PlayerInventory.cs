@@ -97,8 +97,15 @@ public class PlayerInventory : MonoBehaviour
         HotbarChanged?.Invoke();
         if (to == selected || from == selected) SelectedChanged?.Invoke(selected);
     }
-
-
-
-
+    public bool ConsumeSelected(int n = 1)
+    {
+        if ((uint)selected >= (uint)hotbar.Length || n <= 0) return false;
+        var s = hotbar[selected];
+        if (s.item == null || s.count < n) return false;
+        s.count -= n;
+        hotbar[selected] = (s.count > 0) ? s : default;
+        HotbarChanged?.Invoke();
+        SelectedChanged?.Invoke(selected);
+        return true;
+    }
 }

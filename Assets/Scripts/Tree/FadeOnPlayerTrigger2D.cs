@@ -61,7 +61,8 @@ public class FadeOnPlayerTrigger2D : MonoBehaviour
         }
         SetAlpha(target);
         co = null;
-    }
+    }   
+    
 
     void SetAlpha(float a)
     {

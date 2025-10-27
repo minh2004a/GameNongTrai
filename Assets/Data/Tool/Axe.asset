@@ -17,9 +17,12 @@ MonoBehaviour:
   category: 0
   stackable: 0
   maxStack: 999
+  hitboxScale: 1.2
+  hitboxYOffset: 0
+  hitboxForward: -1
   toolType: 1
   weaponType: 0
-  Dame: 1
+  Dame: 2
   range: 0.45
   cooldown: 0.4
   projectilePrefab: {fileID: 0}

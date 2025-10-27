@@ -19,9 +19,9 @@ TagManager:
   - Tree
   - Ghost
   - Items
-  - 
-  - 
-  - 
+  - ChopFX
+  - Stump
+  - PlayerHead
   - 
   - 
   - 
@@ -43,6 +43,15 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Tree
+    uniqueID: 2396452051
+    locked: 0
+  - name: TreeChop
+    uniqueID: 248289295
+    locked: 0
+  - name: Player
+    uniqueID: 3792520095
     locked: 0
   - name: VFX
     uniqueID: 2942553377

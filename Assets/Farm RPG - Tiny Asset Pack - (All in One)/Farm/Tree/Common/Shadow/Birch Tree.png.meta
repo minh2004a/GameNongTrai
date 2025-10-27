@@ -126,12 +126,12 @@ TextureImporter:
       name: Birch Tree_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 48
-        width: 32
-        height: 48
+        x: 10
+        y: 49
+        width: 12
+        height: 8
       alignment: 9
-      pivot: {x: 0.49999985, y: 0.20840661}
+      pivot: {x: 0.48589045, y: 0.07985473}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -147,12 +147,12 @@ TextureImporter:
       name: Birch Tree_1
       rect:
         serializedVersion: 2
-        x: 32
+        x: 36
         y: 48
-        width: 32
-        height: 48
+        width: 20
+        height: 15
       alignment: 9
-      pivot: {x: 0.47178102, y: 0.2021358}
+      pivot: {x: 0.4905933, y: 0.0892609}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -168,12 +168,12 @@ TextureImporter:
       name: Birch Tree_2
       rect:
         serializedVersion: 2
-        x: 64
+        x: 66
         y: 48
-        width: 32
-        height: 48
+        width: 30
+        height: 36
       alignment: 9
-      pivot: {x: 0.51299286, y: 0.1593035}
+      pivot: {x: 0.48257828, y: 0.15825802}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -194,7 +194,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.48435473, y: 0.21229386}
+      pivot: {x: 0.48435378, y: 0.21229355}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -215,7 +215,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.48505688, y: 0.21027415}
+      pivot: {x: 0.48505592, y: 0.21968015}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -236,7 +236,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.48035812, y: 0.21174423}
+      pivot: {x: 0.47565365, y: 0.22115023}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -252,12 +252,12 @@ TextureImporter:
       name: Birch Tree_6
       rect:
         serializedVersion: 2
-        x: 194
+        x: 192
         y: 48
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.42057323, y: 0.21963279}
+      pivot: {x: 0.47648335, y: 0.2132078}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -278,7 +278,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.49529457, y: 0.19272955}
+      pivot: {x: 0.48588514, y: 0.21781246}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -299,7 +299,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.542328, y: 0.15824027}
+      pivot: {x: 0.50940603, y: 0.17078191}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -315,12 +315,12 @@ TextureImporter:
       name: Birch Tree_9
       rect:
         serializedVersion: 2
-        x: 30
+        x: 32
         y: 0
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.56699324, y: 0.21349323}
+      pivot: {x: 0.4848262, y: 0.21035784}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -362,7 +362,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.5035839, y: 0.15824024}
+      pivot: {x: 0.5129888, y: 0.17078191}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -383,7 +383,7 @@ TextureImporter:
         width: 32
         height: 48
       alignment: 9
-      pivot: {x: 0.48454, y: 0.20945896}
+      pivot: {x: 0.48453856, y: 0.20632358}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
