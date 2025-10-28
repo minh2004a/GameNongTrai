@@ -24,4 +24,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   snapToGrid: 1
-  gridSize: 2
+  gridSize: 1

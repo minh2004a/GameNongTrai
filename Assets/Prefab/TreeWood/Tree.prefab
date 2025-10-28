@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6481067371556588845
 Transform:
   m_ObjectHideFlags: 0
@@ -241,8 +241,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.022272812, y: -0.13374244}
-  m_Size: {x: 0.71713686, y: 0.26692632}
+  m_Offset: {x: -0.013436249, y: 0.08254881}
+  m_Size: {x: 0.7171375, y: 0.30948195}
   m_Direction: 1
 --- !u!114 &7895382378436073937
 MonoBehaviour:
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 15
   stumpPrefab: {fileID: 1816410381763513309, guid: 9f446e3d831fe31499ef53a233fa6888, type: 3}
-  chopFxPrefab: {fileID: 8365548167932493270, guid: 636655cb86927cb4fb3827ae39b595a3, type: 3}
+  chopFxPrefab: {fileID: 4742017217648415254, guid: 02905dbb90e0c4d49b1cef96a92643d5, type: 3}
 --- !u!114 &2006831098790179750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,7 +295,7 @@ GameObject:
   - component: {fileID: 4523206007188602553}
   - component: {fileID: 3020058012105556958}
   - component: {fileID: 5185530192138165261}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: FadeZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -349,8 +349,8 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0099179745, y: 1.1019214}
-  m_Size: {x: 1.6611247, y: 2.145158}
+  m_Offset: {x: 0.0099179745, y: 1.301046}
+  m_Size: {x: 1.6611247, y: 2.060681}
   m_Direction: 0
 --- !u!114 &5185530192138165261
 MonoBehaviour:

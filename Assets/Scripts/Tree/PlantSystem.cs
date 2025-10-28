@@ -14,11 +14,24 @@ public class PlantSystem : MonoBehaviour
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
 
         // Snap lưới nếu bật
+        // bên trong TryPlantAt, phần snap:
         if (seed.snapToGrid)
         {
             float s = Mathf.Max(0.01f, seed.gridSize);
-            worldPos = new Vector2(Mathf.Round(worldPos.x / s) * s, Mathf.Round(worldPos.y / s) * s);
+            worldPos = new Vector2(
+                Mathf.Floor(worldPos.x / s) * s + 0.5f * s,
+                Mathf.Floor(worldPos.y / s) * s + 0.5f * s
+            );
         }
+
+if (seed.snapToGrid)
+{
+    float s = Mathf.Max(0.01f, seed.gridSize);
+    worldPos = new Vector2(
+        Mathf.Floor(worldPos.x / s) * s + 0.5f * s,
+        Mathf.Floor(worldPos.y / s) * s + 0.5f * s
+    );
+}
 
         // Chặn trồng đè vật cản / cây khác
         if (Physics2D.OverlapCircle(worldPos, seed.blockCheckRadius, seed.blockMask)) return false; // kiểm tra vùng tròn nhanh gọn. :contentReference[oaicite:1]{index=1}
@@ -28,22 +41,32 @@ public class PlantSystem : MonoBehaviour
         plant.Init(seed);
         return true;
     }
-    public bool CanPlantAt(Vector2 mouseWorld, Vector2 playerPos, float maxRangeWorld,
-                       SeedSO seed, out Vector2 snapped, out bool blocked, out bool tooFar)
+    public bool CanPlantAt(Vector2 mouseWorld, Vector2 playerPos, float _,
+                        SeedSO seed, out Vector2 snapped, out bool blocked, out bool tooFar)
     {
-        // snap lưới
-        snapped = seed.snapToGrid ? new Vector2(
-            Mathf.Round(mouseWorld.x / seed.gridSize) * seed.gridSize,
-            Mathf.Round(mouseWorld.y / seed.gridSize) * seed.gridSize)
-            : mouseWorld;
+        // SNAP: tâm ô kích thước seed.gridSize
+        float s = Mathf.Max(0.01f, seed.gridSize);
+        if (seed.snapToGrid)
+        {
+            snapped = new Vector2(
+                Mathf.Floor(mouseWorld.x / s) * s + 0.5f * s,
+                Mathf.Floor(mouseWorld.y / s) * s + 0.5f * s
+            );
+        }
+        else snapped = mouseWorld;
 
-        // cản bởi layer
+        // Vật cản
         blocked = Physics2D.OverlapCircle(snapped, seed.blockCheckRadius, seed.blockMask);
 
-        // quá xa player
-        tooFar = Vector2.Distance(playerPos, snapped) > maxRangeWorld;
+        // Chebyshev: max(|dx|,|dy|) <= 1  ⇒ “1 ô quanh player”
+        int ix = Mathf.FloorToInt(snapped.x / s);
+        int iy = Mathf.FloorToInt(snapped.y / s);
+        int px = Mathf.FloorToInt(playerPos.x / s);
+        int py = Mathf.FloorToInt(playerPos.y / s);
+        bool inRange = Mathf.Max(Mathf.Abs(ix - px), Mathf.Abs(iy - py)) <= 1;
 
-        return !blocked && !tooFar;
+        tooFar = !inRange;
+        return inRange && !blocked;
     }
 
 }

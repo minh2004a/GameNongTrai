@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 
   icon: {fileID: 1966405731, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  seedData: {fileID: 0}
   category: 0
+  toolType: 1
   stackable: 0
+  weaponType: 0
   maxStack: 999
   hitboxScale: 1.2
   hitboxYOffset: 0
   hitboxForward: -1
-  toolType: 1
-  weaponType: 0
   Dame: 2
-  range: 0.45
+  range: 0.4
   cooldown: 0.4
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10

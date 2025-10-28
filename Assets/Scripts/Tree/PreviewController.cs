@@ -11,7 +11,7 @@ public class PlantPreviewController : MonoBehaviour
     public PlayerInventory inv;
     public PlantSystem plantSystem;
     public Transform player;
-
+    
     Camera cam;
     SpriteRenderer sr;
 
@@ -38,5 +38,6 @@ public class PlantPreviewController : MonoBehaviour
         transform.position = snapped;
         sr.sprite  = ok ? okSprite : blockedSprite;
         sr.enabled = true;
+        
     }
 }

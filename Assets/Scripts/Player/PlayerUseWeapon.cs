@@ -10,6 +10,7 @@ public class PlayerUseWeapon : MonoBehaviour
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
     [SerializeField] LayerMask enemyMask;
+    [SerializeField] LayerMask blockMask;   // NEW
     // [SerializeField] bool bowAimWithMouse = true;
     private float bowFailSafe = 10f; // thời gian khóa tối đa 1 phát
     
@@ -124,9 +125,8 @@ public class PlayerUseWeapon : MonoBehaviour
     go.transform.right = dir;
 
     var proj = go.GetComponent<ArrowProjectile>() ?? go.AddComponent<ArrowProjectile>();
-    proj.Init(it.Dame, dir, it.projectileSpeed, enemyMask, life: 3f,
-              maxDist: it.projectileMaxDistance, hitVFXPrefab: it.projectileHitVFX);
-
+    proj.Init(it.Dame, dir, it.projectileSpeed, enemyMask, blockMask,
+          life: 3f, maxDist: it.projectileMaxDistance, hitVFXPrefab: it.projectileHitVFX);
     var sr = go.GetComponent<SpriteRenderer>();
     if (sr && sprite){
         sr.sortingLayerID = sprite.sortingLayerID;
