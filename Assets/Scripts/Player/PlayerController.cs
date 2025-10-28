@@ -60,8 +60,10 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         rb.velocity = (canMove && !MoveLocked) ? moveInput.normalized * moveSpeed : Vector2.zero;
-    }
 
+        if (stamina && canMove && !MoveLocked && rb.velocity.sqrMagnitude > 0.0001f)
+            stamina.DrainMove(Time.fixedDeltaTime);
+    }
     // helper
     void UpdateFacingFrom(Vector2 v)
     {

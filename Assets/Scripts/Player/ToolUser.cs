@@ -61,7 +61,7 @@ public class ToolUser : MonoBehaviour
     public void OnUse(InputValue v)
     {
         if (!v.isPressed) return;
-
+        if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
         Vector2 mouseW = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         Vector2 toMouse = mouseW - (Vector2)transform.position;
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước

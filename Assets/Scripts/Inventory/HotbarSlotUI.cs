@@ -70,9 +70,17 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     public void OnPointerDown(PointerEventData e)
     {
-        pointerDown = true;
+         pointerDown = true;
         pressTime = Time.time;
-        suppressClick = false;
+
+        // Chọn ngay trên Down để không lỡ bắn bằng item cũ
+        owner?.OnClickSlot(idx);
+
+        // Chặn hành động dùng item trong frame click UI
+        UIInputGuard.MarkClick();
+
+        // Không cần onClick trên Up nữa
+        suppressClick = true;
     }
 
     public void OnPointerUp(PointerEventData e)

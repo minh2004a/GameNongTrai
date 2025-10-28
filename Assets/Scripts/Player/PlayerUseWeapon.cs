@@ -86,10 +86,11 @@ public class PlayerUseWeapon : MonoBehaviour
     }
 
     public void OnUse(InputValue v){
-    if (!v.isPressed || cd>0 || swordLocked || bowLocked) return;
+    if (!v.isPressed || cd > 0 || swordLocked || bowLocked) return;
+    if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
     var it = inv?.CurrentItem; if (it==null || it.category!=ItemCategory.Weapon) return;
 
-   if (it.weaponType == WeaponType.Bow){
+    if (it.weaponType == WeaponType.Bow){
     if (!stamina || !stamina.TrySpend(stamina.bowCost)) return;   // thêm dòng này
     var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
     lastFacing = face;                   // quay mặt trước
