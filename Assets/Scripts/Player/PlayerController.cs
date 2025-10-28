@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
     public bool canMove = true;
-
+    [SerializeField] PlayerStamina stamina; 
     Rigidbody2D rb;
     Vector2 moveInput;
     Vector2 lastFacing = Vector2.right;

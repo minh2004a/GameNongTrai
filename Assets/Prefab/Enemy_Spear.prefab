@@ -32,7 +32,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1094077757790412357}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.37, y: 6.13, z: 16.19305}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -144,8 +144,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.00000010281738, y: -0.36249468}
-  m_Size: {x: 0.6761109, y: 0.6445882}
+  m_Offset: {x: 0.025304977, y: -0.24300614}
+  m_Size: {x: 0.6391278, y: 0.6391278}
   m_Direction: 1
 --- !u!50 &352836795682919198
 Rigidbody2D:
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47309783b9723624f86bf14ae7b04ae6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 8600441533436656489, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+  player: {fileID: 0}
   enemyMask:
     serializedVersion: 2
     m_Bits: 64
@@ -202,12 +202,12 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
-  attackRange: 0.8
-  attackDamage: 1
-  attackCooldown: 0.6
+  attackRange: 0.67
+  attackDamage: 10
+  attackCooldown: 1
   leashOut: 10
   leashIn: 7.4
-  standoffRadius: 1.6
+  standoffRadius: 1.45
   retreatSpeedMul: 1.31
   retreatMinTime: 1.7
   strafeBlend: 0.75
@@ -241,7 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ce540de983a5a844a674518ce469f85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 5
+  maxHp: 20
   hp: 0
   destroyDelay: 1
 --- !u!114 &6952620523447627087
@@ -264,5 +264,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 9c4d5aa95aed93146ae6f48eb02af92f, type: 2}
     countRange: {x: 1, y: 5}
     chance: 1
-  scatterSpeed: {x: 0.8, y: 6}
+  scatterSpeed: {x: 2, y: 4}
   scatterAngle: 35

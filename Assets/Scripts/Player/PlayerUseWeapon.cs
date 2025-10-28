@@ -4,11 +4,14 @@ using UnityEngine.InputSystem;
 // Quản lý việc sử dụng vũ khí của người chơi, bao gồm bắn cung và chém kiếm
 public class PlayerUseWeapon : MonoBehaviour
 {
+    // đầu class
+    [SerializeField] PlayerStamina stamina;
     [SerializeField] Transform arrowMuzzle;            
     [SerializeField] PlayerInventory inv;
     [SerializeField] PlayerController controller;
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
+    
     [SerializeField] LayerMask enemyMask;
     [SerializeField] LayerMask blockMask;   // NEW
     // [SerializeField] bool bowAimWithMouse = true;
@@ -87,6 +90,7 @@ public class PlayerUseWeapon : MonoBehaviour
     var it = inv?.CurrentItem; if (it==null || it.category!=ItemCategory.Weapon) return;
 
    if (it.weaponType == WeaponType.Bow){
+    if (!stamina || !stamina.TrySpend(stamina.bowCost)) return;   // thêm dòng này
     var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
     lastFacing = face;                   // quay mặt trước
     bowFacing  = face;                   // lưu hướng khóa
@@ -98,6 +102,7 @@ public class PlayerUseWeapon : MonoBehaviour
 }
         if (it.weaponType == WeaponType.Sword)
         {
+            if (!stamina || !stamina.TrySpend(stamina.bowCost)) return;   // thêm dòng này
             anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
             cd = Mathf.Max(minCooldown, it.cooldown);
             return;

@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 // Quản lý việc sử dụng công cụ của người chơi, bao gồm hướng và va chạm
 public class ToolUser : MonoBehaviour
 {
+    [SerializeField] PlayerStamina stamina;
     [SerializeField] PlayerInventory inv;
     [SerializeField] Animator anim;
     [SerializeField] Transform hitOrigin;
@@ -70,6 +71,7 @@ public class ToolUser : MonoBehaviour
         var it = inv?.CurrentItem;
         if (!it || it.category != ItemCategory.Tool || it.toolType != ToolType.Axe) return;
         if (Time.time < nextUseTime) return;
+        if (!stamina || !stamina.TrySpend(stamina.toolCost)) return;  // thêm dòng này
         usingItem = it;
         nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown);
         toolLocked = true;
