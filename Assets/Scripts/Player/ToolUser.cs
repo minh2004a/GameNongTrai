@@ -71,7 +71,8 @@ public class ToolUser : MonoBehaviour
         var it = inv?.CurrentItem;
         if (!it || it.category != ItemCategory.Tool || it.toolType != ToolType.Axe) return;
         if (Time.time < nextUseTime) return;
-        if (!stamina || !stamina.TrySpend(stamina.toolCost)) return;  // thêm dòng này
+        if (!stamina) return;
+        stamina.SpendExhaustible(stamina.toolCost);
         usingItem = it;
         nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown);
         toolLocked = true;

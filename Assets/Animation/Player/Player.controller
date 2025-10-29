@@ -192,7 +192,7 @@ AnimatorStateMachine:
     m_Position: {x: 297.8005, y: 257.45367, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 4054739629575827402}
-    m_Position: {x: 270, y: 390, z: 0}
+    m_Position: {x: 300, y: 410, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -5698451188121053782}
     m_Position: {x: 240, y: 900, z: 0}
@@ -202,12 +202,6 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: 4677457971539400162}
     m_Position: {x: 230, y: 1030, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: 31142443575040269}
-    m_Position: {x: 265, y: 1095, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: 6364870691840936729}
-    m_Position: {x: 300, y: 1160, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 7382828306708184824}
@@ -513,32 +507,6 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
---- !u!1102 &31142443575040269
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: AxeRight
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: cceacd9c0ba434746981a5735f0b5cc3, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
 --- !u!206 &1201309456863384357
 BlendTree:
   m_ObjectHideFlags: 1
@@ -640,7 +608,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Running
+  m_Name: Run
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -794,32 +762,6 @@ BlendTree:
   m_UseAutomaticThresholds: 1
   m_NormalizedBlendValues: 0
   m_BlendType: 2
---- !u!1102 &6364870691840936729
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: AxeLeft
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: fe98c358d63be1041895be2186151ae7, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
 --- !u!1102 &7015436314781401985
 AnimatorState:
   serializedVersion: 6

@@ -90,20 +90,23 @@ public class PlayerUseWeapon : MonoBehaviour
     if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
     var it = inv?.CurrentItem; if (it==null || it.category!=ItemCategory.Weapon) return;
 
-    if (it.weaponType == WeaponType.Bow){
-    if (!stamina || !stamina.TrySpend(stamina.bowCost)) return;   // thêm dòng này
-    var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
-    lastFacing = face;                   // quay mặt trước
-    bowFacing  = face;                   // lưu hướng khóa
-    ApplyFacingAndFlip(face);            // cập nhật Animator + flip
-    anim?.ResetTrigger("Shoot");
-    anim?.SetTrigger("Shoot");
-    cd = Mathf.Max(minCooldown, it.cooldown);
-    return;
-}
+    if (it.weaponType == WeaponType.Bow)
+    {
+        if (!stamina) return;
+        stamina.SpendExhaustible(stamina.bowCost);
+        var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
+        lastFacing = face;                   // quay mặt trước
+        bowFacing  = face;                   // lưu hướng khóa
+        ApplyFacingAndFlip(face);            // cập nhật Animator + flip
+        anim?.ResetTrigger("Shoot");
+        anim?.SetTrigger("Shoot");
+        cd = Mathf.Max(minCooldown, it.cooldown);
+        return;
+    }
         if (it.weaponType == WeaponType.Sword)
         {
-            if (!stamina || !stamina.TrySpend(stamina.bowCost)) return;   // thêm dòng này
+            if (!stamina) return;
+            stamina.SpendExhaustible(stamina.swordCost);
             anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
             cd = Mathf.Max(minCooldown, it.cooldown);
             return;

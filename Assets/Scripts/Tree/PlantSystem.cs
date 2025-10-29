@@ -14,6 +14,7 @@ public class PlantSystem : MonoBehaviour
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
 
         // Snap lưới nếu bật
+        // bên trong TryPlantAt, phần snap:/ Snap lưới nếu bật
         // bên trong TryPlantAt, phần snap:
         if (seed.snapToGrid)
         {

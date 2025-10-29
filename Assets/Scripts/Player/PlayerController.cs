@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 4f;
+    [SerializeField] float moveSpeed = 5f;
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
     public bool canMove = true;

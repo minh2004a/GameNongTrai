@@ -127,9 +127,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 147
-        y: 113
-        width: 11
-        height: 46
+        y: 115
+        width: 10
+        height: 42
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -147,10 +147,10 @@ TextureImporter:
       name: Bars_1
       rect:
         serializedVersion: 2
-        x: 116
-        y: 68
-        width: 9
-        height: 32
+        x: 119
+        y: 70
+        width: 3
+        height: 27
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +168,10 @@ TextureImporter:
       name: Bars_2
       rect:
         serializedVersion: 2
-        x: 163
-        y: 113
-        width: 11
-        height: 46
+        x: 164
+        y: 115
+        width: 9
+        height: 42
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -189,12 +189,12 @@ TextureImporter:
       name: Bars_3
       rect:
         serializedVersion: 2
-        x: 132
-        y: 68
-        width: 9
-        height: 32
+        x: 135
+        y: 70
+        width: 3
+        height: 27
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []

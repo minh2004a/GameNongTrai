@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7309168319263878764}
   - component: {fileID: 942076098379964223}
   m_Layer: 8
-  m_Name: Seed
+  m_Name: SeedWood
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

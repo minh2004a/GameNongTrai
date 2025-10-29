@@ -87,4 +87,36 @@ public class TimeManager : MonoBehaviour
         int h12 = h24 % 12; if (h12 == 0) h12 = 12;
         return $"{h12:00}:{m:00} {ampm}";
     }
+    public void SleepToNextMorning()
+    {
+        day++;
+        hour = 6;
+        minute = 0;
+        OnNewDay?.Invoke(); // raise bên trong TimeManager hợp lệ
+    }
+    // TimeManager.cs
+    int MinutesNow() => hour * 60 + minute;
+    int MinutesUntil(int h, int m){
+        int target = h * 60 + m;
+        int now = MinutesNow();
+        return (target - now + 1440) % 1440;
+    }
+
+    public void SleepToNextMorningRecover(PlayerHealth hp, PlayerStamina sta, int fullSleepMin = 480)
+    {
+        int slept = MinutesUntil(6, 0);
+        float factor = Mathf.Clamp01(slept / (float)fullSleepMin);
+
+        if (hp) hp.HealMissingPercent(factor);
+
+        if (sta)
+        {
+            if (sta.exhaustedSinceLastSleep) sta.SetPercent(0.5f);   // đã kiệt sức → chỉ 50%
+            else sta.RecoverMissingPercent(factor);
+            sta.ClearExhaustionFlag();
+        }
+
+        day++; hour = 6; minute = 0;
+        OnNewDay?.Invoke();
+    }
 }

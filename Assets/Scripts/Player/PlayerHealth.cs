@@ -15,8 +15,21 @@ public class PlayerHealth : MonoBehaviour
         OnHpPercent?.Invoke((float)hp / maxHP);
     }
 
-    public void Heal(int v){
+    public void Heal(int v)
+    {
         hp = Mathf.Min(maxHP, hp + v);
         OnHpPercent?.Invoke((float)hp / maxHP);
+    }
+    public void SetPercent(float p)
+    {
+        p = Mathf.Clamp01(p);
+        hp = Mathf.RoundToInt(maxHP * p);
+        OnHpPercent?.Invoke((float)hp / maxHP);
+    }
+    public void HealMissingPercent(float p)
+    {
+        p = Mathf.Clamp01(p);
+        int add = Mathf.RoundToInt((maxHP - hp) * p);
+        Heal(add);
     }
 }

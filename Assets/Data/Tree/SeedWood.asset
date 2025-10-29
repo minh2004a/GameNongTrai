@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 
   icon: {fileID: 367556941, guid: 1c988d5ed3bd414498bc7831be2a523c, type: 3}
   seedData: {fileID: 11400000, guid: 75f582d2f1f229241b1502a7028adf5c, type: 2}
-  category: 0
+  category: 5
   toolType: 0
   stackable: 1
   weaponType: 0
