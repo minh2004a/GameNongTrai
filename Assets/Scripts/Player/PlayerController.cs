@@ -4,11 +4,13 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 5f;
+    [SerializeField] float moveSpeed = 4f;
+    [SerializeField] float exhaustedSpeedMult = 0.5f;
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
     public bool canMove = true;
     [SerializeField] PlayerStamina stamina; 
+    float currentSpeed; // magnitude of velocity
     Rigidbody2D rb;
     Vector2 moveInput;
     Vector2 lastFacing = Vector2.right;
@@ -35,15 +37,18 @@ public class PlayerController : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
     }
+    static readonly int SpeedHash = Animator.StringToHash("Speed");
     void Update()
     {
-        // Speed luôn cập nhật
-        if (anim)
-        {
-            anim.SetFloat("Speed", moveInput.sqrMagnitude);
-        }
+        // 1) Lưu hướng cuối cùng khi có input
+        if (moveInput.sqrMagnitude > 0.0001f)
+            lastFacing = moveInput.normalized;
 
-        // Cách 3: chỉ cập nhật hướng khi KHÔNG lock và đang có input di chuyển
+        // 2) Nuôi tham số Speed của Animator bằng tốc độ thật
+        float speedWorld = currentSpeed;                 // ví dụ 5 hoặc 2.5 khi kiệt sức
+        if (anim) anim.SetFloat("Speed", speedWorld);
+
+        // 3) Chỉ ghi hướng khi không bị lock và có input
         if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f)
         {
             if (anim)
@@ -51,18 +56,16 @@ public class PlayerController : MonoBehaviour
                 anim.SetFloat("Horizontal", lastFacing.x);
                 anim.SetFloat("Vertical", lastFacing.y);
             }
-            if (sprite)
-            {
-                sprite.flipX = lastFacing.x < 0f;
-            }
+            if (sprite) sprite.flipX = lastFacing.x < 0f;
         }
     }
     void FixedUpdate()
     {
-        rb.velocity = (canMove && !MoveLocked) ? moveInput.normalized * moveSpeed : Vector2.zero;
+        float eff = (stamina && stamina.IsExhausted) ? exhaustedSpeedMult : 1f;
+        Vector2 dir = moveInput.sqrMagnitude > 0.0001f ? moveInput.normalized : Vector2.zero;
+        rb.velocity = (canMove && !MoveLocked) ? dir * (moveSpeed * eff) : Vector2.zero;
 
-        if (stamina && canMove && !MoveLocked && rb.velocity.sqrMagnitude > 0.0001f)
-            stamina.DrainMove(Time.fixedDeltaTime);
+        currentSpeed = rb.velocity.magnitude; // nuôi speedWorld cho Update
     }
     // helper
     void UpdateFacingFrom(Vector2 v)

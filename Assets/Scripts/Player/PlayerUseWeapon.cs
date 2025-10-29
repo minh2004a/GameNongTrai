@@ -6,8 +6,10 @@ public class PlayerUseWeapon : MonoBehaviour
 {
     // đầu class
     [SerializeField] PlayerStamina stamina;
-    [SerializeField] Transform arrowMuzzle;            
+    [SerializeField] Transform arrowMuzzle;
     [SerializeField] PlayerInventory inv;
+    [SerializeField] float exhaustedActionTimeMult = 1.6f;      // thời gian dài hơn
+    [SerializeField, Range(0.1f,1f)] float exhaustedAnimSpeedMult = 0.7f; // anim chậm lại  
     [SerializeField] PlayerController controller;
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
@@ -27,7 +29,8 @@ public class PlayerUseWeapon : MonoBehaviour
     [SerializeField] float defaultForward = 0.6f;   // NEW: khoảng cách tâm hitbox mặc định cho kiếm
     [SerializeField] float minCooldown = 0.15f;
     Rigidbody2D rb; Vector2 move, lastFacing = Vector2.down; float cd;
-
+    float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
+    float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -91,7 +94,8 @@ public class PlayerUseWeapon : MonoBehaviour
     var it = inv?.CurrentItem; if (it==null || it.category!=ItemCategory.Weapon) return;
 
     if (it.weaponType == WeaponType.Bow)
-    {
+        {
+        cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
         if (!stamina) return;
         stamina.SpendExhaustible(stamina.bowCost);
         var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
@@ -105,6 +109,7 @@ public class PlayerUseWeapon : MonoBehaviour
     }
         if (it.weaponType == WeaponType.Sword)
         {
+            cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
             if (!stamina) return;
             stamina.SpendExhaustible(stamina.swordCost);
             anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
@@ -145,12 +150,15 @@ public class PlayerUseWeapon : MonoBehaviour
 
     // Animation Events trên clip Attack:
     public void AttackStart(){
-        swordTimer = swordFailSafe;
+        // swordTimer = swordFailSafe;
+        swordTimer = swordFailSafe * ActionTimeMult();
+        if (anim) anim.speed = AnimSpeedMult();
         swordLocked = true; swordFacing = Facing4();
         LockMove(true);
         }
     public void BowStart(){
-        bowTimer = bowFailSafe;
+        bowTimer = bowFailSafe * ActionTimeMult();
+        if (anim) anim.speed = AnimSpeedMult();
         bowLocked = true;
         bowFacing = MouseFacing4();        // chốt 4 hướng cho animator
         bowDirLocked = AimDirToMouse();    // chốt vector bay của mũi tên 1 lần  <— THÊM
@@ -181,15 +189,17 @@ public class PlayerUseWeapon : MonoBehaviour
         swordLocked = false;
         controller?.ApplyPendingMove();   // hoặc sau LockMove(false) đều được
         LockMove(false);
-    
+        if (anim) anim.speed = 1f;
     }
 
     public void BowEnd(){
+        
         lastFacing = bowFacing;            // giữ hướng vừa aim
         ApplyFacingAndFlip(lastFacing);
         bowLocked = false;
         LockMove(false);
         controller?.ApplyPendingMove();    // áp input sau khi mở khoá
+        if (anim) anim.speed = 1f;
     }
 
     void LockMove(bool on)

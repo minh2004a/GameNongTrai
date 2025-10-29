@@ -274,7 +274,7 @@ MonoBehaviour:
   spawnSingles: 1
   maxSinglesPerDrop: 12
   fullCircle: 1
-  pickupPrefab: {fileID: 4013689041040459867, guid: 838a5b6740444f646bd554f3877a34d3, type: 3}
+  pickupPrefab: {fileID: 938829867024995739, guid: 5eaff2eda499336428801cbfe7172d32, type: 3}
   drops:
   - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
     countRange: {x: 5, y: 10}

@@ -10,14 +10,18 @@ public class ToolUser : MonoBehaviour
     [SerializeField] LayerMask hitMask;
     [SerializeField] PlayerController pc;
     [SerializeField] float originDist = 0.55f;
+    [SerializeField] float exhaustedActionTimeMult = 1.6f;
+    [SerializeField, Range(0.1f,1f)] float exhaustedAnimSpeedMult = 0.7f;
     bool toolLocked; 
     Vector2 toolFacing = Vector2.down;
     [SerializeField] float toolFailSafe = 3f;
     float toolTimer;
     ItemSO usingItem;
     float nextUseTime;
-    
+
     Vector2 aimDir = Vector2.right;
+    float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
+    float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
     {
         if (!pc) pc = GetComponent<PlayerController>();
@@ -74,9 +78,10 @@ public class ToolUser : MonoBehaviour
         if (!stamina) return;
         stamina.SpendExhaustible(stamina.toolCost);
         usingItem = it;
-        nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown);
+       nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
         toolLocked = true;
-        toolTimer = toolFailSafe;
+        toolTimer = toolFailSafe * ActionTimeMult();
+        if (anim) anim.speed = AnimSpeedMult();
         toolFacing = Facing4FromAnim();           // chốt hướng
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical",   toolFacing.y);
@@ -110,7 +115,8 @@ public class ToolUser : MonoBehaviour
     }
 
     public void Tool_End()
-    {
+    {   
+        if (anim) anim.speed = 1f;
         usingItem = null;
         if (!toolLocked) return;
         toolLocked = false;
