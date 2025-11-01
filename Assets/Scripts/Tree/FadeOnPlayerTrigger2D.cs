@@ -17,13 +17,10 @@ public class FadeOnPlayerTrigger2D : MonoBehaviour
         var col = GetComponent<Collider2D>();
         col.isTrigger = true; // bắt buộc là trigger
     }
-
-    void Awake()
-    {
+    void Awake(){
         if (renderers == null || renderers.Length == 0)
-            renderers = GetComponentsInParent<SpriteRenderer>();
+            renderers = GetComponentsInParent<SpriteRenderer>(true); // includeInactive
     }
-
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag(playerTag)) return;
@@ -40,8 +37,18 @@ public class FadeOnPlayerTrigger2D : MonoBehaviour
 
     void OnDisable() { if (co != null) StopCoroutine(co); SetAlpha(1f); }
 
-    void StartFade(float target) { if (co != null) StopCoroutine(co); co = StartCoroutine(FadeTo(target)); }
+    void StartFade(float target)
+    {
+        // Nếu object/behaviour không active thì không được StartCoroutine
+        if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
+        { 
+            SetAlpha(target); 
+            return;
+        }
 
+        if (co != null) StopCoroutine(co);
+        co = StartCoroutine(FadeTo(target));
+    } 
     IEnumerator FadeTo(float target)
     {
         float t = 0f, dur = Mathf.Max(0.0001f, fadeDuration);

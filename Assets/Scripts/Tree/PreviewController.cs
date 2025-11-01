@@ -32,9 +32,9 @@ public class PlantPreviewController : MonoBehaviour
         Vector3 wp3 = cam.ScreenToWorldPoint(Input.mousePosition);
         Vector2 wp  = new Vector2(wp3.x, wp3.y);
 
-        bool ok = plantSystem.CanPlantAt(wp, player.position, seed.gridSize * rangeTiles,
-                                         seed, out var snapped, out var blocked, out var tooFar);
-
+        bool ok = plantSystem.CanPlantAt(
+        wp, player.position, rangeTiles,   // <-- không nhân gridSize ở đây
+        seed, out var snapped, out var blocked, out var tooFar);
         transform.position = snapped;
         sr.sprite  = ok ? okSprite : blockedSprite;
         sr.enabled = true;

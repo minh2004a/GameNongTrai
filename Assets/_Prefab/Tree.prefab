@@ -133,6 +133,8 @@ GameObject:
   - component: {fileID: 3655883854092327985}
   - component: {fileID: 7895382378436073937}
   - component: {fileID: 2006831098790179750}
+  - component: {fileID: 6113090764055160075}
+  - component: {fileID: 7182289251752175578}
   m_Layer: 8
   m_Name: Tree
   m_TagString: Untagged
@@ -241,8 +243,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.013436249, y: 0.08254881}
-  m_Size: {x: 0.7171375, y: 0.30948195}
+  m_Offset: {x: -0.013434402, y: 0.08254881}
+  m_Size: {x: 0.73177344, y: 0.30948207}
   m_Direction: 1
 --- !u!114 &7895382378436073937
 MonoBehaviour:
@@ -284,6 +286,33 @@ MonoBehaviour:
     chance: 0.4
   scatterSpeed: {x: 10, y: 15}
   scatterAngle: 90
+--- !u!114 &6113090764055160075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5913987706290959712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 
+--- !u!114 &7182289251752175578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5913987706290959712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b68b6ef936e1264fbf1e7bc452cc5aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stumpPrefab: {fileID: 1816410381763513309, guid: 9f446e3d831fe31499ef53a233fa6888, type: 3}
+  spawnStumpOnRemoved: 1
 --- !u!1 &8897804468038630154
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,14 +12,13 @@ public class PlantGrowth : MonoBehaviour
 
     public bool IsMature => stage >= data.stagePrefabs.Length - 1;
 
-    public void Init(SeedSO seed)
-    {
-        data = seed;
-        stage = 0; daysInStage = 0;
-        if (data && data.growthMode == GrowthMode.RandomRange) PickTargetDays();
-        SpawnStage();
-    }
-
+    public void Init(SeedSO seed){
+    data = seed;
+    stage = 0; daysInStage = 0;
+    if (!data || data.stagePrefabs == null || data.stagePrefabs.Length == 0) return;
+    if (data.growthMode == GrowthMode.RandomRange) PickTargetDays();
+    SpawnStage();
+}
     void OnEnable(){
         time = FindFirstObjectByType<TimeManager>();
         if (time) time.OnNewDay += TickDay;
