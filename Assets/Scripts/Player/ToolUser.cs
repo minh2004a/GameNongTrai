@@ -9,6 +9,7 @@ public class ToolUser : MonoBehaviour
     [SerializeField] Transform hitOrigin;
     [SerializeField] LayerMask hitMask;
     [SerializeField] PlayerController pc;
+    [SerializeField] SleepManager sleep;
     [SerializeField] float originDist = 0.55f;
     [SerializeField] float exhaustedActionTimeMult = 1.6f;
     [SerializeField, Range(0.1f,1f)] float exhaustedAnimSpeedMult = 0.7f;
@@ -76,6 +77,9 @@ public class ToolUser : MonoBehaviour
         if (!it || it.category != ItemCategory.Tool || it.toolType != ToolType.Axe) return;
         if (Time.time < nextUseTime) return;
         if (!stamina) return;
+        var r = stamina.SpendExhaustible(stamina.toolCost);
+        if (r == PlayerStamina.SpendResult.Fainted){ sleep.FaintNow(); return; }
+        // nếu Exhausted thì vẫn tiếp tục chặt, anim/cooldown đã chậm theo ActionTimeMult()
         stamina.SpendExhaustible(stamina.toolCost);
         usingItem = it;
        nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();

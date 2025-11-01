@@ -13,7 +13,7 @@ public class PlayerUseWeapon : MonoBehaviour
     [SerializeField] PlayerController controller;
     [SerializeField] Animator anim;
     [SerializeField] SpriteRenderer sprite;
-    
+    [SerializeField] SleepManager sleep;
     [SerializeField] LayerMask enemyMask;
     [SerializeField] LayerMask blockMask;   // NEW
     // [SerializeField] bool bowAimWithMouse = true;
@@ -97,6 +97,8 @@ public class PlayerUseWeapon : MonoBehaviour
         {
         cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
         if (!stamina) return;
+        var r1 = stamina.SpendExhaustible(stamina.bowCost);
+        if (r1 == PlayerStamina.SpendResult.Fainted) { sleep.FaintNow(); return; }
         stamina.SpendExhaustible(stamina.bowCost);
         var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
         lastFacing = face;                   // quay mặt trước
@@ -109,8 +111,10 @@ public class PlayerUseWeapon : MonoBehaviour
     }
         if (it.weaponType == WeaponType.Sword)
         {
-            cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
+           cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
             if (!stamina) return;
+            var r2 = stamina.SpendExhaustible(stamina.swordCost);
+            if (r2 == PlayerStamina.SpendResult.Fainted){ sleep.FaintNow(); return; }
             stamina.SpendExhaustible(stamina.swordCost);
             anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
             cd = Mathf.Max(minCooldown, it.cooldown);

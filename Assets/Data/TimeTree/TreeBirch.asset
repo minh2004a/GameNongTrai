@@ -18,17 +18,21 @@ MonoBehaviour:
   - {fileID: 9150040079066797203, guid: f6234b89f06831943a37cf9f8a220eac, type: 3}
   - {fileID: 6102650789534650660, guid: d27183660e51b7e4593005506808968f, type: 3}
   - {fileID: 5913987706290959712, guid: 0c809be3d87ad7b49a0eb1c7e2ad7e29, type: 3}
-  stageDays: 
+  stageDays: 00000000000000000000000000000000
   growthMode: 1
   stageAdvanceChance:
   - 0.2
   - 0.2
   - 0.2
   - 0.2
-  stageDayRange: []
+  stageDayRange:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   blockCheckRadius: 0.35
   blockMask:
     serializedVersion: 2
-    m_Bits: 336
+    m_Bits: 8528
   snapToGrid: 1
   gridSize: 1

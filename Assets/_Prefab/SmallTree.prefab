@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2343592767411044491}
   - component: {fileID: 5556665228188783388}
   - component: {fileID: 3822101618269813401}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FadeZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 7144234885884178689}
   - component: {fileID: 3941663065691529007}
   - component: {fileID: 8492448721290567756}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SmallTree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
