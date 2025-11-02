@@ -1,7 +1,9 @@
 // SleepPanel.cs
 using UnityEngine;
 using UnityEngine.UI;
-
+/// <summary>
+/// Panel xác nhận ngủ/ngất.
+/// </summary>
 public class SleepPanel : MonoBehaviour
 {
     [SerializeField] CanvasGroup group;

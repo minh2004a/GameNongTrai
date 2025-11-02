@@ -1,5 +1,6 @@
 using UnityEngine;
-
+/// <summary>
+/// Gán ID duy nhất cho mỗi GameObject để lưu/truy xuất trạng thái.
 [DisallowMultipleComponent]
 public class UniqueId : MonoBehaviour
 {

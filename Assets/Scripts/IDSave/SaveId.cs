@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Lưu ID của người chơi.
 public class SaveId : MonoBehaviour
 {
     // Start is called before the first frame update

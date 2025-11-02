@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+/// <summary>
+/// Quản lý quá trình ngủ của nhân vật, bao gồm chuyển scene, tua thời gian
 public class SleepManager : MonoBehaviour
 {
     [SerializeField] TimeManager timeMgr;
@@ -10,15 +12,16 @@ public class SleepManager : MonoBehaviour
     [SerializeField] PlayerStamina stamina;
     [SerializeField] GameObject player;
     [SerializeField] CanvasGroup fade;
+    
     [SerializeField] MonoBehaviour[] toDisable;
     public bool suppressBedPromptOnce;
     Transform bedSpawn;  // resolve theo scene House
     public System.Action OnSaveRequested;
+
     void Awake()
     {
-        suppressBedPromptOnce = true;    // lúc play nếu đang đứng ở giường thì KHÔNG bật panel
-    }
-    void OnEnable(){
+        suppressBedPromptOnce = true;   // không bật panel khi spawn ở giường
+    }    void OnEnable(){
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void OnDisable(){
@@ -124,7 +127,6 @@ public class SleepManager : MonoBehaviour
             house = SceneManager.GetSceneByName("House");
         }
         SceneManager.SetActiveScene(house);                // đổi scene đích làm Active. :contentReference[oaicite:5]{index=5}
-
         // 4) Teleport về giường, tua thời gian, save
         ResolveBedSpawn();
         if (player && bedSpawn) player.transform.position = bedSpawn.position;
@@ -132,7 +134,7 @@ public class SleepManager : MonoBehaviour
         OnSaveRequested?.Invoke();
 
         // 5) Fade xuống trong và MỞ KHÓA ở CUỐI
-        yield return Fade(0f, 0.35f); // <-- XUỐNG TRONG
+        yield return Fade(0f, 0.35f); // <-- XUỐNG TRONG           // thêm
         foreach (var m in toDisable) if (m) m.enabled = true;
         var watcher = player.GetComponent<ExhaustionWatcher>();
         watcher?.ResetHandled();

@@ -22,35 +22,60 @@ public class ScenePortal : MonoBehaviour
     void OnEnable(){ if (interact) interact.action.Enable(); }
     void OnDisable(){ if (interact) interact.action.Disable(); }
 
-    void OnTriggerEnter2D(Collider2D c){
+    void OnTriggerEnter2D(Collider2D c)
+    {
         if (!c.CompareTag("Player")) return;
         inside = true;
-        if (mode == Mode.AutoOnEnter && !busy) StartCoroutine(Go());
+        if (mode == Mode.AutoOnEnter && !busy)
+        {
+            busy = true;
+            if (SceneLoaderHost.IsSwitching) return;
+            SceneLoaderHost.I.Switch(targetScene, targetSpawnId);  // gọi host
+        }
     }
     void OnTriggerExit2D(Collider2D c){ if (c.CompareTag("Player")) inside = false; }
 
-    void Update(){
+    void Update()
+    {
         if (busy || mode != Mode.InteractAction || !inside || interact == null) return;
-        // Input Actions: kiểm tra nhấn trong frame hiện tại
-        if (interact.action.WasPressedThisFrame()) StartCoroutine(Go());
+        if (interact.action.WasPressedThisFrame())
+        {
+            busy = true;
+            if (SceneLoaderHost.IsSwitching) return;
+            SceneLoaderHost.I.Switch(targetScene, targetSpawnId);  // gọi host
+        }
     }
-
-    IEnumerator Go(){
+    IEnumerator Go()
+    {
+        if (busy) yield break;
         busy = true;
+
+        var fader = ScreenFader.I;
+        if (fader != null) yield return fader.FadeOut(0.35f);
+
         var cur = SceneManager.GetActiveScene();
-        var op = SceneManager.LoadSceneAsync(targetScene, LoadSceneMode.Additive);
-        if (op == null){ Debug.LogError($"LoadSceneAsync null: {targetScene}"); busy = false; yield break; }
-        yield return op;
 
-        var newScene = SceneManager.GetSceneByName(targetScene);
-        if (!newScene.IsValid()) newScene = SceneManager.GetSceneByPath(targetScene);
-        SceneManager.SetActiveScene(newScene);                                     // active scene mới
+        var load = SceneManager.LoadSceneAsync(targetScene, LoadSceneMode.Additive);
+        if (load != null)
+        {
+            yield return load;
 
-        var player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        foreach (var sp in Object.FindObjectsOfType<SpawnPoint>())
-            if (sp.id == targetSpawnId){ player.position = sp.transform.position; break; }
+            var newScene = SceneManager.GetSceneByName(targetScene);
+            if (newScene.IsValid()) SceneManager.SetActiveScene(newScene);
 
-        yield return SceneManager.UnloadSceneAsync(cur);                            // gỡ map cũ
+            var player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (player != null)
+            {
+                foreach (var sp in Object.FindObjectsOfType<SpawnPoint>())
+                {
+                    if (sp.id == targetSpawnId) { player.position = sp.transform.position; break; }
+                }
+            }
+
+            yield return SceneManager.UnloadSceneAsync(cur);
+        }
+
+        if (fader != null) yield return fader.FadeIn(0.35f);
         busy = false;
     }
 }

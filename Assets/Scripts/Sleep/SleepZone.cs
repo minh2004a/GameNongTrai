@@ -1,6 +1,8 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
+/// <summary>
+/// Vùng giường ngủ, hiển thị panel xác nhận ngủ khi nhân vật vào.
 public class SleepZone : MonoBehaviour
 {
     [SerializeField] SleepPanel panel;         // cho phép để trống
