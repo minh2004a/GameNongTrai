@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7944093650571322871}
   - component: {fileID: 5594865644670851074}
   - component: {fileID: 2465059148247919952}
-  - component: {fileID: -1089932384810246763}
   m_Layer: 8
   m_Name: Sapling
   m_TagString: Untagged
@@ -121,16 +120,3 @@ CircleCollider2D:
   m_Offset: {x: 0.016844034, y: 0.01763171}
   serializedVersion: 2
   m_Radius: 0.11877549
---- !u!114 &-1089932384810246763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9150040079066797203}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  id: 

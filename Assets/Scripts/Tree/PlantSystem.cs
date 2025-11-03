@@ -1,4 +1,5 @@
 // PlantSystem.cs
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 // Hệ thống trồng cây từ hạt giống
@@ -7,6 +8,11 @@ public class PlantSystem : MonoBehaviour
 {
     [Header("Prefab gốc chứa PlantGrowth")]
     public GameObject plantRootPrefab;
+
+    void Start()
+    {
+        RestorePlantsFromSave();
+    }
 
     public bool TryPlantAt(Vector2 worldPos, SeedSO seed, out PlantGrowth plant)
     {
@@ -47,5 +53,30 @@ public class PlantSystem : MonoBehaviour
 
         tooFar = !inRange;
         return inRange && !blocked;
+    }
+
+    void RestorePlantsFromSave()
+    {
+        if (!plantRootPrefab) return;
+        var scene = gameObject.scene.IsValid() ? gameObject.scene.name : null;
+        if (string.IsNullOrEmpty(scene)) return;
+
+        List<SaveStore.PlantState> states = new List<SaveStore.PlantState>(SaveStore.GetPlantsInScene(scene));
+        foreach (var state in states)
+        {
+            if (string.IsNullOrEmpty(state.seedId)) continue;
+            var seed = SeedSO.Find(state.seedId);
+            if (!seed)
+            {
+                Debug.LogWarning($"PlantSystem: Không tìm thấy SeedSO với id '{state.seedId}' để khôi phục.");
+                continue;
+            }
+
+            var prefabPos = plantRootPrefab.transform.position;
+            var pos = new Vector3(state.x, state.y, prefabPos.z);
+            var go = Instantiate(plantRootPrefab, pos, Quaternion.identity);
+            var growth = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
+            growth.Restore(seed, state);
+        }
     }
 }
