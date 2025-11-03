@@ -7,7 +7,7 @@ public class PlantPreviewController : MonoBehaviour
     public Sprite okSprite;          // Extras_1
     public Sprite blockedSprite;     // Extras_0
     public float rangeTiles = 1f;
-
+    
     public PlayerInventory inv;
     public PlantSystem plantSystem;
     public Transform player;

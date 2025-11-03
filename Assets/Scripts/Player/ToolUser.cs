@@ -80,9 +80,8 @@ public class ToolUser : MonoBehaviour
         var r = stamina.SpendExhaustible(stamina.toolCost);
         if (r == PlayerStamina.SpendResult.Fainted){ sleep.FaintNow(); return; }
         // nếu Exhausted thì vẫn tiếp tục chặt, anim/cooldown đã chậm theo ActionTimeMult()
-        stamina.SpendExhaustible(stamina.toolCost);
         usingItem = it;
-       nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
+        nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
         toolLocked = true;
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
