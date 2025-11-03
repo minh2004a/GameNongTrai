@@ -12,14 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
   m_Name: Wood
   m_EditorClassIdentifier: 
-  id: 
+  id: Wood
   icon: {fileID: 1473601758, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  seedData: {fileID: 0}
   category: 2
-  stackable: 1
-  maxStack: 999
   toolType: 0
+  stackable: 1
   weaponType: 0
-  power: 1
+  maxStack: 999
+  hitboxScale: 1
+  hitboxYOffset: 0
+  hitboxForward: -1
+  Dame: 1
   range: 1
   cooldown: 0.2
   projectilePrefab: {fileID: 0}

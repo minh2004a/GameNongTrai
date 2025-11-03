@@ -635,6 +635,7 @@ GameObject:
   - component: {fileID: 152460043}
   - component: {fileID: 152460044}
   - component: {fileID: 152460045}
+  - component: {fileID: 152460046}
   m_Layer: 0
   m_Name: _System
   m_TagString: Untagged
@@ -709,7 +710,7 @@ MonoBehaviour:
   timeMgr: {fileID: 1425422339}
   hp: {fileID: 1080744793}
   stamina: {fileID: 1080744791}
-  inv: {fileID: 0}
+  inv: {fileID: 647645683}
   itemDB: {fileID: 11400000, guid: 7f8a8ef0204a5dd42af57ebe24aff5b9, type: 2}
 --- !u!114 &152460044
 MonoBehaviour:
@@ -741,6 +742,20 @@ MonoBehaviour:
   stamina: {fileID: 1080744791}
   inv: {fileID: 647645683}
   itemDB: {fileID: 11400000, guid: 7f8a8ef0204a5dd42af57ebe24aff5b9, type: 2}
+--- !u!114 &152460046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152460039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a12daebc50c65a4eb52bfe7f96ff4b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  loadout: {fileID: 11400000, guid: e589b598ac994ba4eb4aa0aee77f0cc9, type: 2}
+  itemDB: {fileID: 0}
 --- !u!1 &158480009 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 936923126784610755, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
@@ -5896,7 +5911,7 @@ PrefabInstance:
       objectReference: {fileID: 1080744791}
     - target: {fileID: 5362268058865736135, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: moveSpeed
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5502865096794846101, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_Name
@@ -5908,11 +5923,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6288386847750319070, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_SortingLayer
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6288386847750319070, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_SortingLayerID
-      value: -1898515245
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6614574792709815495, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_LocalPosition.x

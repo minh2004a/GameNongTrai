@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6a6959dc43dc994d8e2e307dafe2d1f, type: 3}
+  m_Name: StartingLoadout
+  m_EditorClassIdentifier: 
+  items:
+  - item: {fileID: 11400000, guid: 452b8325a32bbf94fba514e316bf250e, type: 2}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 0
+  - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 1
+  - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 2
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 0
+    equip: 0
+    hotbarSlot: 0
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 0
+    equip: 0
+    hotbarSlot: 0

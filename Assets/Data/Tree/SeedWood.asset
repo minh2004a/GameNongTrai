@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
   m_Name: SeedWood
   m_EditorClassIdentifier: 
-  id: 
+  id: SeedWood
   icon: {fileID: 367556941, guid: 1c988d5ed3bd414498bc7831be2a523c, type: 3}
   seedData: {fileID: 11400000, guid: 75f582d2f1f229241b1502a7028adf5c, type: 2}
   category: 5

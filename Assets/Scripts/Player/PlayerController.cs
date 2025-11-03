@@ -40,9 +40,9 @@ public class PlayerController : MonoBehaviour
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     void Update()
     {
-        // 1) Lưu hướng cuối cùng khi có input
+        // 1) Lưu hướng cuối cùng khi có input (ưu tiên trục ngang/dọc)
         if (moveInput.sqrMagnitude > 0.0001f)
-            lastFacing = moveInput.normalized;
+            UpdateFacingFrom(moveInput);
 
         // 2) Nuôi tham số Speed của Animator bằng tốc độ thật
         float speedWorld = currentSpeed;                 // ví dụ 5 hoặc 2.5 khi kiệt sức

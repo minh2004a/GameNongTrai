@@ -28,6 +28,7 @@ public static class SaveStore
         public int lastUpdatedDay;
     }
     [System.Serializable]
+    
     class Meta
     {
         public string lastScene = "House";
@@ -58,6 +59,7 @@ public static class SaveStore
         meta.inventory = dto;
         SaveToDisk();
     }
+    public static bool JustStartedNewGame { get; set; }
     // Áp từ save → runtime
     public static void ApplyInventory(PlayerInventory inv, ItemDB db)
     {
@@ -265,6 +267,7 @@ public static class SaveStore
         committedTrees.Clear(); committedStumps.Clear();
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
+        JustStartedNewGame = true;
         // meta mới
         meta = new Meta
         {
