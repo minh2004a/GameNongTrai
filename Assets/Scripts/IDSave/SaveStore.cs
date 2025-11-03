@@ -24,6 +24,7 @@ public static class SaveStore
         public int stage;
         public int daysInStage;
         public int targetDaysForStage;
+        public int lastUpdatedDay;
     }
     [System.Serializable]
     class Meta
@@ -87,6 +88,7 @@ public static class SaveStore
     }
     public static void SetTime(int d,int h,int m){ meta.day=d; meta.hour=h; meta.minute=m; SaveToDisk(); }
     public static void GetTime(out int d,out int h,out int m){ d=meta.day; h=meta.hour; m=meta.minute; }
+    public static int PeekSavedDay(){ return meta?.day ?? 1; }
 
     public static void SetVitals01(float hp,float sta){
     meta.hp01=Mathf.Clamp01(hp); meta.sta01=Mathf.Clamp01(sta); SaveToDisk();

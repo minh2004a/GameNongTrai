@@ -16,6 +16,16 @@ public class PlantGrowth : MonoBehaviour
 
     public bool IsMature => IsDataValid() && stage >= data.stagePrefabs.Length - 1;
 
+    int CurrentDay
+    {
+        get
+        {
+            if (time && time.isActiveAndEnabled) return time.day;
+            var tm = FindFirstObjectByType<TimeManager>();
+            return tm ? tm.day : SaveStore.PeekSavedDay();
+        }
+    }
+
     public void Init(SeedSO seed)
     {
         data = seed;
@@ -56,6 +66,7 @@ public class PlantGrowth : MonoBehaviour
         targetDaysForStage = Mathf.Max(0, state.targetDaysForStage);
         if (data.growthMode == GrowthMode.RandomRange && targetDaysForStage <= 0) PickTargetDays();
 
+        ApplyOfflineGrowth(state.lastUpdatedDay);
         SpawnStage();
         PersistState();
     }
@@ -121,6 +132,7 @@ public class PlantGrowth : MonoBehaviour
             }
             case GrowthMode.RandomRange:
             {
+                if (targetDaysForStage <= 0) PickTargetDays();
                 if (daysInStage >= targetDaysForStage)
                 {
                     AdvanceStage();
@@ -135,12 +147,19 @@ public class PlantGrowth : MonoBehaviour
 
     void AdvanceStage()
     {
+        AdvanceStageInternal(true);
+        PersistState();
+    }
+
+    void AdvanceStageInternal(bool spawnVisual)
+    {
         if (!IsDataValid()) return;
-        stage = Mathf.Min(stage + 1, data.stagePrefabs.Length - 1);
+        int maxStage = data.stagePrefabs.Length - 1;
+        int nextStage = Mathf.Min(stage + 1, maxStage);
+        stage = nextStage;
         daysInStage = 0;
         if (data.growthMode == GrowthMode.RandomRange) PickTargetDays();
-        SpawnStage();
-        PersistState();
+        if (spawnVisual) SpawnStage();
     }
 
     void PickTargetDays()
@@ -178,7 +197,8 @@ public class PlantGrowth : MonoBehaviour
             y = transform.position.y,
             stage = stage,
             daysInStage = daysInStage,
-            targetDaysForStage = targetDaysForStage
+            targetDaysForStage = targetDaysForStage,
+            lastUpdatedDay = CurrentDay
         };
     }
 
@@ -209,5 +229,61 @@ public class PlantGrowth : MonoBehaviour
     {
         removeFromSave = true;
         PersistRemoval();
+    }
+
+    void ApplyOfflineGrowth(int lastRecordedDay)
+    {
+        if (!IsDataValid()) return;
+
+        int now = CurrentDay;
+        int last = lastRecordedDay > 0 ? lastRecordedDay : now;
+        int days = Mathf.Max(0, now - last);
+        if (days == 0) return;
+
+        for (int i = 0; i < days; i++)
+        {
+            if (IsMature)
+            {
+                daysInStage = 0;
+                break;
+            }
+
+            daysInStage++;
+
+            switch (data.growthMode)
+            {
+                case GrowthMode.FixedDays:
+                {
+                    int need = (data.stageDays != null && stage < data.stageDays.Length)
+                        ? data.stageDays[stage]
+                        : 1;
+                    if (daysInStage >= need)
+                    {
+                        AdvanceStageInternal(false);
+                    }
+                    break;
+                }
+                case GrowthMode.RandomChance:
+                {
+                    float p = (data.stageAdvanceChance != null && stage < data.stageAdvanceChance.Length)
+                        ? data.stageAdvanceChance[stage]
+                        : 0f;
+                    if (UnityEngine.Random.value <= p)
+                    {
+                        AdvanceStageInternal(false);
+                    }
+                    break;
+                }
+                case GrowthMode.RandomRange:
+                {
+                    if (targetDaysForStage <= 0) PickTargetDays();
+                    if (daysInStage >= targetDaysForStage)
+                    {
+                        AdvanceStageInternal(false);
+                    }
+                    break;
+                }
+            }
+        }
     }
 }

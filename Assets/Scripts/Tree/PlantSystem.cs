@@ -1,4 +1,5 @@
 // PlantSystem.cs
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 // Hệ thống trồng cây từ hạt giống
@@ -60,7 +61,8 @@ public class PlantSystem : MonoBehaviour
         var scene = gameObject.scene.IsValid() ? gameObject.scene.name : null;
         if (string.IsNullOrEmpty(scene)) return;
 
-        foreach (var state in SaveStore.GetPlantsInScene(scene))
+        List<SaveStore.PlantState> states = new List<SaveStore.PlantState>(SaveStore.GetPlantsInScene(scene));
+        foreach (var state in states)
         {
             if (string.IsNullOrEmpty(state.seedId)) continue;
             var seed = SeedSO.Find(state.seedId);
