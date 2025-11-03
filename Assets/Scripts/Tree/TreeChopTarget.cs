@@ -31,7 +31,7 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         if (hp > 0) return;
 
         // Hết HP: tạo gốc cây
-       var sTag = GetComponent<StumpOfTree>();
+        var sTag = GetComponent<StumpOfTree>();
         if (sTag)
         {
             SaveStore.MarkStumpClearedPending(gameObject.scene.name, sTag.treeId);
@@ -44,16 +44,31 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         // Lưu đã chặt (nếu có hệ Save)
         // trong nhánh hp<=0 trước khi Destroy:
         var uid = GetComponent<UniqueId>();
+        var plant = GetComponentInParent<PlantGrowth>();
         if (uid) SaveStore.MarkTreeChoppedPending(gameObject.scene.name, uid.Id);
 
-        if (stumpPrefab){
-            var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, transform.parent);
+        if (stumpPrefab)
+        {
+            var parent = plant ? plant.transform.parent : transform.parent;
+            var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, parent);
             var tag = stump.GetComponent<StumpOfTree>() ?? stump.AddComponent<StumpOfTree>();
             if (uid) tag.treeId = uid.Id;
         }
 
         GetComponent<DropLootOnDeath>()?.Drop();
-        Destroy(gameObject);
+
+        if (plant)
+        {
+            plant.RemoveFromSave();
+            if (plant.gameObject != gameObject)
+                Destroy(plant.gameObject);
+            else
+                Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
 
     }
     void SpawnChopFX(Vector3 pos)
