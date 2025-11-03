@@ -8,6 +8,11 @@ public class PlantSystem : MonoBehaviour
     [Header("Prefab gốc chứa PlantGrowth")]
     public GameObject plantRootPrefab;
 
+    void Start()
+    {
+        RestorePlantsFromSave();
+    }
+
     public bool TryPlantAt(Vector2 worldPos, SeedSO seed, out PlantGrowth plant)
     {
         plant = null; if (!seed || !plantRootPrefab) return false;
@@ -47,5 +52,29 @@ public class PlantSystem : MonoBehaviour
 
         tooFar = !inRange;
         return inRange && !blocked;
+    }
+
+    void RestorePlantsFromSave()
+    {
+        if (!plantRootPrefab) return;
+        var scene = gameObject.scene.IsValid() ? gameObject.scene.name : null;
+        if (string.IsNullOrEmpty(scene)) return;
+
+        foreach (var state in SaveStore.GetPlantsInScene(scene))
+        {
+            if (string.IsNullOrEmpty(state.seedId)) continue;
+            var seed = SeedSO.Find(state.seedId);
+            if (!seed)
+            {
+                Debug.LogWarning($"PlantSystem: Không tìm thấy SeedSO với id '{state.seedId}' để khôi phục.");
+                continue;
+            }
+
+            var prefabPos = plantRootPrefab.transform.position;
+            var pos = new Vector3(state.x, state.y, prefabPos.z);
+            var go = Instantiate(plantRootPrefab, pos, Quaternion.identity);
+            var growth = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
+            growth.Restore(seed, state);
+        }
     }
 }

@@ -6,6 +6,8 @@ public enum GrowthMode { FixedDays, RandomChance, RandomRange }
 [CreateAssetMenu(menuName = "Plants/Seed")]
 public class SeedSO : ScriptableObject
 {
+    static readonly System.Collections.Generic.Dictionary<string, SeedSO> byId =
+        new System.Collections.Generic.Dictionary<string, SeedSO>();
     public string seedId;
 
     [Tooltip("Prefab cho từng giai đoạn, cuối cùng là cây trưởng thành")]
@@ -31,7 +33,24 @@ public class SeedSO : ScriptableObject
     public LayerMask blockMask;
     public bool snapToGrid = true;
     public float gridSize = 1f;
-    #if UNITY_EDITOR
+    void OnEnable(){
+        if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
+    }
+    void OnDisable(){
+        if (!string.IsNullOrEmpty(seedId) && byId.TryGetValue(seedId, out var current) && current == this)
+            byId.Remove(seedId);
+    }
+    public static SeedSO Find(string id){
+        if (string.IsNullOrEmpty(id)) return null;
+        if (byId.TryGetValue(id, out var seed) && seed) return seed;
+        foreach (var s in Resources.FindObjectsOfTypeAll<SeedSO>())
+        {
+            if (string.IsNullOrEmpty(s.seedId)) continue;
+            byId[s.seedId] = s;
+        }
+        return byId.TryGetValue(id, out seed) ? seed : null;
+    }
+#if UNITY_EDITOR
 void OnValidate(){
     gridSize = Mathf.Max(0.01f, gridSize);
     if (stagePrefabs == null) return;
@@ -46,6 +65,7 @@ void OnValidate(){
     if (stageDayRange != null && stageDayRange.Length != n){
         System.Array.Resize(ref stageDayRange, n);
     }
+    if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
 }
 #endif
 }
