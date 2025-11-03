@@ -99,7 +99,6 @@ public class PlayerUseWeapon : MonoBehaviour
         if (!stamina) return;
         var r1 = stamina.SpendExhaustible(stamina.bowCost);
         if (r1 == PlayerStamina.SpendResult.Fainted) { sleep.FaintNow(); return; }
-        stamina.SpendExhaustible(stamina.bowCost);
         var face = MouseFacing4();          // lấy hướng theo chuột, 4 góc 90°
         lastFacing = face;                   // quay mặt trước
         bowFacing  = face;                   // lưu hướng khóa
@@ -115,7 +114,6 @@ public class PlayerUseWeapon : MonoBehaviour
             if (!stamina) return;
             var r2 = stamina.SpendExhaustible(stamina.swordCost);
             if (r2 == PlayerStamina.SpendResult.Fainted){ sleep.FaintNow(); return; }
-            stamina.SpendExhaustible(stamina.swordCost);
             anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
             cd = Mathf.Max(minCooldown, it.cooldown);
             return;

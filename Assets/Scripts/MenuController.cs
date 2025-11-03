@@ -1,65 +1,109 @@
-// using UnityEngine;
-// using UnityEngine.UI;
-// using UnityEngine.SceneManagement;
-// using System.Collections;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-// public class MenuController : MonoBehaviour
-// {
-//     [Header("Scenes")]
-//     [SerializeField] string persistentScene = "Persistent";
-//     [SerializeField] string startMapScene   = "House";
+public class MenuController : MonoBehaviour
+{
+    [Header("Scenes")]
+    [SerializeField] string persistentScene = "Persistent";
+    [SerializeField] string startMapScene = "House";
 
-//     [Header("UI")]
-//     [SerializeField] Button newGameButton;
-//     [SerializeField] Button continueButton;
-//     [SerializeField] Button quitButton;
-//     [SerializeField] GameObject confirmWipePanel;
+    [Header("UI")]
+    [SerializeField] Button newGameButton;
+    [SerializeField] Button continueButton;
+    [SerializeField] Button quitButton;
+    [SerializeField] GameObject confirmWipePanel;
 
-//     void Awake(){
-//         // Đủ để bật/tắt nút Chơi tiếp
-//         if (continueButton) continueButton.interactable = SaveStore.HasAnySave();
-//         Time.timeScale = 1f;
-//     }
+    void Awake()
+    {
+        SaveStore.LoadFromDisk();
 
-//     public void OnClickNewGame(){
-//         // Nếu có panel xác nhận và đã có save -> hỏi xoá.
-//         if (SaveStore.HasAnySave() && confirmWipePanel){
-//             confirmWipePanel.SetActive(true);
-//             return;
-//         }
-//         StartCoroutine(StartNewGameRoutine());
-//     }
-//     public void OnConfirmWipe(){
-//         // Gọi NewGame sẽ ghi file mới luôn
-//         StartCoroutine(StartNewGameRoutine());
-//     }
-//     public void OnCancelWipe(){ if (confirmWipePanel) confirmWipePanel.SetActive(false); }
+        if (continueButton)
+        {
+            continueButton.interactable = SaveStore.HasAnySave();
+        }
 
-//     IEnumerator StartNewGameRoutine(){
-//         // Tạo save rỗng + meta
-//         SaveStore.NewGame(startMapScene);
-//         // Vào Persistent rồi additively load map bắt đầu
-//         yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
-//         yield return SceneManager.LoadSceneAsync(startMapScene, LoadSceneMode.Additive);
-//         SceneManager.SetActiveScene(SceneManager.GetSceneByName(startMapScene));
-//     }
+        if (confirmWipePanel)
+        {
+            confirmWipePanel.SetActive(false);
+        }
 
-//     public void OnClickContinue(){
-//         if (!SaveStore.HasAnySave()) return;
-//         StartCoroutine(ContinueRoutine());
-//     }
-//     IEnumerator ContinueRoutine(){
-//         yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
-//         var scene = SaveStore.GetLastScene();
-//         yield return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
-//         SceneManager.SetActiveScene(SceneManager.GetSceneByName(scene));
-//     }
+        Time.timeScale = 1f;
+    }
 
-//     public void OnClickQuit(){
-// #if UNITY_EDITOR
-//         UnityEditor.EditorApplication.isPlaying = false;
-// #else
-//         Application.Quit();
-// #endif
-//     }
-// }
+    public void OnClickNewGame()
+    {
+        if (SaveStore.HasAnySave() && confirmWipePanel)
+        {
+            confirmWipePanel.SetActive(true);
+            return;
+        }
+
+        StartCoroutine(StartNewGameRoutine());
+    }
+
+    public void OnConfirmWipe()
+    {
+        if (confirmWipePanel)
+        {
+            confirmWipePanel.SetActive(false);
+        }
+
+        StartCoroutine(StartNewGameRoutine());
+    }
+
+    public void OnCancelWipe()
+    {
+        if (confirmWipePanel)
+        {
+            confirmWipePanel.SetActive(false);
+        }
+    }
+
+    IEnumerator StartNewGameRoutine()
+    {
+        SaveStore.NewGame(startMapScene);
+
+        yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
+        yield return SceneManager.LoadSceneAsync(startMapScene, LoadSceneMode.Additive);
+
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(startMapScene));
+    }
+
+    public void OnClickContinue()
+    {
+        if (!SaveStore.HasAnySave())
+        {
+            return;
+        }
+
+        StartCoroutine(ContinueRoutine());
+    }
+
+    IEnumerator ContinueRoutine()
+    {
+        SaveStore.LoadFromDisk();
+
+        yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
+
+        var sceneToLoad = SaveStore.GetLastScene();
+        if (string.IsNullOrEmpty(sceneToLoad))
+        {
+            sceneToLoad = startMapScene;
+        }
+
+        yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
+
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneToLoad));
+    }
+
+    public void OnClickQuit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+}
