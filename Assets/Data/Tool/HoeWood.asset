@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: AxeWood
+  m_Name: HoeWood
   m_EditorClassIdentifier: 
-  id: AxeWood
-  icon: {fileID: 1966405731, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  id: HoeWood
+  icon: {fileID: 1508434368, guid: 791eb7bc0f0ffb64fb4797b58f8d2767, type: 3}
   seedData: {fileID: 0}
   category: 0
-  toolType: 1
+  toolType: 2
   stackable: 0
   weaponType: 0
   maxStack: 999
-  hitboxScale: 1.2
-  hitboxYOffset: -0.2
-  hitboxForward: -1
-  Dame: 2
-  range: 0.2
+  hitboxScale: 1
+  hitboxYOffset: -0.43
+  hitboxForward: 0.75
+  Dame: 1
+  range: 0.3
   cooldown: 0.4
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10

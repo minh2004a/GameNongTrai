@@ -8,6 +8,15 @@ public class PlantSystem : MonoBehaviour
 {
     [Header("Prefab gốc chứa PlantGrowth")]
     public GameObject plantRootPrefab;
+    [Header("Đất canh tác")]
+    public SoilManager soilManager;
+
+    SoilManager GetSoilManager()
+    {
+        if (soilManager && soilManager.isActiveAndEnabled) return soilManager;
+        soilManager = FindFirstObjectByType<SoilManager>();
+        return soilManager;
+    }
 
     void Start()
     {
@@ -19,7 +28,15 @@ public class PlantSystem : MonoBehaviour
         plant = null; if (!seed || !plantRootPrefab) return false;
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
 
-        if (seed.snapToGrid){
+        if (seed.requiresTilledSoil)
+        {
+            var soil = GetSoilManager();
+            if (!soil) return false;
+            var cell = soil.WorldToCell(worldPos);
+            if (!soil.IsCellTilled(cell)) return false;
+            worldPos = soil.CellToWorld(cell);
+        }
+        else if (seed.snapToGrid){
             float s = Mathf.Max(0.01f, seed.gridSize);
             worldPos = new Vector2(
                 Mathf.Floor(worldPos.x / s) * s + 0.5f * s,
@@ -44,10 +61,27 @@ public class PlantSystem : MonoBehaviour
                           Mathf.Floor(mouseWorld.y / s) * s + 0.5f * s)
             : mouseWorld;
 
+        SoilManager soil = null;
+        if (seed.requiresTilledSoil)
+        {
+            soil = GetSoilManager();
+            if (soil)
+            {
+                snapped = soil.SnapToGrid(snapped);
+            }
+        }
+
         blocked = Physics2D.OverlapCircle(snapped, seed.blockCheckRadius, seed.blockMask);
 
-        int ix = Mathf.FloorToInt(snapped.x / s),  iy = Mathf.FloorToInt(snapped.y / s);
-        int px = Mathf.FloorToInt(playerPos.x / s), py = Mathf.FloorToInt(playerPos.y / s);
+        if (seed.requiresTilledSoil)
+        {
+            bool tilledOk = soil && soil.IsTilled(snapped);
+            blocked = blocked || !tilledOk;
+        }
+
+        float grid = seed.requiresTilledSoil && soil ? soil.GridSize : s;
+        int ix = Mathf.FloorToInt(snapped.x / grid),  iy = Mathf.FloorToInt(snapped.y / grid);
+        int px = Mathf.FloorToInt(playerPos.x / grid), py = Mathf.FloorToInt(playerPos.y / grid);
         int r  = Mathf.Max(0, Mathf.RoundToInt(rangeTiles));
         bool inRange = Mathf.Max(Mathf.Abs(ix - px), Mathf.Abs(iy - py)) <= r;
 
@@ -74,6 +108,17 @@ public class PlantSystem : MonoBehaviour
 
             var prefabPos = plantRootPrefab.transform.position;
             var pos = new Vector3(state.x, state.y, prefabPos.z);
+            if (seed.requiresTilledSoil)
+            {
+                var soil = GetSoilManager();
+                if (soil)
+                {
+                    var cell = soil.WorldToCell(pos);
+                    soil.EnsureCellTilledFromSave(cell);
+                    var center = soil.CellToWorld(cell);
+                    pos = new Vector3(center.x, center.y, prefabPos.z);
+                }
+            }
             var go = Instantiate(plantRootPrefab, pos, Quaternion.identity);
             var growth = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
             growth.Restore(seed, state);

@@ -13,6 +13,7 @@ public class ToolUser : MonoBehaviour
     [SerializeField] float originDist = 0.55f;
     [SerializeField] float exhaustedActionTimeMult = 1.6f;
     [SerializeField, Range(0.1f,1f)] float exhaustedAnimSpeedMult = 0.7f;
+    [SerializeField] SoilManager soilManager;
     bool toolLocked; 
     Vector2 toolFacing = Vector2.down;
     [SerializeField] float toolFailSafe = 3f;
@@ -27,9 +28,10 @@ public class ToolUser : MonoBehaviour
     {
         if (!pc) pc = GetComponent<PlayerController>();
         if (!anim) anim = GetComponentInChildren<Animator>();
+        if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
     }
 
-    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); }
+    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); }
 
     void Update()
     {
@@ -74,7 +76,8 @@ public class ToolUser : MonoBehaviour
 
     public void TryUseCurrent(){
         var it = inv?.CurrentItem;
-        if (!it || it.category != ItemCategory.Tool || it.toolType != ToolType.Axe) return;
+        if (!it || it.category != ItemCategory.Tool) return;
+        if (it.toolType != ToolType.Axe && it.toolType != ToolType.Hoe) return;
         if (Time.time < nextUseTime) return;
         if (!stamina) return;
         var r = stamina.SpendExhaustible(stamina.toolCost);
@@ -90,7 +93,23 @@ public class ToolUser : MonoBehaviour
         anim.SetFloat("Vertical",   toolFacing.y);
         anim.SetFloat("Speed",      0f);
         pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
-        anim.SetTrigger("UseTool");
+        if (anim)
+        {
+            switch (usingItem.toolType)
+            {
+                case ToolType.Axe:
+                    anim.ResetTrigger("UseHoe");
+                    anim.SetTrigger("UseAxe");
+                    break;
+                case ToolType.Hoe:
+                    anim.ResetTrigger("UseAxe");
+                    anim.SetTrigger("UseHoe");
+                    break;
+                default:
+                    anim.SetTrigger("UseTool");
+                    break;
+            }
+        }
     }
 
     public void Tool_DoHit()
@@ -113,6 +132,16 @@ public class ToolUser : MonoBehaviour
             {
                 Vector2 pushDir = (c.transform.position - transform.position).normalized;
                 t.Hit(usingItem.toolType, usingItem.Dame, pushDir);
+            }
+        }
+
+        if (usingItem.toolType == ToolType.Hoe)
+        {
+            if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
+            if (soilManager)
+            {
+                var cell = soilManager.WorldToCell((Vector2)center);
+                soilManager.TryTillCell(cell);
             }
         }
     }

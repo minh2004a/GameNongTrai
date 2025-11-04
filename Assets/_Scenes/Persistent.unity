@@ -2787,6 +2787,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plantRootPrefab: {fileID: 5994108680218134156, guid: 66821e722f60e054899df7b4b90f48b5, type: 3}
+  soilManager: {fileID: 0}
 --- !u!1 &975302568
 GameObject:
   m_ObjectHideFlags: 0
@@ -3128,7 +3129,7 @@ Transform:
   m_GameObject: {fileID: 1030219192}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.51, y: 6.79, z: -10}
+  m_LocalPosition: {x: 10.4, y: 6.1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3202,6 +3203,7 @@ MonoBehaviour:
   originDist: 0.4
   exhaustedActionTimeMult: 1.6
   exhaustedAnimSpeedMult: 0.7
+  soilManager: {fileID: 0}
   toolFailSafe: 0.4
 --- !u!114 &1080744781 stripped
 MonoBehaviour:
@@ -5975,11 +5977,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8600441533436656489, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.51
+      value: 10.4
       objectReference: {fileID: 0}
     - target: {fileID: 8600441533436656489, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.79
+      value: 6.1
       objectReference: {fileID: 0}
     - target: {fileID: 8600441533436656489, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_LocalPosition.z
