@@ -25,6 +25,7 @@ public class MenuController : MonoBehaviour
 
     Coroutine loadingDotsRoutine;
     bool autoCreatedLoadingPanel;
+    bool loadingPanelDetachedForLoad;
 
     void Awake()
     {
@@ -56,7 +57,7 @@ public class MenuController : MonoBehaviour
             return;
         }
 
-        StartCoroutine(StartNewGameRoutine());
+        StartCoroutine(RunSceneTransition(StartNewGameRoutine()));
     }
 
     public void OnConfirmWipe()
@@ -66,7 +67,7 @@ public class MenuController : MonoBehaviour
             confirmWipePanel.SetActive(false);
         }
 
-        StartCoroutine(StartNewGameRoutine());
+        StartCoroutine(RunSceneTransition(StartNewGameRoutine()));
     }
 
     public void OnCancelWipe()
@@ -77,20 +78,28 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    IEnumerator StartNewGameRoutine()
+    IEnumerator RunSceneTransition(IEnumerator loadRoutine)
     {
+        PrepareForSceneTransition();
+
         ShowLoadingScreen();
         var loadingStartTime = Time.unscaledTime;
 
+        yield return loadRoutine;
+        yield return EnsureMinimumLoadingTime(loadingStartTime);
+        HideLoadingScreen();
+
+        Destroy(gameObject);
+    }
+
+    IEnumerator StartNewGameRoutine()
+    {
         SaveStore.NewGame(startMapScene);
 
         yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
         yield return SceneManager.LoadSceneAsync(startMapScene, LoadSceneMode.Additive);
 
         SceneManager.SetActiveScene(SceneManager.GetSceneByName(startMapScene));
-
-        yield return EnsureMinimumLoadingTime(loadingStartTime);
-        HideLoadingScreen();
     }
 
     public void OnClickContinue()
@@ -100,14 +109,11 @@ public class MenuController : MonoBehaviour
             return;
         }
 
-        StartCoroutine(ContinueRoutine());
+        StartCoroutine(RunSceneTransition(ContinueRoutine()));
     }
 
     IEnumerator ContinueRoutine()
     {
-        ShowLoadingScreen();
-        var loadingStartTime = Time.unscaledTime;
-
         SaveStore.LoadFromDisk();
 
         yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
@@ -121,9 +127,6 @@ public class MenuController : MonoBehaviour
         yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
 
         SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneToLoad));
-
-        yield return EnsureMinimumLoadingTime(loadingStartTime);
-        HideLoadingScreen();
     }
 
     public void OnClickQuit()
@@ -185,6 +188,13 @@ public class MenuController : MonoBehaviour
                 loadingText = null;
                 autoCreatedLoadingPanel = false;
             }
+            else if (loadingPanelDetachedForLoad)
+            {
+                Destroy(loadingPanel);
+                loadingPanel = null;
+                loadingText = null;
+                loadingPanelDetachedForLoad = false;
+            }
         }
     }
 
@@ -202,6 +212,14 @@ public class MenuController : MonoBehaviour
             loadingPanel = null;
             loadingText = null;
             autoCreatedLoadingPanel = false;
+        }
+
+        if (loadingPanelDetachedForLoad && loadingPanel)
+        {
+            Destroy(loadingPanel);
+            loadingPanel = null;
+            loadingText = null;
+            loadingPanelDetachedForLoad = false;
         }
     }
 
@@ -287,6 +305,58 @@ public class MenuController : MonoBehaviour
         if (remaining > 0f)
         {
             yield return new WaitForSecondsRealtime(remaining);
+        }
+    }
+
+    void PrepareForSceneTransition()
+    {
+        DontDestroyOnLoad(gameObject);
+
+        if (newGameButton)
+        {
+            newGameButton.gameObject.SetActive(false);
+        }
+
+        if (continueButton)
+        {
+            continueButton.gameObject.SetActive(false);
+        }
+
+        if (quitButton)
+        {
+            quitButton.gameObject.SetActive(false);
+        }
+
+        if (confirmWipePanel)
+        {
+            confirmWipePanel.SetActive(false);
+        }
+
+        if (loadingPanel)
+        {
+            DontDestroyOnLoad(loadingPanel);
+            loadingPanelDetachedForLoad = !autoCreatedLoadingPanel;
+
+            var loadingTransform = loadingPanel.transform;
+
+            foreach (Transform child in transform)
+            {
+                var childObj = child.gameObject;
+
+                if (childObj == loadingPanel || loadingTransform.IsChildOf(child))
+                {
+                    continue;
+                }
+
+                if (childObj.activeSelf)
+                {
+                    childObj.SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            loadingPanelDetachedForLoad = false;
         }
     }
 }
