@@ -507,7 +507,7 @@ MonoBehaviour:
   loadingBaseText: Loading
   maxLoadingDots: 10
   dotAnimationInterval: 0.3
-  minimumLoadingScreenTime: 3
+  minimumLoadingScreenTime: 4
 --- !u!4 &373541163
 Transform:
   m_ObjectHideFlags: 0
