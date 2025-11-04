@@ -16,15 +16,12 @@ public class MenuController : MonoBehaviour
     [SerializeField] GameObject confirmWipePanel;
 
     [Header("Loading Screen")]
-    [SerializeField] GameObject loadingPanel;
-    [SerializeField] Text loadingText;
     [SerializeField] string loadingBaseText = "Đang tải";
     [SerializeField, Min(1)] int maxLoadingDots = 3;
     [SerializeField, Min(0f)] float dotAnimationInterval = 0.3f;
     [SerializeField, Min(0f)] float minimumLoadingScreenTime = 1.5f;
 
-    Coroutine loadingDotsRoutine;
-    bool autoCreatedLoadingPanel;
+    bool isLoading;
 
     void Awake()
     {
@@ -40,33 +37,38 @@ public class MenuController : MonoBehaviour
             confirmWipePanel.SetActive(false);
         }
 
-        if (loadingPanel)
-        {
-            loadingPanel.SetActive(false);
-        }
-
         Time.timeScale = 1f;
     }
 
     public void OnClickNewGame()
     {
+        if (isLoading)
+        {
+            return;
+        }
+
         if (SaveStore.HasAnySave() && confirmWipePanel)
         {
             confirmWipePanel.SetActive(true);
             return;
         }
 
-        StartCoroutine(StartNewGameRoutine());
+        StartNewGame();
     }
 
     public void OnConfirmWipe()
     {
+        if (isLoading)
+        {
+            return;
+        }
+
         if (confirmWipePanel)
         {
             confirmWipePanel.SetActive(false);
         }
 
-        StartCoroutine(StartNewGameRoutine());
+        StartNewGame();
     }
 
     public void OnCancelWipe()
@@ -77,53 +79,41 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    IEnumerator StartNewGameRoutine()
+    void StartNewGame()
     {
-        ShowLoadingScreen();
-        var loadingStartTime = Time.unscaledTime;
+        DisableMenuButtons();
 
-        SaveStore.NewGame(startMapScene);
+        var persistent = persistentScene;
+        var startMap = startMapScene;
+        isLoading = LoadingScreenService.Instance.RunLoadingOperation(
+            () => StartNewGameRoutine(persistent, startMap),
+            BuildLoadingConfig());
 
-        yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
-        yield return SceneManager.LoadSceneAsync(startMapScene, LoadSceneMode.Additive);
-
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName(startMapScene));
-
-        yield return EnsureMinimumLoadingTime(loadingStartTime);
-        HideLoadingScreen();
+        if (!isLoading)
+        {
+            RestoreMenuButtons();
+        }
     }
 
     public void OnClickContinue()
     {
-        if (!SaveStore.HasAnySave())
+        if (isLoading || !SaveStore.HasAnySave())
         {
             return;
         }
 
-        StartCoroutine(ContinueRoutine());
-    }
+        DisableMenuButtons();
 
-    IEnumerator ContinueRoutine()
-    {
-        ShowLoadingScreen();
-        var loadingStartTime = Time.unscaledTime;
+        var persistent = persistentScene;
+        var startMap = startMapScene;
+        isLoading = LoadingScreenService.Instance.RunLoadingOperation(
+            () => ContinueRoutine(persistent, startMap),
+            BuildLoadingConfig());
 
-        SaveStore.LoadFromDisk();
-
-        yield return SceneManager.LoadSceneAsync(persistentScene, LoadSceneMode.Single);
-
-        var sceneToLoad = SaveStore.GetLastScene();
-        if (string.IsNullOrEmpty(sceneToLoad))
+        if (!isLoading)
         {
-            sceneToLoad = startMapScene;
+            RestoreMenuButtons();
         }
-
-        yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
-
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneToLoad));
-
-        yield return EnsureMinimumLoadingTime(loadingStartTime);
-        HideLoadingScreen();
     }
 
     public void OnClickQuit()
@@ -135,158 +125,79 @@ public class MenuController : MonoBehaviour
 #endif
     }
 
-    void ShowLoadingScreen()
+    IEnumerator StartNewGameRoutine(string persistent, string startMap)
     {
-        EnsureLoadingUI();
+        SaveStore.NewGame(startMap);
 
-        if (loadingPanel)
+        yield return SceneManager.LoadSceneAsync(persistent, LoadSceneMode.Single);
+        yield return SceneManager.LoadSceneAsync(startMap, LoadSceneMode.Additive);
+
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(startMap));
+    }
+
+    IEnumerator ContinueRoutine(string persistent, string defaultScene)
+    {
+        SaveStore.LoadFromDisk();
+
+        yield return SceneManager.LoadSceneAsync(persistent, LoadSceneMode.Single);
+
+        var sceneToLoad = SaveStore.GetLastScene();
+        if (string.IsNullOrEmpty(sceneToLoad))
         {
-            loadingPanel.SetActive(true);
-
-            if (autoCreatedLoadingPanel)
-            {
-                DontDestroyOnLoad(loadingPanel);
-            }
+            sceneToLoad = defaultScene;
         }
 
-        if (loadingDotsRoutine != null)
+        yield return SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
+
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneToLoad));
+    }
+
+    LoadingScreenService.Config BuildLoadingConfig()
+    {
+        return new LoadingScreenService.Config
         {
-            StopCoroutine(loadingDotsRoutine);
+            BaseText = loadingBaseText,
+            MaxDots = maxLoadingDots,
+            DotInterval = dotAnimationInterval,
+            MinimumDuration = minimumLoadingScreenTime
+        };
+    }
+
+    void DisableMenuButtons()
+    {
+        if (newGameButton)
+        {
+            newGameButton.interactable = false;
         }
 
-        if (loadingText)
+        if (continueButton)
         {
-            loadingText.text = loadingBaseText;
-            loadingDotsRoutine = StartCoroutine(AnimateLoadingDots());
+            continueButton.interactable = false;
+        }
+
+        if (quitButton)
+        {
+            quitButton.interactable = false;
         }
     }
 
-    void HideLoadingScreen()
+    void RestoreMenuButtons()
     {
-        if (loadingDotsRoutine != null)
+        if (newGameButton)
         {
-            StopCoroutine(loadingDotsRoutine);
-            loadingDotsRoutine = null;
+            newGameButton.interactable = true;
         }
 
-        if (loadingText)
+        if (continueButton)
         {
-            loadingText.text = loadingBaseText;
+            continueButton.interactable = SaveStore.HasAnySave();
         }
 
-        if (loadingPanel)
+        if (quitButton)
         {
-            loadingPanel.SetActive(false);
-
-            if (autoCreatedLoadingPanel)
-            {
-                Destroy(loadingPanel);
-                loadingPanel = null;
-                loadingText = null;
-                autoCreatedLoadingPanel = false;
-            }
-        }
-    }
-
-    void OnDestroy()
-    {
-        if (loadingDotsRoutine != null)
-        {
-            StopCoroutine(loadingDotsRoutine);
-            loadingDotsRoutine = null;
+            quitButton.interactable = true;
         }
 
-        if (autoCreatedLoadingPanel && loadingPanel)
-        {
-            Destroy(loadingPanel);
-            loadingPanel = null;
-            loadingText = null;
-            autoCreatedLoadingPanel = false;
-        }
-    }
-
-    void EnsureLoadingUI()
-    {
-        if (loadingPanel)
-        {
-            return;
-        }
-
-        loadingPanel = new GameObject("LoadingScreen");
-        autoCreatedLoadingPanel = true;
-
-        var canvas = loadingPanel.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = short.MaxValue;
-
-        var scaler = loadingPanel.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-
-        loadingPanel.AddComponent<GraphicRaycaster>();
-
-        var backgroundObj = new GameObject("Background");
-        backgroundObj.transform.SetParent(loadingPanel.transform, false);
-        var backgroundImage = backgroundObj.AddComponent<Image>();
-        backgroundImage.color = new Color(0f, 0f, 0f, 0.75f);
-
-        var backgroundRect = backgroundObj.GetComponent<RectTransform>();
-        backgroundRect.anchorMin = Vector2.zero;
-        backgroundRect.anchorMax = Vector2.one;
-        backgroundRect.offsetMin = Vector2.zero;
-        backgroundRect.offsetMax = Vector2.zero;
-
-        var textObj = new GameObject("LoadingText");
-        textObj.transform.SetParent(backgroundObj.transform, false);
-        loadingText = textObj.AddComponent<Text>();
-        loadingText.alignment = TextAnchor.MiddleCenter;
-        loadingText.color = Color.white;
-        loadingText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        loadingText.fontSize = 48;
-        loadingText.text = loadingBaseText;
-
-        var textRect = loadingText.GetComponent<RectTransform>();
-        textRect.anchorMin = new Vector2(0.5f, 0.5f);
-        textRect.anchorMax = new Vector2(0.5f, 0.5f);
-        textRect.pivot = new Vector2(0.5f, 0.5f);
-        textRect.anchoredPosition = Vector2.zero;
-        textRect.sizeDelta = new Vector2(800f, 160f);
-
-        loadingPanel.SetActive(false);
-    }
-
-    IEnumerator AnimateLoadingDots()
-    {
-        if (maxLoadingDots <= 0)
-        {
-            maxLoadingDots = 3;
-        }
-
-        var dotCount = 0;
-        var wait = new WaitForSecondsRealtime(Mathf.Max(0.01f, dotAnimationInterval));
-
-        while (true)
-        {
-            if (loadingText)
-            {
-                loadingText.text = loadingBaseText + new string('.', dotCount);
-            }
-
-            dotCount = (dotCount + 1) % (maxLoadingDots + 1);
-
-            yield return wait;
-        }
-    }
-
-    IEnumerator EnsureMinimumLoadingTime(float startTime)
-    {
-        var targetDuration = Mathf.Max(0f, minimumLoadingScreenTime);
-        var elapsed = Time.unscaledTime - startTime;
-        var remaining = targetDuration - elapsed;
-
-        if (remaining > 0f)
-        {
-            yield return new WaitForSecondsRealtime(remaining);
-        }
+        isLoading = false;
     }
 }
