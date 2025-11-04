@@ -93,7 +93,23 @@ public class ToolUser : MonoBehaviour
         anim.SetFloat("Vertical",   toolFacing.y);
         anim.SetFloat("Speed",      0f);
         pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
-        anim.SetTrigger("UseTool");
+        if (anim)
+        {
+            switch (usingItem.toolType)
+            {
+                case ToolType.Axe:
+                    anim.ResetTrigger("UseHoe");
+                    anim.SetTrigger("UseAxe");
+                    break;
+                case ToolType.Hoe:
+                    anim.ResetTrigger("UseAxe");
+                    anim.SetTrigger("UseHoe");
+                    break;
+                default:
+                    anim.SetTrigger("UseTool");
+                    break;
+            }
+        }
     }
 
     public void Tool_DoHit()
