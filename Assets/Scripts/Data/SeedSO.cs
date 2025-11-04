@@ -33,6 +33,8 @@ public class SeedSO : ScriptableObject
     public LayerMask blockMask;
     public bool snapToGrid = true;
     public float gridSize = 1f;
+    [Tooltip("Chỉ có thể trồng trên ô đất đã được xới")]
+    public bool requiresTilledSoil = false;
     void OnEnable(){
         if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
     }

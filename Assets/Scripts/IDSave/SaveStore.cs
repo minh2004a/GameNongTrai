@@ -28,7 +28,13 @@ public static class SaveStore
         public int lastUpdatedDay;
     }
     [System.Serializable]
-    
+    public struct SoilTileState
+    {
+        public int x;
+        public int y;
+    }
+    [System.Serializable]
+
     class Meta
     {
         public string lastScene = "House";
@@ -103,12 +109,14 @@ public static class SaveStore
 
     [Serializable] class SceneRecord { public string scene; public List<string> ids = new(); }
     [Serializable] class PlantSceneRecord { public string scene; public List<PlantState> plants = new(); }
+    [Serializable] class SoilSceneRecord { public string scene; public List<SoilTileState> tiles = new(); }
     [Serializable]
     class SaveData
     {
         public List<SceneRecord> trees = new();
         public List<SceneRecord> stumps = new();
         public List<PlantSceneRecord> plants = new();
+        public List<SoilSceneRecord> soils = new();
         public Meta meta = new Meta();
     }
     // Hỗ trợ file cũ (chỉ có "scenes")
@@ -123,6 +131,9 @@ public static class SaveStore
     static readonly Dictionary<string, Dictionary<string, PlantState>> pendingPlants = new();
     static readonly Dictionary<string, HashSet<string>> pendingRemovedPlants = new();
 
+    static readonly Dictionary<string, HashSet<Vector2Int>> committedSoil = new();
+    static readonly Dictionary<string, HashSet<Vector2Int>> pendingSoil = new();
+
     static string PathFile => Path.Combine(Application.persistentDataPath, "save.json");
 
     public static void LoadFromDisk()
@@ -131,10 +142,12 @@ public static class SaveStore
         var pendingStumpSnapshot = CloneSceneSets(pendingStumps);
         var pendingPlantSnapshot = ClonePlantScenes(pendingPlants);
         var pendingRemovedSnapshot = CloneSceneSets(pendingRemovedPlants);
+        var pendingSoilSnapshot = CloneSoilSets(pendingSoil);
 
         committedTrees.Clear(); committedStumps.Clear();
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
+        committedSoil.Clear(); pendingSoil.Clear();
 
         if (!File.Exists(PathFile)) return;
         var json = File.ReadAllText(PathFile);
@@ -164,12 +177,24 @@ public static class SaveStore
             }
             if (dict.Count > 0) committedPlants[r.scene] = dict;
         }
+        foreach (var r in data.soils ?? new List<SoilSceneRecord>())
+        {
+            if (string.IsNullOrEmpty(r.scene)) continue;
+            if (r.tiles == null || r.tiles.Count == 0) continue;
+            var set = new HashSet<Vector2Int>();
+            foreach (var tile in r.tiles)
+            {
+                set.Add(new Vector2Int(tile.x, tile.y));
+            }
+            if (set.Count > 0) committedSoil[r.scene] = set;
+        }
         meta = data.meta ?? new Meta();
 
         RestoreSceneSets(pendingTrees, pendingTreeSnapshot);
         RestoreSceneSets(pendingStumps, pendingStumpSnapshot);
         RestorePlantScenes(pendingPlants, pendingPlantSnapshot);
         RestoreSceneSets(pendingRemovedPlants, pendingRemovedSnapshot);
+        RestoreSoilSets(pendingSoil, pendingSoilSnapshot);
     }
 
     public static void SaveToDisk()
@@ -186,6 +211,15 @@ public static class SaveStore
             }
             data.plants.Add(rec);
         }
+        foreach (var kv in committedSoil)
+        {
+            var rec = new SoilSceneRecord { scene = kv.Key };
+            foreach (var cell in kv.Value)
+            {
+                rec.tiles.Add(new SoilTileState { x = cell.x, y = cell.y });
+            }
+            data.soils.Add(rec);
+        }
         data.meta = meta;
         File.WriteAllText(PathFile, JsonUtility.ToJson(data, true));
     }
@@ -198,6 +232,11 @@ public static class SaveStore
         if (!pendingStumps.TryGetValue(scene, out var s)) pendingStumps[scene] = s = new HashSet<string>();
         s.Add(id);
     }
+    public static void MarkSoilTilledPending(string scene, Vector2Int cell){
+        if (string.IsNullOrEmpty(scene)) return;
+        if (!pendingSoil.TryGetValue(scene, out var set)) pendingSoil[scene] = set = new HashSet<Vector2Int>();
+        set.Add(cell);
+    }
 
     // kiểm tra trong phiên (committed ∪ pending)
     public static bool IsTreeChoppedInSession(string scene, string id) =>
@@ -207,6 +246,10 @@ public static class SaveStore
     public static bool IsStumpClearedInSession(string scene, string id) =>
         (committedStumps.TryGetValue(scene, out var c) && c.Contains(id)) ||
         (pendingStumps.TryGetValue(scene, out var p) && p.Contains(id));
+
+    public static bool IsSoilTilledInSession(string scene, Vector2Int cell) =>
+        (pendingSoil.TryGetValue(scene, out var p) && p.Contains(cell)) ||
+        (committedSoil.TryGetValue(scene, out var c) && c.Contains(cell));
 
     // người chơi Save/Ngủ
     public static void CommitPendingAndSave(){
@@ -231,8 +274,14 @@ public static class SaveStore
             if (!committedPlants.TryGetValue(kv.Key, out var dict)) continue;
             foreach (var id in kv.Value) dict.Remove(id);
         }
+        foreach (var kv in pendingSoil)
+        {
+            if (!committedSoil.TryGetValue(kv.Key, out var set)) committedSoil[kv.Key] = set = new HashSet<Vector2Int>();
+            set.UnionWith(kv.Value);
+        }
         pendingTrees.Clear(); pendingStumps.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
+        pendingSoil.Clear();
         SaveToDisk();
     }
 
@@ -240,6 +289,7 @@ public static class SaveStore
     {
         pendingTrees.Clear(); pendingStumps.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
+        pendingSoil.Clear();
     }
     // =============== MENU SUPPORT ===============
     public static bool HasAnySave()
@@ -267,6 +317,7 @@ public static class SaveStore
         committedTrees.Clear(); committedStumps.Clear();
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
+        committedSoil.Clear(); pendingSoil.Clear();
         JustStartedNewGame = true;
         // meta mới
         meta = new Meta
@@ -304,6 +355,30 @@ public static class SaveStore
         if (!pendingRemovedPlants.TryGetValue(scene, out var set)) pendingRemovedPlants[scene] = set = new HashSet<string>();
         set.Add(plantId);
         if (pendingPlants.TryGetValue(scene, out var dict)) dict.Remove(plantId);
+    }
+
+    public static IEnumerable<Vector2Int> GetTilledSoilInScene(string scene)
+    {
+        if (string.IsNullOrEmpty(scene)) yield break;
+
+        var emitted = new HashSet<Vector2Int>();
+
+        if (committedSoil.TryGetValue(scene, out var committed))
+        {
+            foreach (var cell in committed)
+            {
+                yield return cell;
+                emitted.Add(cell);
+            }
+        }
+
+        if (pendingSoil.TryGetValue(scene, out var pending))
+        {
+            foreach (var cell in pending)
+            {
+                if (emitted.Add(cell)) yield return cell;
+            }
+        }
     }
 
     public static IEnumerable<PlantState> GetPlantsInScene(string scene)
@@ -376,6 +451,16 @@ public static class SaveStore
         return clone;
     }
 
+    static Dictionary<string, HashSet<Vector2Int>> CloneSoilSets(Dictionary<string, HashSet<Vector2Int>> source)
+    {
+        var clone = new Dictionary<string, HashSet<Vector2Int>>();
+        foreach (var kv in source)
+        {
+            clone[kv.Key] = new HashSet<Vector2Int>(kv.Value);
+        }
+        return clone;
+    }
+
     static void RestoreSceneSets(Dictionary<string, HashSet<string>> target, Dictionary<string, HashSet<string>> snapshot)
     {
         foreach (var kv in snapshot)
@@ -395,6 +480,15 @@ public static class SaveStore
             {
                 dict[plant.Key] = plant.Value;
             }
+        }
+    }
+
+    static void RestoreSoilSets(Dictionary<string, HashSet<Vector2Int>> target, Dictionary<string, HashSet<Vector2Int>> snapshot)
+    {
+        foreach (var kv in snapshot)
+        {
+            if (target.TryGetValue(kv.Key, out var set)) set.UnionWith(kv.Value);
+            else target[kv.Key] = new HashSet<Vector2Int>(kv.Value);
         }
     }
 }
