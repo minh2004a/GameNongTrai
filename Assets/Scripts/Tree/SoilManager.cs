@@ -11,6 +11,14 @@ public class SoilManager : MonoBehaviour
     [SerializeField] LayerMask tillableMask;
     [SerializeField, Range(0.05f, 1f)] float maskCheckRadiusMultiplier = 0.45f;
 
+    static readonly Vector2Int[] CardinalOffsets =
+    {
+        Vector2Int.up,
+        Vector2Int.right,
+        Vector2Int.down,
+        Vector2Int.left
+    };
+
     readonly HashSet<Vector2Int> tilledCells = new();
     readonly Dictionary<Vector2Int, GameObject> visuals = new();
 
@@ -74,12 +82,13 @@ public class SoilManager : MonoBehaviour
 
     void AddCell(Vector2Int cell, bool markPending)
     {
-        if (!tilledCells.Add(cell)) return;
+        bool added = tilledCells.Add(cell);
         SpawnVisual(cell);
-        if (markPending && !string.IsNullOrEmpty(sceneName))
+        if (added && markPending && !string.IsNullOrEmpty(sceneName))
         {
             SaveStore.MarkSoilTilledPending(sceneName, cell);
         }
+        RefreshCellAndNeighbors(cell);
     }
 
     void SpawnVisual(Vector2Int cell)
@@ -94,6 +103,35 @@ public class SoilManager : MonoBehaviour
         var parent = tilledParent ? tilledParent : transform;
         var inst = Instantiate(tilledSoilPrefab, CellToWorld(cell), Quaternion.identity, parent);
         visuals[cell] = inst;
+    }
+
+    void RefreshCellAndNeighbors(Vector2Int cell)
+    {
+        RefreshVisual(cell);
+        foreach (var offset in CardinalOffsets)
+        {
+            RefreshVisual(cell + offset);
+        }
+    }
+
+    void RefreshVisual(Vector2Int cell)
+    {
+        if (!visuals.TryGetValue(cell, out var go) || !go) return;
+        if (!tilledCells.Contains(cell)) return;
+
+        int mask = 0;
+        for (int i = 0; i < CardinalOffsets.Length; ++i)
+        {
+            if (tilledCells.Contains(cell + CardinalOffsets[i]))
+            {
+                mask |= 1 << i;
+            }
+        }
+
+        if (go.TryGetComponent<TilledSoilVisual>(out var visual))
+        {
+            visual.ApplyMask(mask);
+        }
     }
 
     void RestoreFromSave()
