@@ -1657,7 +1657,7 @@ GameObject:
   - component: {fileID: 1926777829}
   - component: {fileID: 1926777828}
   m_Layer: 5
-  m_Name: Image
+  m_Name: BackGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1857,8 +1857,8 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 538033237}
   - {fileID: 1356814631}
   - {fileID: 634866422}
   - {fileID: 373541163}
-  - {fileID: 538033237}
   - {fileID: 1002805027}

@@ -24,7 +24,7 @@ MonoBehaviour:
   hitboxYOffset: -0.2
   hitboxForward: -1
   Dame: 2
-  range: 0.3
+  range: 0.4
   cooldown: 0.4
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10
