@@ -502,6 +502,7 @@ MonoBehaviour:
   continueButton: {fileID: 1717271324}
   quitButton: {fileID: 1000179852}
   confirmWipePanel: {fileID: 1859610832}
+  noSaveDataMessage: "Ch\u01B0a c\xF3 d\u1EEF li\u1EC7u game \u1EA5y \u01A1i"
   loadingPanel: {fileID: 1148518454}
   loadingText: {fileID: 265538197}
   loadingBaseText: Loading

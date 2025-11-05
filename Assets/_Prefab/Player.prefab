@@ -110,8 +110,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0155964745, y: -0.306042}
-  m_Size: {x: 0.59236586, y: 0.48848766}
+  m_Offset: {x: 0.012880389, y: 0.017144889}
+  m_Size: {x: 0.64964324, y: 0.30575183}
   m_Direction: 1
 --- !u!212 &6288386847750319070
 SpriteRenderer:
@@ -154,7 +154,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1363738664, guid: 14d454932fb15dc4a99b0b438716e54d, type: 3}
+  m_Sprite: {fileID: 814113676, guid: 4217febf202c2d94db0a4e4bf6ee78ad, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -398,7 +398,7 @@ MonoBehaviour:
   current: 270
   bowCost: 27
   swordCost: 0
-  toolCost: 3
+  toolCost: 1.5
   moveDrainPerSecond: 0
   regenPerSecond: 0
   regenDelay: 0
@@ -482,9 +482,9 @@ MonoBehaviour:
   displayRenderer: {fileID: 0}
   playerBody: {fileID: 8754012071114403644}
   stamina: {fileID: 9196139618529040389}
-  displayOffset: {x: 0, y: 0.8}
+  displayOffset: {x: 0, y: 1.7}
   sortingOrderOffset: 10
-  targetIconHeight: 0.5
+  targetIconHeight: 0.9
   autoCreateRenderer: 1
   flipWithFacing: 0
   holdingBool: HoldingItem
@@ -739,7 +739,7 @@ Transform:
   m_GameObject: {fileID: 6570345652378038097}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.25, z: 0}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

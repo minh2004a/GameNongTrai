@@ -20,11 +20,11 @@ MonoBehaviour:
   stackable: 0
   weaponType: 0
   maxStack: 999
-  hitboxScale: 1.2
-  hitboxYOffset: -0.2
-  hitboxForward: -1
+  hitboxScale: 1
+  hitboxYOffset: 0.1
+  hitboxForward: 0.7
   Dame: 2
-  range: 0.2
+  range: 0.25
   cooldown: 0.4
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10

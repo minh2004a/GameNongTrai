@@ -20,9 +20,9 @@ MonoBehaviour:
   stackable: 0
   weaponType: 1
   maxStack: 999
-  hitboxScale: 1.2
-  hitboxYOffset: -0.06
-  hitboxForward: -1
+  hitboxScale: 1
+  hitboxYOffset: 0.4
+  hitboxForward: 0.7
   Dame: 8
   range: 0.45
   cooldown: 0.4

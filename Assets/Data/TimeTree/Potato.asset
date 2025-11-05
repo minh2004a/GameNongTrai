@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
+  m_Name: Potato
+  m_EditorClassIdentifier: 
+  seedId: Potato
+  stagePrefabs:
+  - {fileID: 7930887471044461919, guid: 86a29f611b4faca44be477731aa42489, type: 3}
+  - {fileID: 7561514577489064249, guid: c5e729e873083674d9bb45537acd8ab6, type: 3}
+  - {fileID: 8101671915225503, guid: 9d0455ee94867cb42813e4d9e342f944, type: 3}
+  - {fileID: 7919579596319810351, guid: 0d9df97cb56bf8e4c945a7eaeac7dac2, type: 3}
+  - {fileID: 24607235231259619, guid: 762f849761d0bb44c88273d72baf5945, type: 3}
+  - {fileID: 5208824497724448737, guid: 9a64a38b4e2a81b45aa3b3ca74b0fecf, type: 3}
+  stageDays: 010000000100000001000000010000000100000001000000
+  growthMode: 0
+  stageAdvanceChance:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  stageDayRange:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  blockCheckRadius: 0.35
+  blockMask:
+    serializedVersion: 2
+    m_Bits: 131328
+  snapToGrid: 1
+  gridSize: 1
+  requiresTilledSoil: 1
+  requiresWatering: 1

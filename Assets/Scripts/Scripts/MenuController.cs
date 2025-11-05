@@ -1,5 +1,7 @@
+
 using System.Collections;
 using UnityEngine;
+using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -14,6 +16,7 @@ public class MenuController : MonoBehaviour
     [SerializeField] Button continueButton;
     [SerializeField] Button quitButton;
     [SerializeField] GameObject confirmWipePanel;
+    [SerializeField, TextArea] string noSaveDataMessage = "Bạn chưa có dữ liệu";
 
     [Header("Loading Screen")]
     [SerializeField] GameObject loadingPanel;
@@ -25,6 +28,21 @@ public class MenuController : MonoBehaviour
 
     Coroutine loadingDotsRoutine;
     bool autoCreatedLoadingPanel;
+    TMP_Text confirmWipeMessage;
+    Button confirmWipeCancelButton;
+    RectTransform confirmWipeOkRect;
+    Vector2 confirmWipeOkDefaultPosition;
+    string confirmWipeDefaultMessage;
+    bool confirmDialogCached;
+
+    enum ConfirmDialogMode
+    {
+        None,
+        WipeSave,
+        MissingSave
+    }
+
+    ConfirmDialogMode currentConfirmDialogMode = ConfirmDialogMode.None;
 
     void Awake()
     {
@@ -32,12 +50,13 @@ public class MenuController : MonoBehaviour
 
         if (continueButton)
         {
-            continueButton.interactable = SaveStore.HasAnySave();
+            continueButton.interactable = true;
         }
 
         if (confirmWipePanel)
         {
-            confirmWipePanel.SetActive(false);
+            CacheConfirmDialog();
+            HideConfirmDialog();
         }
 
         if (loadingPanel)
@@ -52,7 +71,7 @@ public class MenuController : MonoBehaviour
     {
         if (SaveStore.HasAnySave() && confirmWipePanel)
         {
-            confirmWipePanel.SetActive(true);
+            ShowConfirmDialog(ConfirmDialogMode.WipeSave);
             return;
         }
 
@@ -61,20 +80,20 @@ public class MenuController : MonoBehaviour
 
     public void OnConfirmWipe()
     {
-        if (confirmWipePanel)
+        if (currentConfirmDialogMode != ConfirmDialogMode.WipeSave)
         {
-            confirmWipePanel.SetActive(false);
+            HideConfirmDialog();
+            return;
         }
+
+        HideConfirmDialog();
 
         StartCoroutine(StartNewGameRoutine());
     }
 
     public void OnCancelWipe()
     {
-        if (confirmWipePanel)
-        {
-            confirmWipePanel.SetActive(false);
-        }
+        HideConfirmDialog();
     }
 
     IEnumerator StartNewGameRoutine()
@@ -97,6 +116,10 @@ public class MenuController : MonoBehaviour
     {
         if (!SaveStore.HasAnySave())
         {
+            if (confirmWipePanel)
+            {
+                ShowConfirmDialog(ConfirmDialogMode.MissingSave);
+            }
             return;
         }
 
@@ -185,6 +208,99 @@ public class MenuController : MonoBehaviour
                 loadingText = null;
                 autoCreatedLoadingPanel = false;
             }
+        }
+    }
+
+    void CacheConfirmDialog()
+    {
+        if (confirmDialogCached || !confirmWipePanel) return;
+
+        confirmDialogCached = true;
+        confirmWipeMessage = confirmWipePanel.GetComponentInChildren<TMP_Text>(true);
+        if (confirmWipeMessage)
+        {
+            confirmWipeDefaultMessage = confirmWipeMessage.text;
+        }
+
+        var okTransform = confirmWipePanel.transform.Find("OkButton");
+        if (okTransform)
+        {
+            confirmWipeOkRect = okTransform.GetComponent<RectTransform>();
+            if (confirmWipeOkRect)
+            {
+                confirmWipeOkDefaultPosition = confirmWipeOkRect.anchoredPosition;
+            }
+        }
+
+        var cancelTransform = confirmWipePanel.transform.Find("NoButon");
+        if (cancelTransform)
+        {
+            confirmWipeCancelButton = cancelTransform.GetComponent<Button>();
+        }
+    }
+
+    void ShowConfirmDialog(ConfirmDialogMode mode)
+    {
+        CacheConfirmDialog();
+
+        currentConfirmDialogMode = mode;
+        if (!confirmWipePanel) return;
+
+        if (confirmWipeMessage)
+        {
+            if (mode == ConfirmDialogMode.MissingSave && !string.IsNullOrEmpty(noSaveDataMessage))
+            {
+                confirmWipeMessage.text = noSaveDataMessage;
+            }
+            else if (confirmWipeDefaultMessage != null)
+            {
+                confirmWipeMessage.text = confirmWipeDefaultMessage;
+            }
+        }
+
+        bool showCancel = mode == ConfirmDialogMode.WipeSave;
+        if (confirmWipeCancelButton)
+        {
+            confirmWipeCancelButton.gameObject.SetActive(showCancel);
+        }
+
+        if (confirmWipeOkRect)
+        {
+            var pos = confirmWipeOkDefaultPosition;
+            if (!showCancel)
+            {
+                pos.x = 0f;
+            }
+            confirmWipeOkRect.anchoredPosition = pos;
+        }
+
+        confirmWipePanel.SetActive(true);
+    }
+
+    void HideConfirmDialog()
+    {
+        currentConfirmDialogMode = ConfirmDialogMode.None;
+
+        if (!confirmWipePanel) return;
+
+        if (confirmWipePanel.activeSelf)
+        {
+            confirmWipePanel.SetActive(false);
+        }
+
+        if (confirmWipeMessage && confirmWipeDefaultMessage != null)
+        {
+            confirmWipeMessage.text = confirmWipeDefaultMessage;
+        }
+
+        if (confirmWipeCancelButton)
+        {
+            confirmWipeCancelButton.gameObject.SetActive(true);
+        }
+
+        if (confirmWipeOkRect)
+        {
+            confirmWipeOkRect.anchoredPosition = confirmWipeOkDefaultPosition;
         }
     }
 

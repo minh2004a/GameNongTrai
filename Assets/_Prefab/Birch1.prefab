@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7309168319263878764}
   - component: {fileID: 942076098379964223}
   - component: {fileID: -8072291950846443584}
-  m_Layer: 8
+  m_Layer: 17
   m_Name: Birch1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,6 +117,6 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.009406507, y: 0.094062805}
-  m_Size: {x: 0.75, y: 0.5}
+  m_Offset: {x: -0.0299858, y: 0.054670483}
+  m_Size: {x: 0.4611229, y: 0.46112293}
   m_Direction: 0

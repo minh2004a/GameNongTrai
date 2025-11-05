@@ -1,5 +1,6 @@
 
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ using UnityEngine;
 /// </summary>
 public static class SaveStore
 {
-    [System.Serializable] public struct ItemStackDTO { public string key; public int count; }
+    [System.Serializable] public struct ItemStackDTO { public string key; public string id; public int count; }
     [System.Serializable] public class InventoryDTO {
     public ItemStackDTO[] hotbar;
     public ItemStackDTO[] bag;
@@ -65,12 +66,18 @@ public static class SaveStore
         for (int i = 0; i < inv.hotbar.Length; i++)
         {
             var s = inv.hotbar[i];
-            dto.hotbar[i] = new ItemStackDTO { key = db.GetKey(s.item), count = s.count };
+            var key = db.GetKey(s.item);
+            var id = s.item ? s.item.id : null;
+            if (string.IsNullOrEmpty(key)) key = id;
+            dto.hotbar[i] = new ItemStackDTO { key = key, id = id, count = s.count };
         }
         for (int i = 0; i < inv.bag.Length; i++)
         {
             var s = inv.bag[i];
-            dto.bag[i] = new ItemStackDTO { key = db.GetKey(s.item), count = s.count };
+            var key = db.GetKey(s.item);
+            var id = s.item ? s.item.id : null;
+            if (string.IsNullOrEmpty(key)) key = id;
+            dto.bag[i] = new ItemStackDTO { key = key, id = id, count = s.count };
         }
         meta.inventory = dto;
         SaveToDisk();
@@ -87,6 +94,8 @@ public static class SaveStore
         {
             var d = meta.inventory.hotbar[i];
             var it = db.Find(d.key);
+            if (!it && !string.IsNullOrEmpty(d.id))
+                it = db.Find(d.id);
             inv.SetHotbar(i, it, Mathf.Max(0, d.count)); // UI sẽ refresh và fire events
         }
         for (int i = n; i < inv.hotbar.Length; i++) inv.SetHotbar(i, null, 0);
@@ -97,6 +106,8 @@ public static class SaveStore
         {
             var d = meta.inventory.bag[i];
             var it = db.Find(d.key);
+            if (!it && !string.IsNullOrEmpty(d.id))
+                it = db.Find(d.id);
             inv.SetBag(i, it, Mathf.Max(0, d.count));
         }
         for (int i = m; i < inv.bag.Length; i++) inv.SetBag(i, null, 0);
@@ -169,7 +180,11 @@ public static class SaveStore
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
         committedWateredSoil.Clear(); pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
 
-        if (!File.Exists(PathFile)) return;
+        if (!File.Exists(PathFile))
+        {
+            meta = new Meta();
+            return;
+        }
         var json = File.ReadAllText(PathFile);
 
         var data = JsonUtility.FromJson<SaveData>(json) ?? new SaveData();
@@ -401,6 +416,7 @@ public static class SaveStore
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
         pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
+        meta.hasSave = true;
         SaveToDisk();
     }
 
@@ -414,8 +430,11 @@ public static class SaveStore
     // =============== MENU SUPPORT ===============
     public static bool HasAnySave()
     {
-        // có file save.json là coi như có save
-        return File.Exists(PathFile);
+        if (meta != null && meta.hasSave) return true;
+        if (!File.Exists(PathFile)) return false;
+
+        LoadFromDisk();
+        return meta != null && meta.hasSave;
     }
 
     public static string GetLastScene()
@@ -427,7 +446,6 @@ public static class SaveStore
     {
         if (string.IsNullOrEmpty(scene)) return;
         meta.lastScene = scene;
-        meta.hasSave = true;
         SaveToDisk();
     }
 
@@ -438,12 +456,13 @@ public static class SaveStore
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
+        committedWateredSoil.Clear(); pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
         JustStartedNewGame = true;
         // meta mới
         meta = new Meta
         {
             lastScene = string.IsNullOrEmpty(startScene) ? "House" : startScene,
-            hasSave = true,
+            hasSave = false,
             day = 1,
             hour = 6,
             minute = 0,

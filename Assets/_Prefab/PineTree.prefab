@@ -99,7 +99,6 @@ GameObject:
   - component: {fileID: 6073621166513563435}
   - component: {fileID: 6506601577548889661}
   - component: {fileID: 6209674571976452878}
-  - component: {fileID: 1165777359238672856}
   m_Layer: 8
   m_Name: PineTree
   m_TagString: Untagged
@@ -207,8 +206,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0021570385, y: 0.048979674}
-  m_Size: {x: 0.99848413, y: 0.50728214}
+  m_Offset: {x: 0.0021570313, y: -0.0114114005}
+  m_Size: {x: 0.99848425, y: 0.628066}
   m_Direction: 1
 --- !u!114 &2092108020899245305
 MonoBehaviour:
@@ -237,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 3659f616-2c36-4c31-99f9-1b5a0fb3d416
+  id: 
 --- !u!114 &6506601577548889661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,38 +276,3 @@ MonoBehaviour:
     chance: 1
   scatterSpeed: {x: 10, y: 15}
   scatterAngle: 35
---- !u!58 &1165777359238672856
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8731117239119827141}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.09327543}
-  serializedVersion: 2
-  m_Radius: 0.38922107

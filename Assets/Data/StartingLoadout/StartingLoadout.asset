@@ -18,37 +18,57 @@ MonoBehaviour:
     amount: 1
     equip: 0
     hotbarSlot: 0
-  - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 1
-  - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 2
-  - item: {fileID: 11400000, guid: 6b6153a7d6c8b714d82a0bb794a7cefd, type: 2}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 3
   - item: {fileID: 11400000, guid: 2e60ed2a2ebf9b444ac5353bda449be1, type: 2}
     itemKey: 
     amount: 1
     equip: 0
-    hotbarSlot: 4
-  - item: {fileID: 0}
+    hotbarSlot: 1
+  - item: {fileID: 11400000, guid: 6b6153a7d6c8b714d82a0bb794a7cefd, type: 2}
     itemKey: 
-    amount: 2
+    amount: 1
+    equip: 0
+    hotbarSlot: 2
+  - item: {fileID: 11400000, guid: 4f19e87cbbc6b864fb786c68ee8ce6f4, type: 2}
+    itemKey: 
+    amount: 99
+    equip: 0
+    hotbarSlot: 3
+  - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
+    itemKey: 
+    amount: 1
     equip: 0
     hotbarSlot: 4
+  - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
+    itemKey: 
+    amount: 0
+    equip: 0
+    hotbarSlot: 5
+  - item: {fileID: 11400000, guid: 696b84f441f642048aa01f992ab155fe, type: 2}
+    itemKey: 
+    amount: 88
+    equip: 0
+    hotbarSlot: 6
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 0
+    equip: 0
+    hotbarSlot: 7
   - item: {fileID: 0}
     itemKey: 
     amount: 1
     equip: 0
-    hotbarSlot: 5
-  - item: {fileID: 11400000, guid: 6b6153a7d6c8b714d82a0bb794a7cefd, type: 2}
+    hotbarSlot: 6
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 6
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 6
+  - item: {fileID: 0}
     itemKey: 
     amount: 1
     equip: 0

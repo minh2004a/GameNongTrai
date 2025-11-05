@@ -14,11 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 
   icon: {fileID: -312610671, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  seedData: {fileID: 0}
   category: 1
-  stackable: 1
-  maxStack: 999
   toolType: 0
+  stackable: 1
   weaponType: 2
+  maxStack: 999
+  hitboxScale: 1
+  hitboxYOffset: 0
+  hitboxForward: -1
   Dame: 5
   range: 0.5
   cooldown: 1
