@@ -1,3 +1,4 @@
+
 // SoilManager.cs
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,15 +22,29 @@ public class SoilManager : MonoBehaviour
 
     readonly HashSet<Vector2Int> tilledCells = new();
     readonly Dictionary<Vector2Int, GameObject> visuals = new();
+    readonly HashSet<Vector2Int> wetCells = new();
+    readonly Dictionary<Vector2Int, int> wetCellDay = new();
 
     string sceneName;
+    TimeManager time;
 
     void Awake()
     {
         gridSize = Mathf.Max(0.01f, gridSize);
         if (!tilledParent) tilledParent = transform;
         sceneName = gameObject.scene.IsValid() ? gameObject.scene.name : null;
+        time = FindFirstObjectByType<TimeManager>();
         RestoreFromSave();
+    }
+
+    void OnEnable()
+    {
+        AttachTimeManager(time ?? FindFirstObjectByType<TimeManager>());
+    }
+
+    void OnDisable()
+    {
+        if (time) time.OnNewDay -= HandleNewDay;
     }
 
     public float GridSize => gridSize;
@@ -83,6 +98,40 @@ public class SoilManager : MonoBehaviour
         AddCell(cell, false);
     }
 
+    public void EnsureCellWateredFromSave(Vector2Int cell, int day)
+    {
+        if (!tilledCells.Contains(cell)) return;
+        if (day < CurrentDay) return;
+        wetCells.Add(cell);
+        wetCellDay[cell] = day;
+        RefreshCellAndNeighbors(cell);
+    }
+
+    public bool TryWaterAt(Vector2 worldPos)
+    {
+        return TryWaterCell(WorldToCell(worldPos));
+    }
+
+    public bool TryWaterCell(Vector2Int cell)
+    {
+        if (!tilledCells.Contains(cell)) return false;
+        int day = CurrentDay;
+        bool changed = !wetCells.Contains(cell) || !wetCellDay.TryGetValue(cell, out var prevDay) || prevDay != day;
+        wetCells.Add(cell);
+        wetCellDay[cell] = day;
+        if (changed && HasScene)
+        {
+            SaveStore.MarkSoilWateredPending(sceneName, cell, day);
+        }
+        RefreshCellAndNeighbors(cell);
+        return changed;
+    }
+
+    public bool TryDryCell(Vector2Int cell)
+    {
+        return ClearWetCell(cell, true);
+    }
+
     bool CanTillCell(Vector2Int cell)
     {
         if (tilledCells.Contains(cell)) return false;
@@ -96,6 +145,11 @@ public class SoilManager : MonoBehaviour
     {
         bool added = tilledCells.Add(cell);
         SpawnVisual(cell);
+        if (added)
+        {
+            wetCells.Remove(cell);
+            wetCellDay.Remove(cell);
+        }
         if (added && markPending && !string.IsNullOrEmpty(sceneName))
         {
             SaveStore.MarkSoilTilledPending(sceneName, cell);
@@ -130,6 +184,8 @@ public class SoilManager : MonoBehaviour
     {
         if (!tilledCells.Remove(cell)) return;
 
+        ClearWetCell(cell, markPending);
+
         if (visuals.TryGetValue(cell, out var go) && go)
         {
             Destroy(go);
@@ -158,9 +214,22 @@ public class SoilManager : MonoBehaviour
             }
         }
 
+        bool isWet = wetCells.Contains(cell);
+        int wetMask = 0;
+        if (isWet)
+        {
+            for (int i = 0; i < CardinalOffsets.Length; ++i)
+            {
+                if (wetCells.Contains(cell + CardinalOffsets[i]))
+                {
+                    wetMask |= 1 << i;
+                }
+            }
+        }
+
         if (go.TryGetComponent<TilledSoilVisual>(out var visual))
         {
-            visual.ApplyMask(mask);
+            visual.ApplyState(mask, isWet, wetMask);
         }
     }
 
@@ -170,6 +239,60 @@ public class SoilManager : MonoBehaviour
         foreach (var cell in SaveStore.GetTilledSoilInScene(sceneName))
         {
             AddCell(cell, false);
+        }
+        foreach (var state in SaveStore.GetWateredSoilInScene(sceneName))
+        {
+            EnsureCellWateredFromSave(new Vector2Int(state.x, state.y), state.day);
+        }
+    }
+
+    int CurrentDay
+    {
+        get
+        {
+            if (time && time.isActiveAndEnabled) return time.day;
+            var tm = FindFirstObjectByType<TimeManager>();
+            if (tm)
+            {
+                AttachTimeManager(tm);
+                return tm.day;
+            }
+            return SaveStore.PeekSavedDay();
+        }
+    }
+
+    bool HasScene => !string.IsNullOrEmpty(sceneName);
+
+    bool ClearWetCell(Vector2Int cell, bool markPending)
+    {
+        if (!wetCells.Remove(cell)) return false;
+        wetCellDay.Remove(cell);
+        if (markPending && HasScene)
+        {
+            SaveStore.MarkSoilDriedPending(sceneName, cell);
+        }
+        RefreshCellAndNeighbors(cell);
+        return true;
+    }
+
+    void HandleNewDay()
+    {
+        if (wetCells.Count == 0) return;
+        var toDry = new List<Vector2Int>(wetCells);
+        foreach (var cell in toDry)
+        {
+            ClearWetCell(cell, true);
+        }
+    }
+
+    void AttachTimeManager(TimeManager tm)
+    {
+        if (!tm) return;
+        if (time) time.OnNewDay -= HandleNewDay;
+        time = tm;
+        if (isActiveAndEnabled)
+        {
+            time.OnNewDay += HandleNewDay;
         }
     }
 }

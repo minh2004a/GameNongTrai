@@ -1,4 +1,5 @@
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,12 +27,21 @@ public static class SaveStore
         public int daysInStage;
         public int targetDaysForStage;
         public int lastUpdatedDay;
+        public bool wateredToday;
+        public int lastWateredDay;
     }
     [System.Serializable]
     public struct SoilTileState
     {
         public int x;
         public int y;
+    }
+    [System.Serializable]
+    public struct WateredSoilState
+    {
+        public int x;
+        public int y;
+        public int day;
     }
     [System.Serializable]
 
@@ -110,6 +120,7 @@ public static class SaveStore
     [Serializable] class SceneRecord { public string scene; public List<string> ids = new(); }
     [Serializable] class PlantSceneRecord { public string scene; public List<PlantState> plants = new(); }
     [Serializable] class SoilSceneRecord { public string scene; public List<SoilTileState> tiles = new(); }
+    [Serializable] class WateredSoilSceneRecord { public string scene; public List<WateredSoilState> tiles = new(); }
     [Serializable]
     class SaveData
     {
@@ -117,6 +128,7 @@ public static class SaveStore
         public List<SceneRecord> stumps = new();
         public List<PlantSceneRecord> plants = new();
         public List<SoilSceneRecord> soils = new();
+        public List<WateredSoilSceneRecord> wateredSoils = new();
         public Meta meta = new Meta();
     }
     // Hỗ trợ file cũ (chỉ có "scenes")
@@ -134,6 +146,9 @@ public static class SaveStore
     static readonly Dictionary<string, HashSet<Vector2Int>> committedSoil = new();
     static readonly Dictionary<string, HashSet<Vector2Int>> pendingSoil = new();
     static readonly Dictionary<string, HashSet<Vector2Int>> pendingClearedSoil = new();
+    static readonly Dictionary<string, Dictionary<Vector2Int, int>> committedWateredSoil = new();
+    static readonly Dictionary<string, Dictionary<Vector2Int, int>> pendingWateredSoil = new();
+    static readonly Dictionary<string, HashSet<Vector2Int>> pendingDriedSoil = new();
 
     static string PathFile => Path.Combine(Application.persistentDataPath, "save.json");
 
@@ -145,11 +160,14 @@ public static class SaveStore
         var pendingRemovedSnapshot = CloneSceneSets(pendingRemovedPlants);
         var pendingSoilSnapshot = CloneSoilSets(pendingSoil);
         var pendingClearedSoilSnapshot = CloneSoilSets(pendingClearedSoil);
+        var pendingWateredSnapshot = CloneSoilDayMaps(pendingWateredSoil);
+        var pendingDriedSnapshot = CloneSoilSets(pendingDriedSoil);
 
         committedTrees.Clear(); committedStumps.Clear();
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
+        committedWateredSoil.Clear(); pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
 
         if (!File.Exists(PathFile)) return;
         var json = File.ReadAllText(PathFile);
@@ -190,6 +208,17 @@ public static class SaveStore
             }
             if (set.Count > 0) committedSoil[r.scene] = set;
         }
+        foreach (var r in data.wateredSoils ?? new List<WateredSoilSceneRecord>())
+        {
+            if (string.IsNullOrEmpty(r.scene)) continue;
+            if (r.tiles == null || r.tiles.Count == 0) continue;
+            var dict = new Dictionary<Vector2Int, int>();
+            foreach (var tile in r.tiles)
+            {
+                dict[new Vector2Int(tile.x, tile.y)] = tile.day;
+            }
+            if (dict.Count > 0) committedWateredSoil[r.scene] = dict;
+        }
         meta = data.meta ?? new Meta();
 
         RestoreSceneSets(pendingTrees, pendingTreeSnapshot);
@@ -198,6 +227,8 @@ public static class SaveStore
         RestoreSceneSets(pendingRemovedPlants, pendingRemovedSnapshot);
         RestoreSoilSets(pendingSoil, pendingSoilSnapshot);
         RestoreSoilSets(pendingClearedSoil, pendingClearedSoilSnapshot);
+        RestoreSoilDayMaps(pendingWateredSoil, pendingWateredSnapshot);
+        RestoreSoilSets(pendingDriedSoil, pendingDriedSnapshot);
     }
 
     public static void SaveToDisk()
@@ -222,6 +253,15 @@ public static class SaveStore
                 rec.tiles.Add(new SoilTileState { x = cell.x, y = cell.y });
             }
             data.soils.Add(rec);
+        }
+        foreach (var kv in committedWateredSoil)
+        {
+            var rec = new WateredSoilSceneRecord { scene = kv.Key };
+            foreach (var entry in kv.Value)
+            {
+                rec.tiles.Add(new WateredSoilState { x = entry.Key.x, y = entry.Key.y, day = entry.Value });
+            }
+            data.wateredSoils.Add(rec);
         }
         data.meta = meta;
         File.WriteAllText(PathFile, JsonUtility.ToJson(data, true));
@@ -250,6 +290,27 @@ public static class SaveStore
         {
             tilled.Remove(cell);
             if (tilled.Count == 0) pendingSoil.Remove(scene);
+        }
+        MarkSoilDriedPending(scene, cell);
+    }
+
+    public static void MarkSoilWateredPending(string scene, Vector2Int cell, int day)
+    {
+        if (string.IsNullOrEmpty(scene)) return;
+        if (!pendingWateredSoil.TryGetValue(scene, out var dict)) pendingWateredSoil[scene] = dict = new Dictionary<Vector2Int, int>();
+        dict[cell] = day;
+        if (pendingDriedSoil.TryGetValue(scene, out var dried)) dried.Remove(cell);
+    }
+
+    public static void MarkSoilDriedPending(string scene, Vector2Int cell)
+    {
+        if (string.IsNullOrEmpty(scene)) return;
+        if (!pendingDriedSoil.TryGetValue(scene, out var set)) pendingDriedSoil[scene] = set = new HashSet<Vector2Int>();
+        set.Add(cell);
+        if (pendingWateredSoil.TryGetValue(scene, out var dict))
+        {
+            dict.Remove(cell);
+            if (dict.Count == 0) pendingWateredSoil.Remove(scene);
         }
     }
 
@@ -308,14 +369,38 @@ public static class SaveStore
             }
         }
 
+        foreach (var kv in pendingDriedSoil)
+        {
+            if (pendingWateredSoil.TryGetValue(kv.Key, out var pending))
+            {
+                foreach (var cell in kv.Value) pending.Remove(cell);
+                if (pending.Count == 0) pendingWateredSoil.Remove(kv.Key);
+            }
+
+            if (committedWateredSoil.TryGetValue(kv.Key, out var committed))
+            {
+                foreach (var cell in kv.Value) committed.Remove(cell);
+                if (committed.Count == 0) committedWateredSoil.Remove(kv.Key);
+            }
+        }
+
         foreach (var kv in pendingSoil)
         {
             if (!committedSoil.TryGetValue(kv.Key, out var set)) committedSoil[kv.Key] = set = new HashSet<Vector2Int>();
             set.UnionWith(kv.Value);
         }
+        foreach (var kv in pendingWateredSoil)
+        {
+            if (!committedWateredSoil.TryGetValue(kv.Key, out var dict)) committedWateredSoil[kv.Key] = dict = new Dictionary<Vector2Int, int>();
+            foreach (var entry in kv.Value)
+            {
+                dict[entry.Key] = entry.Value;
+            }
+        }
         pendingTrees.Clear(); pendingStumps.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
+        pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
         SaveToDisk();
     }
 
@@ -324,6 +409,7 @@ public static class SaveStore
         pendingTrees.Clear(); pendingStumps.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
+        pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
     }
     // =============== MENU SUPPORT ===============
     public static bool HasAnySave()
@@ -419,6 +505,34 @@ public static class SaveStore
         }
     }
 
+    public static IEnumerable<WateredSoilState> GetWateredSoilInScene(string scene)
+    {
+        if (string.IsNullOrEmpty(scene)) yield break;
+
+        pendingDriedSoil.TryGetValue(scene, out var dried);
+        var emitted = new HashSet<Vector2Int>();
+
+        if (committedWateredSoil.TryGetValue(scene, out var committed))
+        {
+            foreach (var kv in committed)
+            {
+                if (dried != null && dried.Contains(kv.Key)) continue;
+                yield return new WateredSoilState { x = kv.Key.x, y = kv.Key.y, day = kv.Value };
+                emitted.Add(kv.Key);
+            }
+        }
+
+        if (pendingWateredSoil.TryGetValue(scene, out var pending))
+        {
+            foreach (var kv in pending)
+            {
+                if (dried != null && dried.Contains(kv.Key)) continue;
+                if (emitted.Contains(kv.Key)) continue;
+                yield return new WateredSoilState { x = kv.Key.x, y = kv.Key.y, day = kv.Value };
+            }
+        }
+    }
+
     public static IEnumerable<PlantState> GetPlantsInScene(string scene)
     {
         if (string.IsNullOrEmpty(scene)) yield break;
@@ -499,6 +613,21 @@ public static class SaveStore
         return clone;
     }
 
+    static Dictionary<string, Dictionary<Vector2Int, int>> CloneSoilDayMaps(Dictionary<string, Dictionary<Vector2Int, int>> source)
+    {
+        var clone = new Dictionary<string, Dictionary<Vector2Int, int>>();
+        foreach (var kv in source)
+        {
+            var dict = new Dictionary<Vector2Int, int>();
+            foreach (var entry in kv.Value)
+            {
+                dict[entry.Key] = entry.Value;
+            }
+            clone[kv.Key] = dict;
+        }
+        return clone;
+    }
+
     static void RestoreSceneSets(Dictionary<string, HashSet<string>> target, Dictionary<string, HashSet<string>> snapshot)
     {
         foreach (var kv in snapshot)
@@ -527,6 +656,19 @@ public static class SaveStore
         {
             if (target.TryGetValue(kv.Key, out var set)) set.UnionWith(kv.Value);
             else target[kv.Key] = new HashSet<Vector2Int>(kv.Value);
+        }
+    }
+
+    static void RestoreSoilDayMaps(Dictionary<string, Dictionary<Vector2Int, int>> target,
+                                   Dictionary<string, Dictionary<Vector2Int, int>> snapshot)
+    {
+        foreach (var kv in snapshot)
+        {
+            if (!target.TryGetValue(kv.Key, out var dict)) target[kv.Key] = dict = new Dictionary<Vector2Int, int>();
+            foreach (var entry in kv.Value)
+            {
+                dict[entry.Key] = entry.Value;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 
+
 // PlantGrowth.cs
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,9 +14,12 @@ public class PlantGrowth : MonoBehaviour
     TimeManager time;
     string plantId;
     bool removeFromSave;
+    bool wasWateredToday;
+    int lastWateredDay;
     static readonly HashSet<SeedSO> warnedMissingId = new();
 
     public bool IsMature => IsDataValid() && stage >= data.stagePrefabs.Length - 1;
+    bool RequiresWatering => data && data.requiresWatering;
 
     int CurrentDay
     {
@@ -33,6 +37,9 @@ public class PlantGrowth : MonoBehaviour
         stage = 0;
         daysInStage = 0;
         plantId = SaveStore.CreatePlantId();
+        wasWateredToday = false;
+        int today = Mathf.Max(0, CurrentDay);
+        lastWateredDay = RequiresWatering ? Mathf.Max(0, today - 1) : today;
 
         if (!IsDataValid())
         {
@@ -54,6 +61,8 @@ public class PlantGrowth : MonoBehaviour
         stage = 0;
         daysInStage = 0;
         targetDaysForStage = 0;
+        wasWateredToday = state.wateredToday;
+        lastWateredDay = Mathf.Max(0, state.lastWateredDay);
 
         if (!IsDataValid())
         {
@@ -69,6 +78,16 @@ public class PlantGrowth : MonoBehaviour
 
         ApplyOfflineGrowth(state.lastUpdatedDay);
         SpawnStage();
+        PersistState();
+    }
+
+    public void Water()
+    {
+        if (!IsDataValid()) return;
+        int today = CurrentDay;
+        if (wasWateredToday && lastWateredDay == today) return;
+        wasWateredToday = true;
+        lastWateredDay = today;
         PersistState();
     }
 
@@ -100,6 +119,14 @@ public class PlantGrowth : MonoBehaviour
 
         if (IsMature)
         {
+            wasWateredToday = false;
+            PersistState();
+            return;
+        }
+
+        if (RequiresWatering && !wasWateredToday)
+        {
+            wasWateredToday = false;
             PersistState();
             return;
         }
@@ -115,6 +142,7 @@ public class PlantGrowth : MonoBehaviour
                            ? data.stageDays[stage] : 1;
                 if (daysInStage >= need)
                 {
+                    wasWateredToday = false;
                     AdvanceStage();
                     advanced = true;
                 }
@@ -126,6 +154,7 @@ public class PlantGrowth : MonoBehaviour
                           ? data.stageAdvanceChance[stage] : 0f;
                 if (UnityEngine.Random.value <= p)
                 {
+                    wasWateredToday = false;
                     AdvanceStage();
                     advanced = true;
                 }
@@ -136,6 +165,7 @@ public class PlantGrowth : MonoBehaviour
                 if (targetDaysForStage <= 0) PickTargetDays();
                 if (daysInStage >= targetDaysForStage)
                 {
+                    wasWateredToday = false;
                     AdvanceStage();
                     advanced = true;
                 }
@@ -143,7 +173,15 @@ public class PlantGrowth : MonoBehaviour
             }
         }
 
-        if (!advanced) PersistState();
+        if (!advanced)
+        {
+            wasWateredToday = false;
+            PersistState();
+        }
+        else
+        {
+            wasWateredToday = false;
+        }
     }
 
     void AdvanceStage()
@@ -199,7 +237,9 @@ public class PlantGrowth : MonoBehaviour
             stage = stage,
             daysInStage = daysInStage,
             targetDaysForStage = targetDaysForStage,
-            lastUpdatedDay = CurrentDay
+            lastUpdatedDay = CurrentDay,
+            wateredToday = wasWateredToday,
+            lastWateredDay = this.lastWateredDay
         };
     }
 
@@ -238,16 +278,20 @@ public class PlantGrowth : MonoBehaviour
 
         int now = CurrentDay;
         int last = lastRecordedDay > 0 ? lastRecordedDay : now;
-        int days = Mathf.Max(0, now - last);
-        if (days == 0) return;
+        if (now <= last) return;
 
-        for (int i = 0; i < days; i++)
+        if (data.growthMode == GrowthMode.RandomRange && targetDaysForStage <= 0) PickTargetDays();
+
+        for (int day = last; day < now; day++)
         {
             if (IsMature)
             {
                 daysInStage = 0;
                 break;
             }
+
+            bool watered = !RequiresWatering || lastWateredDay >= day;
+            if (!watered) continue;
 
             daysInStage++;
 
@@ -286,5 +330,7 @@ public class PlantGrowth : MonoBehaviour
                 }
             }
         }
+
+        wasWateredToday = false;
     }
 }

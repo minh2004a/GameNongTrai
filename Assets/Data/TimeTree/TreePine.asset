@@ -18,7 +18,7 @@ MonoBehaviour:
   - {fileID: 232539971814092877, guid: cd52de3a3640fd441aa3578c3d72abbd, type: 3}
   - {fileID: 6379738931492730087, guid: 57e5b8b13d7833549b3a4998ee361550, type: 3}
   - {fileID: 8731117239119827141, guid: e06fc71371d5d1e42a576d6716bc2892, type: 3}
-  stageDays: 00000000000000000000000000000000
+  stageDays: 01000000010000000100000001000000
   growthMode: 1
   stageAdvanceChance:
   - 0.2
@@ -37,3 +37,4 @@ MonoBehaviour:
   snapToGrid: 1
   gridSize: 1
   requiresTilledSoil: 0
+  requiresWatering: 0
