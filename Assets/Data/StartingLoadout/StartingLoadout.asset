@@ -28,26 +28,26 @@ MonoBehaviour:
     amount: 1
     equip: 0
     hotbarSlot: 2
-  - item: {fileID: 11400000, guid: 696b84f441f642048aa01f992ab155fe, type: 2}
-    itemKey: 
-    amount: 2
-    equip: 0
-    hotbarSlot: 3
-  - item: {fileID: 11400000, guid: 533ff0872f85ce34eb3495758e732ca4, type: 2}
-    itemKey: 
-    amount: 2
-    equip: 0
-    hotbarSlot: 4
-  - item: {fileID: 11400000, guid: 2e60ed2a2ebf9b444ac5353bda449be1, type: 2}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 5
   - item: {fileID: 11400000, guid: 6b6153a7d6c8b714d82a0bb794a7cefd, type: 2}
     itemKey: 
     amount: 1
     equip: 0
-    hotbarSlot: 6
+    hotbarSlot: 3
+  - item: {fileID: 11400000, guid: 2e60ed2a2ebf9b444ac5353bda449be1, type: 2}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 4
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 2
+    equip: 0
+    hotbarSlot: 4
+  - item: {fileID: 0}
+    itemKey: 
+    amount: 1
+    equip: 0
+    hotbarSlot: 5
   - item: {fileID: 11400000, guid: 6b6153a7d6c8b714d82a0bb794a7cefd, type: 2}
     itemKey: 
     amount: 1

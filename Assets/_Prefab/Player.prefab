@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 8069884629022415873}
   - component: {fileID: 7700877869166976594}
   - component: {fileID: 9170890197009293846}
-  - component: {fileID: 8401200392681010920}
+  - component: {fileID: 1058324450758781111}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -260,17 +260,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hotbar:
-  - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
-    count: 1
-  - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
-    count: 1
-  - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
-    count: 1
-  - item: {fileID: 11400000, guid: 452b8325a32bbf94fba514e316bf250e, type: 2}
+  - item: {fileID: 0}
     count: 1
   - item: {fileID: 0}
     count: 1
-  - item: {fileID: 11400000, guid: 533ff0872f85ce34eb3495758e732ca4, type: 2}
+  - item: {fileID: 0}
+    count: 1
+  - item: {fileID: 0}
+    count: 1
+  - item: {fileID: 0}
+    count: 1
+  - item: {fileID: 0}
     count: 99
   - item: {fileID: 0}
     count: 1
@@ -464,7 +464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stamina: {fileID: 9196139618529040389}
   sleep: {fileID: 0}
---- !u!114 &8401200392681010920
+--- !u!114 &1058324450758781111
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -473,22 +473,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 936923126784610755}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc8393ec4d255ab4ca2fa24c8e88d444, type: 3}
+  m_Script: {fileID: 11500000, guid: d64505ef7e7fb5c4493ab7c7723e510c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inventory: {fileID: 1845909153704676813}
   animator: {fileID: 2327405225107318857}
   playerSprite: {fileID: 6288386847750319070}
-  displayRenderer: {fileID: 4222584492212310583}
+  displayRenderer: {fileID: 0}
   playerBody: {fileID: 8754012071114403644}
-  displayOffset: {x: 0, y: 1.4}
-  sortingOrderOffset: 5
-  holdLayerName: HoldingItem
-  holdMovingBool: HoldMoving
-  holdLayerWeight: 1
+  stamina: {fileID: 9196139618529040389}
+  displayOffset: {x: 0, y: 0.8}
+  sortingOrderOffset: 10
+  targetIconHeight: 0.5
   autoCreateRenderer: 1
   flipWithFacing: 0
+  holdingBool: HoldingItem
+  holdMovingBool: HoldMoving
+  holdStateParam: HoldState
+  holdLayerName: HoldingItem
+  holdLayerWeight: 1
   movingSpeedThreshold: 0.15
+  runningSpeedThreshold: 2.6
+  normalAnimatorSpeedMultiplier: 1
+  exhaustedAnimatorSpeedMultiplier: 0.6
 --- !u!1 &3900807971405855068
 GameObject:
   m_ObjectHideFlags: 0
