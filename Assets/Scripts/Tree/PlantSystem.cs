@@ -28,9 +28,11 @@ public class PlantSystem : MonoBehaviour
         plant = null; if (!seed || !plantRootPrefab) return false;
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
 
+        SoilManager soil = GetSoilManager();
+        Vector2Int? tilledCellToClear = null;
+
         if (seed.requiresTilledSoil)
         {
-            var soil = GetSoilManager();
             if (!soil) return false;
             var cell = soil.WorldToCell(worldPos);
             if (!soil.IsCellTilled(cell)) return false;
@@ -44,11 +46,27 @@ public class PlantSystem : MonoBehaviour
             );
         }
 
+        if (!seed.requiresTilledSoil && soil && soil.IsTilled(worldPos))
+        {
+            var cell = soil.WorldToCell(worldPos);
+            if (soil.IsCellTilled(cell))
+            {
+                tilledCellToClear = cell;
+                worldPos = soil.CellToWorld(cell);
+            }
+        }
+
         if (Physics2D.OverlapCircle(worldPos, seed.blockCheckRadius, seed.blockMask)) return false;
 
         var go = Instantiate(plantRootPrefab, worldPos, Quaternion.identity);
         plant = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
         plant.Init(seed);
+
+        if (tilledCellToClear.HasValue && soil)
+        {
+            soil.TryClearCell(tilledCellToClear.Value);
+        }
+
         return true;
     }
 

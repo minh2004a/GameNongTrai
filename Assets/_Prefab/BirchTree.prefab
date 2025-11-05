@@ -279,7 +279,7 @@ MonoBehaviour:
   pickupPrefab: {fileID: 938829867024995739, guid: 5eaff2eda499336428801cbfe7172d32, type: 3}
   drops:
   - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
-    countRange: {x: 5, y: 10}
+    countRange: {x: 10, y: 15}
     chance: 1
   - item: {fileID: 11400000, guid: 533ff0872f85ce34eb3495758e732ca4, type: 2}
     countRange: {x: 1, y: 2}

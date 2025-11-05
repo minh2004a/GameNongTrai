@@ -271,5 +271,8 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 696b84f441f642048aa01f992ab155fe, type: 2}
     countRange: {x: 1, y: 2}
     chance: 0.4
+  - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
+    countRange: {x: 10, y: 15}
+    chance: 1
   scatterSpeed: {x: 10, y: 15}
   scatterAngle: 35

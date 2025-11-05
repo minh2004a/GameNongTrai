@@ -156,7 +156,7 @@ MonoBehaviour:
   pickupPrefab: {fileID: 938829867024995739, guid: 5eaff2eda499336428801cbfe7172d32, type: 3}
   drops:
   - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
-    countRange: {x: 3, y: 5}
+    countRange: {x: 3, y: 7}
     chance: 1
   scatterSpeed: {x: 15, y: 20}
   scatterAngle: 35

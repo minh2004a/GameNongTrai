@@ -133,6 +133,7 @@ public static class SaveStore
 
     static readonly Dictionary<string, HashSet<Vector2Int>> committedSoil = new();
     static readonly Dictionary<string, HashSet<Vector2Int>> pendingSoil = new();
+    static readonly Dictionary<string, HashSet<Vector2Int>> pendingClearedSoil = new();
 
     static string PathFile => Path.Combine(Application.persistentDataPath, "save.json");
 
@@ -143,11 +144,12 @@ public static class SaveStore
         var pendingPlantSnapshot = ClonePlantScenes(pendingPlants);
         var pendingRemovedSnapshot = CloneSceneSets(pendingRemovedPlants);
         var pendingSoilSnapshot = CloneSoilSets(pendingSoil);
+        var pendingClearedSoilSnapshot = CloneSoilSets(pendingClearedSoil);
 
         committedTrees.Clear(); committedStumps.Clear();
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
-        committedSoil.Clear(); pendingSoil.Clear();
+        committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
 
         if (!File.Exists(PathFile)) return;
         var json = File.ReadAllText(PathFile);
@@ -195,6 +197,7 @@ public static class SaveStore
         RestorePlantScenes(pendingPlants, pendingPlantSnapshot);
         RestoreSceneSets(pendingRemovedPlants, pendingRemovedSnapshot);
         RestoreSoilSets(pendingSoil, pendingSoilSnapshot);
+        RestoreSoilSets(pendingClearedSoil, pendingClearedSoilSnapshot);
     }
 
     public static void SaveToDisk()
@@ -236,6 +239,18 @@ public static class SaveStore
         if (string.IsNullOrEmpty(scene)) return;
         if (!pendingSoil.TryGetValue(scene, out var set)) pendingSoil[scene] = set = new HashSet<Vector2Int>();
         set.Add(cell);
+        if (pendingClearedSoil.TryGetValue(scene, out var cleared)) cleared.Remove(cell);
+    }
+
+    public static void MarkSoilClearedPending(string scene, Vector2Int cell){
+        if (string.IsNullOrEmpty(scene)) return;
+        if (!pendingClearedSoil.TryGetValue(scene, out var set)) pendingClearedSoil[scene] = set = new HashSet<Vector2Int>();
+        set.Add(cell);
+        if (pendingSoil.TryGetValue(scene, out var tilled))
+        {
+            tilled.Remove(cell);
+            if (tilled.Count == 0) pendingSoil.Remove(scene);
+        }
     }
 
     // kiểm tra trong phiên (committed ∪ pending)
@@ -247,9 +262,13 @@ public static class SaveStore
         (committedStumps.TryGetValue(scene, out var c) && c.Contains(id)) ||
         (pendingStumps.TryGetValue(scene, out var p) && p.Contains(id));
 
-    public static bool IsSoilTilledInSession(string scene, Vector2Int cell) =>
-        (pendingSoil.TryGetValue(scene, out var p) && p.Contains(cell)) ||
-        (committedSoil.TryGetValue(scene, out var c) && c.Contains(cell));
+    public static bool IsSoilTilledInSession(string scene, Vector2Int cell)
+    {
+        if (string.IsNullOrEmpty(scene)) return false;
+        if (pendingClearedSoil.TryGetValue(scene, out var cleared) && cleared.Contains(cell)) return false;
+        return (pendingSoil.TryGetValue(scene, out var p) && p.Contains(cell)) ||
+               (committedSoil.TryGetValue(scene, out var c) && c.Contains(cell));
+    }
 
     // người chơi Save/Ngủ
     public static void CommitPendingAndSave(){
@@ -274,6 +293,21 @@ public static class SaveStore
             if (!committedPlants.TryGetValue(kv.Key, out var dict)) continue;
             foreach (var id in kv.Value) dict.Remove(id);
         }
+        foreach (var kv in pendingClearedSoil)
+        {
+            if (pendingSoil.TryGetValue(kv.Key, out var pending))
+            {
+                pending.ExceptWith(kv.Value);
+                if (pending.Count == 0) pendingSoil.Remove(kv.Key);
+            }
+
+            if (committedSoil.TryGetValue(kv.Key, out var committed))
+            {
+                committed.ExceptWith(kv.Value);
+                if (committed.Count == 0) committedSoil.Remove(kv.Key);
+            }
+        }
+
         foreach (var kv in pendingSoil)
         {
             if (!committedSoil.TryGetValue(kv.Key, out var set)) committedSoil[kv.Key] = set = new HashSet<Vector2Int>();
@@ -281,7 +315,7 @@ public static class SaveStore
         }
         pendingTrees.Clear(); pendingStumps.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
-        pendingSoil.Clear();
+        pendingSoil.Clear(); pendingClearedSoil.Clear();
         SaveToDisk();
     }
 
@@ -289,7 +323,7 @@ public static class SaveStore
     {
         pendingTrees.Clear(); pendingStumps.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
-        pendingSoil.Clear();
+        pendingSoil.Clear(); pendingClearedSoil.Clear();
     }
     // =============== MENU SUPPORT ===============
     public static bool HasAnySave()
@@ -317,7 +351,7 @@ public static class SaveStore
         committedTrees.Clear(); committedStumps.Clear();
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
-        committedSoil.Clear(); pendingSoil.Clear();
+        committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
         JustStartedNewGame = true;
         // meta mới
         meta = new Meta
@@ -363,10 +397,13 @@ public static class SaveStore
 
         var emitted = new HashSet<Vector2Int>();
 
+        pendingClearedSoil.TryGetValue(scene, out var cleared);
+
         if (committedSoil.TryGetValue(scene, out var committed))
         {
             foreach (var cell in committed)
             {
+                if (cleared != null && cleared.Contains(cell)) continue;
                 yield return cell;
                 emitted.Add(cell);
             }
@@ -376,6 +413,7 @@ public static class SaveStore
         {
             foreach (var cell in pending)
             {
+                if (cleared != null && cleared.Contains(cell)) continue;
                 if (emitted.Add(cell)) yield return cell;
             }
         }
