@@ -141,12 +141,30 @@ public class ToolUser : MonoBehaviour
         var cols = Physics2D.OverlapCircleAll(center, r, hitMask);
         if (usingItem.toolType == ToolType.WateringCan)
         {
+            if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
             var watered = new HashSet<PlantGrowth>();
+            HashSet<Vector2Int> hydratedCells = soilManager ? new HashSet<Vector2Int>() : null;
             foreach (var c in cols)
             {
                 var plant = c.GetComponentInParent<PlantGrowth>();
                 if (!plant) continue;
-                if (watered.Add(plant)) plant.Water();
+                if (watered.Add(plant))
+                {
+                    plant.Water();
+                    if (hydratedCells != null)
+                    {
+                        hydratedCells.Add(soilManager.WorldToCell(plant.transform.position));
+                    }
+                }
+            }
+
+            if (hydratedCells != null)
+            {
+                hydratedCells.Add(soilManager.WorldToCell((Vector2)center));
+                foreach (var cell in hydratedCells)
+                {
+                    soilManager.TryWaterCell(cell);
+                }
             }
             return;
         }
