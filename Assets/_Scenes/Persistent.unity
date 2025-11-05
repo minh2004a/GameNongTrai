@@ -5775,11 +5775,62 @@ PrefabInstance:
       propertyPath: OnStamina01.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1223590759}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8401200392681010920, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 936923126784610755, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2116136252306584678}
   m_SourcePrefab: {fileID: 100100000, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+--- !u!212 &2116136252306584676 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 6288386847750319070, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+  m_PrefabInstance: {fileID: 2116136252306584675}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2116136252306584677 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 2327405225107318857, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+  m_PrefabInstance: {fileID: 2116136252306584675}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2116136252306584678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 158480009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d64505ef7e7fb5c4493ab7c7723e510c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory: {fileID: 647645683}
+  animator: {fileID: 2116136252306584677}
+  playerSprite: {fileID: 2116136252306584676}
+  displayRenderer: {fileID: 0}
+  playerBody: {fileID: 2116136252306584679}
+  stamina: {fileID: 1080744791}
+  displayOffset: {x: 0, y: 1.35}
+  sortingOrderOffset: 10
+  targetIconHeight: 0.5
+  autoCreateRenderer: 1
+  flipWithFacing: 0
+  holdingBool: HoldingItem
+  holdMovingBool: HoldMoving
+  holdStateParam: HoldState
+  holdLayerName: HoldingItem
+  holdLayerWeight: 1
+  movingSpeedThreshold: 0.15
+  runningSpeedThreshold: 2.6
+  normalAnimatorSpeedMultiplier: 1
+  exhaustedAnimatorSpeedMultiplier: 0.6
+--- !u!50 &2116136252306584679 stripped
+Rigidbody2D:
+  m_CorrespondingSourceObject: {fileID: 8754012071114403644, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+  m_PrefabInstance: {fileID: 2116136252306584675}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2875196082650874940
 PrefabInstance:
   m_ObjectHideFlags: 0
