@@ -23,6 +23,7 @@ public class ToolUser : MonoBehaviour
     ItemSO usingItem;
     float nextUseTime;
 
+    [SerializeField, Tooltip("Khoảng cách click gần nhân vật để quay mặt theo chuột")] float closeClickRadius = 1.1f;
     Vector2 aimDir = Vector2.right;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
@@ -73,6 +74,7 @@ public class ToolUser : MonoBehaviour
         if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
         Vector2 mouseW = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         Vector2 toMouse = mouseW - (Vector2)transform.position;
+        TrySnapAimToClick(toMouse);
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước
     }
 
@@ -204,6 +206,28 @@ public class ToolUser : MonoBehaviour
         float x = anim.GetFloat("Horizontal"), y = anim.GetFloat("Vertical");
         if (Mathf.Abs(x) >= Mathf.Abs(y)) return x >= 0 ? Vector2.right : Vector2.left;
         return y >= 0 ? Vector2.up : Vector2.down;
+    }
+    void TrySnapAimToClick(Vector2 toMouse)
+    {
+        if (!anim) return;
+        if (!inv) return;
+        var it = inv.CurrentItem;
+        if (!it || it.category != ItemCategory.Tool) return;
+        if (toMouse.sqrMagnitude > closeClickRadius * closeClickRadius) return;
+        if (toMouse.sqrMagnitude < 0.0001f) return;
+        var snapped = SnapCardinal(toMouse);
+        if (snapped == Vector2.zero) return;
+        aimDir = snapped;
+        if (toolLocked) return;
+        anim.SetFloat("Horizontal", snapped.x);
+        anim.SetFloat("Vertical", snapped.y);
+        anim.SetFloat("Speed", 0f);
+    }
+    static Vector2 SnapCardinal(Vector2 v)
+    {
+        if (Mathf.Approximately(v.sqrMagnitude, 0f)) return Vector2.zero;
+        if (Mathf.Abs(v.x) >= Mathf.Abs(v.y)) return v.x >= 0f ? Vector2.right : Vector2.left;
+        return v.y >= 0f ? Vector2.up : Vector2.down;
     }
     public void ApplyToolFacingLockFrame()
     {
