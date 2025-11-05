@@ -11,16 +11,19 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     [SerializeField] Animator animator;
     [SerializeField] SpriteRenderer playerSprite;
     [SerializeField] SpriteRenderer displaySprite;
+    [SerializeField] Rigidbody2D body;
     [SerializeField] float displayHeight = 1.35f;
     [SerializeField] float targetIconHeight = 0.75f;
 
     ItemSO currentItem;
+    bool isHolding;
 
     void Awake()
     {
         if (!inventory) inventory = GetComponent<PlayerInventory>();
         if (!animator) animator = GetComponentInChildren<Animator>();
         if (!playerSprite) playerSprite = GetComponentInChildren<SpriteRenderer>();
+        if (!body) body = GetComponent<Rigidbody2D>();
         EnsureDisplaySprite();
         HideDisplay();
         RefreshDisplay();
@@ -121,7 +124,8 @@ public class PlayerHeldItemDisplay : MonoBehaviour
             displaySprite.transform.localScale = Vector3.one * scale;
         }
 
-        UpdateAnimator(true);
+        isHolding = true;
+        UpdateAnimator();
     }
 
     void HideDisplay()
@@ -131,13 +135,33 @@ public class PlayerHeldItemDisplay : MonoBehaviour
             displaySprite.sprite = null;
             displaySprite.enabled = false;
         }
-        UpdateAnimator(false);
+        isHolding = false;
+        UpdateAnimator();
     }
 
-    void UpdateAnimator(bool holding)
+    void UpdateAnimator()
     {
         if (!animator) return;
-        animator.SetBool("HoldingItem", holding);
-        animator.SetBool("HoldMoving", holding);
+        animator.SetBool("HoldingItem", isHolding);
+        animator.SetBool("HoldMoving", isHolding && IsMoving());
+    }
+
+    void Update()
+    {
+        if (!animator) return;
+        if (!isHolding)
+        {
+            if (animator.GetBool("HoldMoving"))
+                animator.SetBool("HoldMoving", false);
+            return;
+        }
+
+        animator.SetBool("HoldMoving", IsMoving());
+    }
+
+    bool IsMoving()
+    {
+        if (!body) return false;
+        return body.velocity.sqrMagnitude > 0.0001f;
     }
 }
