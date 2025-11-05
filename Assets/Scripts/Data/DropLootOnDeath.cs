@@ -63,24 +63,28 @@ public class DropLootOnDeath : MonoBehaviour
         go.Set(item, count);
 
         var rb = go.GetComponent<Rigidbody2D>();
-        if (rb)
-        {
-            float angDeg;
-            if (scatterDir.HasValue)
-            {
-                float baseDeg = Mathf.Atan2(scatterDir.Value.y, scatterDir.Value.x) * Mathf.Rad2Deg;
-                float spread = fullCircle ? 180f : Mathf.Max(0f, scatterAngle);
-                angDeg = baseDeg + Random.Range(-spread, spread);
-            }
-            else
-            {
-                angDeg = fullCircle ? Random.Range(0f, 360f)
-                                     : Random.Range(-scatterAngle, scatterAngle);
-            }
+        if (!rb) return;
 
-            float ang = angDeg * Mathf.Deg2Rad;
-            Vector2 dir = new(Mathf.Cos(ang), Mathf.Sin(ang));
-            rb.velocity = dir * Random.Range(scatterSpeed.x, scatterSpeed.y);
+        float angDeg;
+        if (scatterDir.HasValue)
+        {
+            float baseDeg = Mathf.Atan2(scatterDir.Value.y, scatterDir.Value.x) * Mathf.Rad2Deg;
+            float spread = Mathf.Max(0f, scatterAngle);
+            angDeg = spread > 0f
+                ? baseDeg + Random.Range(-spread, spread)
+                : baseDeg;
         }
+        else if (fullCircle)
+        {
+            angDeg = Random.Range(0f, 360f);
+        }
+        else
+        {
+            angDeg = Random.Range(-scatterAngle, scatterAngle);
+        }
+
+        float ang = angDeg * Mathf.Deg2Rad;
+        Vector2 dir = new(Mathf.Cos(ang), Mathf.Sin(ang));
+        rb.velocity = dir * Random.Range(scatterSpeed.x, scatterSpeed.y);
     }
 }
