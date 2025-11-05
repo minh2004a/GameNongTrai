@@ -455,6 +455,7 @@ public static class SaveStore
         pendingTrees.Clear();   pendingStumps.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
+        committedWateredSoil.Clear(); pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
         JustStartedNewGame = true;
         // meta mới
         meta = new Meta
