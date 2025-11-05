@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 // Xử lý chặt cây: trừ HP, spawn FX, tạo gốc cây, và lưu trạng thái đã chặt
@@ -31,11 +32,13 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         if (hp > 0) return;
 
         // Hết HP: tạo gốc cây
+        var drop = GetComponent<DropLootOnDeath>();
         var sTag = GetComponent<StumpOfTree>();
         if (sTag)
         {
             SaveStore.MarkStumpClearedPending(gameObject.scene.name, sTag.treeId);
-            GetComponent<DropLootOnDeath>()?.Drop();
+            if (drop) drop.SetScatterDirection(pushDir);
+            drop?.Drop();
             Destroy(gameObject);
             return;
         }
@@ -47,6 +50,8 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         var plant = GetComponentInParent<PlantGrowth>();
         if (uid) SaveStore.MarkTreeChoppedPending(gameObject.scene.name, uid.Id);
 
+        if (drop) drop.SetScatterDirection(pushDir);
+
         if (stumpPrefab)
         {
             var parent = plant ? plant.transform.parent : transform.parent;
@@ -55,7 +60,7 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
             if (uid) tag.treeId = uid.Id;
         }
 
-        GetComponent<DropLootOnDeath>()?.Drop();
+        drop?.Drop();
 
         if (plant)
         {
@@ -72,18 +77,18 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
 
     }
     void SpawnChopFX(Vector3 pos)
-{
-    if (!chopFxPrefab) return;
-
-    var fx = Instantiate(chopFxPrefab, pos, Quaternion.identity);
-
-    int layerId = SortingLayer.NameToID("FX_Back");        // dưới Characters
-    foreach (var r in fx.GetComponentsInChildren<Renderer>(true))
     {
-        r.sortingLayerID = layerId;
-        r.sortingOrder   = 0;                               // không cần cao
-        if (r is ParticleSystemRenderer psr)
-            psr.sortingFudge = +10f;                       // đẩy hạt VỀ SAU
+        if (!chopFxPrefab) return;
+
+        var fx = Instantiate(chopFxPrefab, pos, Quaternion.identity);
+
+        int layerId = SortingLayer.NameToID("FX_Back");        // dưới Characters
+        foreach (var r in fx.GetComponentsInChildren<Renderer>(true))
+        {
+            r.sortingLayerID = layerId;
+            r.sortingOrder = 0;                               // không cần cao
+            if (r is ParticleSystemRenderer psr)
+                psr.sortingFudge = +10f;                      // đẩy hạt VỀ SAU
+        }
     }
-}
 }

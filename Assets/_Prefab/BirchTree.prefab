@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 689417141832883326}
   - component: {fileID: 2771232707196829741}
   - component: {fileID: 3655883854092327985}
+  - component: {fileID: -1024844080898690737}
   - component: {fileID: 7895382378436073937}
   - component: {fileID: 2006831098790179750}
   - component: {fileID: 6113090764055160075}
@@ -243,9 +244,44 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.029843623, y: 0.08254881}
-  m_Size: {x: 0.95273554, y: 0.30948272}
+  m_Offset: {x: -0.029843621, y: 0.092875466}
+  m_Size: {x: 0.9527358, y: 0.46861684}
   m_Direction: 1
+--- !u!58 &-1024844080898690737
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5913987706290959712}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.05651927, y: -0.06364417}
+  serializedVersion: 2
+  m_Radius: 0.39787507
 --- !u!114 &7895382378436073937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -275,7 +311,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnSingles: 1
   maxSinglesPerDrop: 12
-  fullCircle: 1
+  fullCircle: 0
   pickupPrefab: {fileID: 938829867024995739, guid: 5eaff2eda499336428801cbfe7172d32, type: 3}
   drops:
   - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
@@ -285,7 +321,7 @@ MonoBehaviour:
     countRange: {x: 1, y: 2}
     chance: 0.4
   scatterSpeed: {x: 10, y: 15}
-  scatterAngle: 90
+  scatterAngle: 35
 --- !u!114 &6113090764055160075
 MonoBehaviour:
   m_ObjectHideFlags: 0

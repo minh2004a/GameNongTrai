@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3965600088620362223}
   - component: {fileID: 6764937070279067256}
   - component: {fileID: -4371843923752589091}
+  - component: {fileID: 6814943177632531038}
   m_Layer: 8
   m_Name: PineStump
   m_TagString: Untagged
@@ -116,7 +117,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnSingles: 1
   maxSinglesPerDrop: 12
-  fullCircle: 1
+  fullCircle: 0
   pickupPrefab: {fileID: 938829867024995739, guid: 5eaff2eda499336428801cbfe7172d32, type: 3}
   drops:
   - item: {fileID: 11400000, guid: 3691f76312940394ebff87cca83e3bfe, type: 2}
@@ -156,6 +157,41 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.010284854, y: 0.10132188}
-  m_Size: {x: 0.9817982, y: 0.3498105}
+  m_Offset: {x: 0.010284854, y: 0.1013217}
+  m_Size: {x: 0.9817984, y: 0.52959687}
   m_Direction: 1
+--- !u!58 &6814943177632531038
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5888336983269139626}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.09416211}
+  serializedVersion: 2
+  m_Radius: 0.42197454
