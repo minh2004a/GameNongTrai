@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     Vector2 pendingMoveInput;
     public bool MoveLocked { get; private set; }
     public Vector2 Facing4 => lastFacing;
+    public Vector2 MoveInput => moveInput;
     public void SetMoveLock(bool locked)
     {
         MoveLocked = locked;

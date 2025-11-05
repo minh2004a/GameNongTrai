@@ -25,6 +25,9 @@ public class ToolUser : MonoBehaviour
 
     [SerializeField, Tooltip("Khoảng cách click gần nhân vật để quay mặt theo chuột")] float closeClickRadius = 1.1f;
     Vector2 aimDir = Vector2.right;
+    bool manualAimActive;
+    Vector2 manualAimDir = Vector2.right;
+    Vector2 manualAimGuardInput;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
@@ -49,8 +52,35 @@ public class ToolUser : MonoBehaviour
         }
         else
         {
-            var d = new Vector2(anim.GetFloat("Horizontal"), anim.GetFloat("Vertical"));
-            if (d.sqrMagnitude > 0.001f) aimDir = d.normalized;
+            if (manualAimActive)
+            {
+                Vector2 moveInput = (pc && !pc.MoveLocked) ? pc.MoveInput : Vector2.zero;
+                bool hasMove = moveInput.sqrMagnitude > 0.0001f;
+                if (!hasMove)
+                {
+                    manualAimGuardInput = Vector2.zero;
+                }
+                else if ((moveInput - manualAimGuardInput).sqrMagnitude > 0.0001f)
+                {
+                    manualAimActive = false;
+                }
+
+                if (manualAimActive)
+                {
+                    aimDir = manualAimDir;
+                    if (anim)
+                    {
+                        anim.SetFloat("Horizontal", manualAimDir.x);
+                        anim.SetFloat("Vertical", manualAimDir.y);
+                    }
+                }
+            }
+
+            if (!manualAimActive)
+            {
+                var d = new Vector2(anim.GetFloat("Horizontal"), anim.GetFloat("Vertical"));
+                if (d.sqrMagnitude > 0.001f) aimDir = d.normalized;
+            }
         }
 
         var dir = toolLocked ? toolFacing : aimDir;                 // dùng hướng đã khóa khi chặt
@@ -218,6 +248,9 @@ public class ToolUser : MonoBehaviour
         var snapped = SnapCardinal(toMouse);
         if (snapped == Vector2.zero) return;
         aimDir = snapped;
+        manualAimActive = true;
+        manualAimDir = snapped;
+        manualAimGuardInput = (pc && !pc.MoveLocked) ? pc.MoveInput : Vector2.zero;
         if (toolLocked) return;
         anim.SetFloat("Horizontal", snapped.x);
         anim.SetFloat("Vertical", snapped.y);
