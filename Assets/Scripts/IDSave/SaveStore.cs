@@ -179,7 +179,11 @@ public static class SaveStore
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
         committedWateredSoil.Clear(); pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
 
-        if (!File.Exists(PathFile)) return;
+        if (!File.Exists(PathFile))
+        {
+            meta = new Meta();
+            return;
+        }
         var json = File.ReadAllText(PathFile);
 
         var data = JsonUtility.FromJson<SaveData>(json) ?? new SaveData();
@@ -411,6 +415,7 @@ public static class SaveStore
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
         pendingWateredSoil.Clear(); pendingDriedSoil.Clear();
+        meta.hasSave = true;
         SaveToDisk();
     }
 
@@ -424,8 +429,11 @@ public static class SaveStore
     // =============== MENU SUPPORT ===============
     public static bool HasAnySave()
     {
-        // có file save.json là coi như có save
-        return File.Exists(PathFile);
+        if (meta != null && meta.hasSave) return true;
+        if (!File.Exists(PathFile)) return false;
+
+        LoadFromDisk();
+        return meta != null && meta.hasSave;
     }
 
     public static string GetLastScene()
@@ -437,7 +445,6 @@ public static class SaveStore
     {
         if (string.IsNullOrEmpty(scene)) return;
         meta.lastScene = scene;
-        meta.hasSave = true;
         SaveToDisk();
     }
 
@@ -453,7 +460,7 @@ public static class SaveStore
         meta = new Meta
         {
             lastScene = string.IsNullOrEmpty(startScene) ? "House" : startScene,
-            hasSave = true,
+            hasSave = false,
             day = 1,
             hour = 6,
             minute = 0,
