@@ -2,7 +2,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 // Xử lý rơi vật phẩm khi đối tượng chết
-[System.Serializable] public class DropEntry{ public ItemSO item; public Vector2Int countRange = new(1,1); [Range(0,1)] public float chance = 1f; }
+[System.Serializable]
+public class DropEntry
+{
+    public ItemSO item;
+    public Vector2Int countRange = new(1, 1);
+    [Range(0, 1)] public float chance = 1f;
+}
 
 public class DropLootOnDeath : MonoBehaviour
 {
