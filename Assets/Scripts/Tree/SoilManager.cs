@@ -66,6 +66,18 @@ public class SoilManager : MonoBehaviour
         return true;
     }
 
+    public bool TryClearAt(Vector2 worldPos)
+    {
+        return TryClearCell(WorldToCell(worldPos));
+    }
+
+    public bool TryClearCell(Vector2Int cell)
+    {
+        if (!tilledCells.Contains(cell)) return false;
+        RemoveCell(cell, true);
+        return true;
+    }
+
     public void EnsureCellTilledFromSave(Vector2Int cell)
     {
         AddCell(cell, false);
@@ -112,6 +124,24 @@ public class SoilManager : MonoBehaviour
         {
             RefreshVisual(cell + offset);
         }
+    }
+
+    void RemoveCell(Vector2Int cell, bool markPending)
+    {
+        if (!tilledCells.Remove(cell)) return;
+
+        if (visuals.TryGetValue(cell, out var go) && go)
+        {
+            Destroy(go);
+        }
+        visuals.Remove(cell);
+
+        if (markPending && !string.IsNullOrEmpty(sceneName))
+        {
+            SaveStore.MarkSoilClearedPending(sceneName, cell);
+        }
+
+        RefreshCellAndNeighbors(cell);
     }
 
     void RefreshVisual(Vector2Int cell)
