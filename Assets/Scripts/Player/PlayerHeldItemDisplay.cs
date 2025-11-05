@@ -233,9 +233,9 @@ public class PlayerHeldItemDisplay : MonoBehaviour
             return;
 
         float speed = playerBody ? playerBody.velocity.magnitude : 0f;
-        bool moving = speed > movingSpeedThreshold;
-        bool running = speed > runningSpeedThreshold;
         bool exhausted = stamina && stamina.IsExhausted;
+        bool moving = speed > movingSpeedThreshold;
+        bool running = speed > runningSpeedThreshold && !exhausted;
 
         if (hasHoldingBool)
             animator.SetBool(holdingBoolHash, isVisible);
