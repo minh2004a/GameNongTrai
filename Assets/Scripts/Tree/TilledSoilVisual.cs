@@ -5,32 +5,26 @@ using UnityEngine;
 public class TilledSoilVisual : MonoBehaviour
 {
     [SerializeField] SpriteRenderer spriteRenderer;
+    [SerializeField] SpriteRenderer wetOverlayRenderer;
     [SerializeField] Sprite[] connectionSprites = new Sprite[16];
     [SerializeField] Sprite[] wetConnectionSprites = new Sprite[16];
 
     void Reset()
     {
-        CacheRenderer();
+        CacheRenderers();
     }
 
     public void ApplyState(int tilledMask, bool isWet, int wetMask)
     {
-        CacheRenderer();
+        CacheRenderers();
 
-        Sprite sprite = SelectSprite(isWet ? wetMask : tilledMask, isWet);
-        if (!sprite)
+        var drySprite = SelectDrySprite(tilledMask);
+        if (drySprite && spriteRenderer && spriteRenderer.sprite != drySprite)
         {
-            sprite = SelectSprite(tilledMask, false);
-        }
-        if (!sprite)
-        {
-            sprite = SelectSprite(0, false);
+            spriteRenderer.sprite = drySprite;
         }
 
-        if (spriteRenderer && spriteRenderer.sprite != sprite)
-        {
-            spriteRenderer.sprite = sprite;
-        }
+        ApplyWetOverlay(isWet, wetMask, tilledMask);
     }
 
     public void ApplyMask(int mask)
@@ -38,13 +32,72 @@ public class TilledSoilVisual : MonoBehaviour
         ApplyState(mask, false, mask);
     }
 
-    void CacheRenderer()
+    void CacheRenderers()
     {
-        if (spriteRenderer) return;
-        spriteRenderer = GetComponent<SpriteRenderer>();
         if (!spriteRenderer)
         {
-            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (!spriteRenderer)
+            {
+                spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            }
+        }
+        if (!wetOverlayRenderer)
+        {
+            foreach (var renderer in GetComponentsInChildren<SpriteRenderer>())
+            {
+                if (renderer != spriteRenderer)
+                {
+                    wetOverlayRenderer = renderer;
+                    break;
+                }
+            }
+        }
+    }
+
+    Sprite SelectDrySprite(int tilledMask)
+    {
+        var drySprite = SelectSprite(tilledMask, false);
+        if (!drySprite)
+        {
+            drySprite = SelectSprite(0, false);
+        }
+        return drySprite;
+    }
+
+    void ApplyWetOverlay(bool isWet, int wetMask, int fallbackMask)
+    {
+        if (!isWet)
+        {
+            if (wetOverlayRenderer)
+            {
+                wetOverlayRenderer.enabled = false;
+            }
+            return;
+        }
+
+        Sprite overlay = SelectSprite(wetMask, true);
+        if (!overlay)
+        {
+            overlay = SelectSprite(fallbackMask, true);
+        }
+        if (!overlay)
+        {
+            overlay = SelectSprite(0, true);
+        }
+
+        if (wetOverlayRenderer)
+        {
+            wetOverlayRenderer.enabled = overlay != null;
+            if (overlay && wetOverlayRenderer.sprite != overlay)
+            {
+                wetOverlayRenderer.sprite = overlay;
+            }
+        }
+        else if (overlay && spriteRenderer)
+        {
+            // Fallback for prefabs without a dedicated overlay renderer.
+            spriteRenderer.sprite = overlay;
         }
     }
 
