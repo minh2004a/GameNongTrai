@@ -35,7 +35,9 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         if (sTag)
         {
             SaveStore.MarkStumpClearedPending(gameObject.scene.name, sTag.treeId);
-            GetComponent<DropLootOnDeath>()?.Drop();
+            var drop = GetComponent<DropLootOnDeath>();
+            if (drop) drop.SetScatterDirection(pushDir);
+            drop?.Drop();
             Destroy(gameObject);
             return;
         }
@@ -47,6 +49,9 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         var plant = GetComponentInParent<PlantGrowth>();
         if (uid) SaveStore.MarkTreeChoppedPending(gameObject.scene.name, uid.Id);
 
+        var drop = GetComponent<DropLootOnDeath>();
+        if (drop) drop.SetScatterDirection(pushDir);
+
         if (stumpPrefab)
         {
             var parent = plant ? plant.transform.parent : transform.parent;
@@ -55,7 +60,7 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
             if (uid) tag.treeId = uid.Id;
         }
 
-        GetComponent<DropLootOnDeath>()?.Drop();
+        drop?.Drop();
 
         if (plant)
         {
