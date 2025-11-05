@@ -35,6 +35,8 @@ public class SeedSO : ScriptableObject
     public float gridSize = 1f;
     [Tooltip("Chỉ có thể trồng trên ô đất đã được xới")]
     public bool requiresTilledSoil = false;
+    [Tooltip("Phải tưới nước mỗi ngày mới phát triển")]
+    public bool requiresWatering = false;
     void OnEnable(){
         if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
     }

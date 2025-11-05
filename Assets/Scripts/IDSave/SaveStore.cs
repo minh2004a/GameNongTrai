@@ -26,6 +26,8 @@ public static class SaveStore
         public int daysInStage;
         public int targetDaysForStage;
         public int lastUpdatedDay;
+        public bool wateredToday;
+        public int lastWateredDay;
     }
     [System.Serializable]
     public struct SoilTileState

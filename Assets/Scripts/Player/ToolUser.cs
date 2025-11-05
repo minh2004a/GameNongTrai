@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 // Quản lý việc sử dụng công cụ của người chơi, bao gồm hướng và va chạm
@@ -77,7 +78,15 @@ public class ToolUser : MonoBehaviour
     public void TryUseCurrent(){
         var it = inv?.CurrentItem;
         if (!it || it.category != ItemCategory.Tool) return;
-        if (it.toolType != ToolType.Axe && it.toolType != ToolType.Hoe) return;
+        switch (it.toolType)
+        {
+            case ToolType.Axe:
+            case ToolType.Hoe:
+            case ToolType.WateringCan:
+                break;
+            default:
+                return;
+        }
         if (Time.time < nextUseTime) return;
         if (!stamina) return;
         var r = stamina.SpendExhaustible(stamina.toolCost);
@@ -105,6 +114,11 @@ public class ToolUser : MonoBehaviour
                     anim.ResetTrigger("UseAxe");
                     anim.SetTrigger("UseHoe");
                     break;
+                case ToolType.WateringCan:
+                    anim.ResetTrigger("UseAxe");
+                    anim.ResetTrigger("UseHoe");
+                    anim.SetTrigger("UseTool");
+                    break;
                 default:
                     anim.SetTrigger("UseTool");
                     break;
@@ -125,6 +139,18 @@ public class ToolUser : MonoBehaviour
         float r = Mathf.Max(0.01f, usingItem.range) * Mathf.Max(0.01f, usingItem.hitboxScale);
 
         var cols = Physics2D.OverlapCircleAll(center, r, hitMask);
+        if (usingItem.toolType == ToolType.WateringCan)
+        {
+            var watered = new HashSet<PlantGrowth>();
+            foreach (var c in cols)
+            {
+                var plant = c.GetComponentInParent<PlantGrowth>();
+                if (!plant) continue;
+                if (watered.Add(plant)) plant.Water();
+            }
+            return;
+        }
+
         foreach (var c in cols)
         {
             var t = c.GetComponent<IToolTarget>();
