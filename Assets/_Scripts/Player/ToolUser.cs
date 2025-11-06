@@ -235,7 +235,11 @@ public class ToolUser : MonoBehaviour
         usingItem = null;
         if (!toolLocked) return;
         toolLocked = false;
-        pc?.SetMoveLock(false);
+        if (pc)
+        {
+            pc.ForceFace(toolFacing);
+            pc.SetMoveLock(false);
+        }
         pendingWaterDir = Vector2.zero;
         hasPendingWaterTarget = false;
         pendingWaterTargetPosition = Vector3.zero;
@@ -257,6 +261,9 @@ public class ToolUser : MonoBehaviour
     {
         Vector2 baseFacing = toMouse.sqrMagnitude > 0.0001f ? Facing4FromVector(toMouse) : Facing4FromVector(aimDir);
         Vector2 facing = baseFacing;
+        hasPendingWaterTarget = false;
+        pendingWaterTargetPosition = Vector3.zero;
+
         if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
         if (soilManager)
         {
@@ -264,6 +271,7 @@ public class ToolUser : MonoBehaviour
             Vector2Int mouseCell = soilManager.WorldToCell(mouseWorld);
             Vector2Int delta = mouseCell - playerCell;
             facing = DetermineFacingFromDelta(delta, baseFacing);
+
             if (delta != Vector2Int.zero && Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y)) <= 1)
             {
                 hasPendingWaterTarget = true;
@@ -272,19 +280,23 @@ public class ToolUser : MonoBehaviour
             }
         }
 
-        pendingWaterDir = facing;
-        if (pendingWaterDir.sqrMagnitude > 0.0001f)
+        ApplyPendingWaterFacing(facing);
+    }
+
+    void ApplyPendingWaterFacing(Vector2 desiredFacing)
+    {
+        pendingWaterDir = desiredFacing;
+        if (pendingWaterDir.sqrMagnitude <= 0.0001f) return;
+
+        aimDir = pendingWaterDir;
+        if (anim)
         {
-            aimDir = pendingWaterDir;
-            if (anim)
-            {
-                anim.SetFloat("Horizontal", pendingWaterDir.x);
-                anim.SetFloat("Vertical", pendingWaterDir.y);
-            }
-            if (pc)
-            {
-                pc.ForceFace(pendingWaterDir);
-            }
+            anim.SetFloat("Horizontal", pendingWaterDir.x);
+            anim.SetFloat("Vertical", pendingWaterDir.y);
+        }
+        if (pc)
+        {
+            pc.ForceFace(pendingWaterDir);
         }
     }
 
@@ -297,10 +309,13 @@ public class ToolUser : MonoBehaviour
 
     static Vector2 DetermineFacingFromDelta(Vector2Int delta, Vector2 fallback)
     {
-        if (delta.y > 0) return Vector2.up;
-        if (delta.y < 0) return Vector2.down;
-        if (delta.x > 0) return Vector2.right;
-        if (delta.x < 0) return Vector2.left;
+        Vector2Int clamped = new Vector2Int(Mathf.Clamp(delta.x, -1, 1), Mathf.Clamp(delta.y, -1, 1));
+        if (clamped == Vector2Int.zero) return fallback;
+
+        if (clamped.y > 0) return Vector2.up;
+        if (clamped.y < 0) return Vector2.down;
+        if (clamped.x > 0) return Vector2.right;
+        if (clamped.x < 0) return Vector2.left;
         return fallback;
     }
 
