@@ -73,6 +73,12 @@ public class ToolUser : MonoBehaviour
         if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
         Vector2 mouseW = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         Vector2 toMouse = mouseW - (Vector2)transform.position;
+        if (toMouse.sqrMagnitude > 1e-4f)
+        {
+            Vector2 face = Facing4FromVector(toMouse);
+            aimDir = face;
+            pc?.ForceFace(face);
+        }
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước
     }
 
@@ -204,6 +210,13 @@ public class ToolUser : MonoBehaviour
         float x = anim.GetFloat("Horizontal"), y = anim.GetFloat("Vertical");
         if (Mathf.Abs(x) >= Mathf.Abs(y)) return x >= 0 ? Vector2.right : Vector2.left;
         return y >= 0 ? Vector2.up : Vector2.down;
+    }
+    Vector2 Facing4FromVector(Vector2 dir)
+    {
+        if (dir.sqrMagnitude <= 1e-4f) return Facing4FromAnim();
+        return Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)
+            ? (dir.x >= 0 ? Vector2.right : Vector2.left)
+            : (dir.y >= 0 ? Vector2.up : Vector2.down);
     }
     public void ApplyToolFacingLockFrame()
     {
