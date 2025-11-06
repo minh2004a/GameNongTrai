@@ -42,7 +42,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b4a7613f88efdc044b3d220b8ffb6c15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   data: {fileID: 0}
   stage: 0
+  pickupPrefab: {fileID: 419432099498450197, guid: 5eaff2eda499336428801cbfe7172d32, type: 3}

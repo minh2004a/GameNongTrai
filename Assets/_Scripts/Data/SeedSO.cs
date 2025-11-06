@@ -3,6 +3,7 @@
 using UnityEngine;
 
 public enum GrowthMode { FixedDays, RandomChance, RandomRange }
+public enum HarvestMethod { None, Hand, Tool }
 
 [CreateAssetMenu(menuName = "Plants/Seed")]
 public class SeedSO : ScriptableObject
@@ -38,6 +39,18 @@ public class SeedSO : ScriptableObject
     public bool requiresTilledSoil = false;
     [Tooltip("Phải tưới nước mỗi ngày mới phát triển")]
     public bool requiresWatering = false;
+
+    [Header("Thu hoạch")]
+    [Tooltip("Phương thức thu hoạch khi cây trưởng thành")]
+    public HarvestMethod harvestMethod = HarvestMethod.None;
+    [Tooltip("Công cụ yêu cầu nếu thu hoạch bằng dụng cụ")]
+    public ToolType requiredTool = ToolType.None;
+    [Tooltip("Vật phẩm thu được khi thu hoạch")]
+    public ItemSO harvestItem;
+    [Min(1), Tooltip("Số lượng vật phẩm thu được khi thu hoạch")]
+    public int harvestItemCount = 1;
+    [Tooltip("Xóa cây sau khi thu hoạch thành công")]
+    public bool destroyOnHarvest = true;
     void OnEnable(){
         if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
     }
@@ -58,6 +71,7 @@ public class SeedSO : ScriptableObject
 #if UNITY_EDITOR
 void OnValidate(){
     gridSize = Mathf.Max(0.01f, gridSize);
+    harvestItemCount = Mathf.Max(1, harvestItemCount);
     if (stagePrefabs == null) return;
     int n = stagePrefabs.Length;
 
