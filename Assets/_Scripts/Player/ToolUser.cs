@@ -8,6 +8,7 @@ public class ToolUser : MonoBehaviour
     [SerializeField] PlayerStamina stamina;
     [SerializeField] PlayerInventory inv;
     [SerializeField] Animator anim;
+    [SerializeField] SpriteRenderer[] spriteLocks;
     [SerializeField] Transform hitOrigin;
     [SerializeField] LayerMask hitMask;
     [SerializeField] PlayerController pc;
@@ -31,10 +32,14 @@ public class ToolUser : MonoBehaviour
     {
         if (!pc) pc = GetComponent<PlayerController>();
         if (!anim) anim = GetComponentInChildren<Animator>();
+        if ((spriteLocks == null || spriteLocks.Length == 0) && anim)
+        {
+            spriteLocks = anim.GetComponentsInChildren<SpriteRenderer>(true);
+        }
         if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
     }
 
-    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); }
+    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); spriteLocks = anim ? anim.GetComponentsInChildren<SpriteRenderer>(true) : null; }
 
     void Update()
     {
@@ -236,6 +241,19 @@ public class ToolUser : MonoBehaviour
         return Facing4FromAnim();
     }
 
+    void ApplySpriteFacing(Vector2 facing)
+    {
+        if (spriteLocks == null) return;
+        if (facing.x > 0.0001f)
+        {
+            for (int i = 0; i < spriteLocks.Length; i++) if (spriteLocks[i]) spriteLocks[i].flipX = false;
+        }
+        else if (facing.x < -0.0001f)
+        {
+            for (int i = 0; i < spriteLocks.Length; i++) if (spriteLocks[i]) spriteLocks[i].flipX = true;
+        }
+    }
+
     void ApplyAnimatorFacing(Vector2 facing)
     {
         if (!anim) return;
@@ -252,6 +270,10 @@ public class ToolUser : MonoBehaviour
         {
             pc.ForceFace(facing);
         }
+        else
+        {
+            ApplySpriteFacing(facing);
+        }
         ApplyAnimatorFacing(facing);
     }
     public void ApplyToolFacingLockFrame()
@@ -260,6 +282,7 @@ public class ToolUser : MonoBehaviour
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical", toolFacing.y);
         anim.SetFloat("Speed", 0f);
+        ApplySpriteFacing(toolFacing);
     }
 
     bool TryGetFacingFromClick(Vector2 toMouse, ItemSO item, out Vector2 facing)
