@@ -8,6 +8,7 @@ public class ToolUser : MonoBehaviour
     [SerializeField] PlayerStamina stamina;
     [SerializeField] PlayerInventory inv;
     [SerializeField] Animator anim;
+    [SerializeField] SpriteRenderer sprite;
     [SerializeField] Transform hitOrigin;
     [SerializeField] LayerMask hitMask;
     [SerializeField] PlayerController pc;
@@ -31,19 +32,24 @@ public class ToolUser : MonoBehaviour
     {
         if (!pc) pc = GetComponent<PlayerController>();
         if (!anim) anim = GetComponentInChildren<Animator>();
+        if (!sprite) sprite = GetComponentInChildren<SpriteRenderer>();
         if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
     }
 
-    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); }
+    void Reset()
+    {
+        anim = GetComponentInChildren<Animator>();
+        sprite = GetComponentInChildren<SpriteRenderer>();
+        pc = GetComponent<PlayerController>();
+        soilManager = FindFirstObjectByType<SoilManager>();
+    }
 
     void Update()
     {
         if (toolLocked)
         {
             // ép Animator giữ hướng, đứng yên
-            anim.SetFloat("Horizontal", toolFacing.x);
-            anim.SetFloat("Vertical", toolFacing.y);
-            anim.SetFloat("Speed", 0f);
+            ApplyAnimatorFacing(toolFacing, true);
             toolTimer -= Time.deltaTime;
             if (toolTimer <= 0f) Tool_End(); // failsafe nếu quên Animation Event
         }
@@ -62,25 +68,23 @@ public class ToolUser : MonoBehaviour
     {
         if (!toolLocked) return;
         // fallback: nếu script khác đổi sau Animator, vẫn ép lại ở LateUpdate
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical", toolFacing.y);
-        anim.SetFloat("Speed", 0f);
+        ApplyAnimatorFacing(toolFacing, true);
     }
 
     public Vector2 ToolFacing => toolFacing; // để SMB đọc
     public void OnUse(InputValue v)
     {
         if (!v.isPressed) return;
-        if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
-        Vector2 mouseW = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        Vector2 toMouse = mouseW - (Vector2)transform.position;
-        if (toMouse.sqrMagnitude > 1e-4f)
+        if (UIInputGuard.BlockInputNow()) return;
+        Vector2 face = MouseFacing4();
+        if (face.sqrMagnitude <= 1e-4f)
         {
-            Vector2 face = Facing4FromVector(toMouse);
-            aimDir = face;
-            requestedFacing = face;
-            pc?.ForceFace(face);
+            face = pc ? pc.Facing4 : Facing4FromAnim();
+            if (face.sqrMagnitude <= 1e-4f) face = toolFacing;
         }
+        aimDir = face;
+        requestedFacing = face;
+        ForceFace(face);
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước
     }
 
@@ -103,16 +107,16 @@ public class ToolUser : MonoBehaviour
         // nếu Exhausted thì vẫn tiếp tục chặt, anim/cooldown đã chậm theo ActionTimeMult()
         usingItem = it;
         nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
+        var lockDir = DetermineToolFacing();
+        toolFacing = Facing4FromVector(lockDir);           // chốt hướng
+        aimDir = toolFacing;
+        requestedFacing = Vector2.zero;
         toolLocked = true;
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
-        var lockDir = requestedFacing.sqrMagnitude > 1e-4f ? requestedFacing : aimDir;
-        toolFacing = Facing4FromVector(lockDir);           // chốt hướng
-        requestedFacing = Vector2.zero;
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical",   toolFacing.y);
-        anim.SetFloat("Speed",      0f);
-        pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
+        ForceFace(toolFacing);
+        ApplyAnimatorFacing(toolFacing, true);
+        pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này
         if (anim)
         {
             switch (usingItem.toolType)
@@ -208,9 +212,15 @@ public class ToolUser : MonoBehaviour
         if (!toolLocked) return;
         toolLocked = false;
         pc?.SetMoveLock(false);
+        pc?.ApplyPendingMove();
+        Vector2 face = pc ? pc.Facing4 : toolFacing;
+        ForceFace(face);
+        toolFacing = face;
+        aimDir = face;
     }
     Vector2 Facing4FromAnim()
     {
+        if (!anim) return toolFacing;
         float x = anim.GetFloat("Horizontal"), y = anim.GetFloat("Vertical");
         if (Mathf.Abs(x) >= Mathf.Abs(y)) return x >= 0 ? Vector2.right : Vector2.left;
         return y >= 0 ? Vector2.up : Vector2.down;
@@ -222,12 +232,58 @@ public class ToolUser : MonoBehaviour
             ? (dir.x >= 0 ? Vector2.right : Vector2.left)
             : (dir.y >= 0 ? Vector2.up : Vector2.down);
     }
+    Vector2 MouseFacing4()
+    {
+        if (!Camera.main || Mouse.current == null) return Vector2.zero;
+        Vector3 mp = Mouse.current.position.ReadValue();
+        Vector3 mw = Camera.main.ScreenToWorldPoint(mp);
+        mw.z = 0f;
+        Vector2 delta = (Vector2)mw - (Vector2)transform.position;
+        if (delta.sqrMagnitude <= 1e-4f) return Vector2.zero;
+        return Facing4FromVector(delta);
+    }
+    Vector2 DetermineToolFacing()
+    {
+        if (requestedFacing.sqrMagnitude > 1e-4f) return requestedFacing;
+        var mouseFace = MouseFacing4();
+        if (mouseFace.sqrMagnitude > 1e-4f) return mouseFace;
+        if (pc)
+        {
+            var f = pc.Facing4;
+            if (f.sqrMagnitude > 1e-4f) return f;
+        }
+        var animFace = Facing4FromAnim();
+        if (animFace.sqrMagnitude > 1e-4f) return animFace;
+        return toolFacing;
+    }
+    void ForceFace(Vector2 face)
+    {
+        if (face.sqrMagnitude <= 1e-4f) return;
+        if (pc)
+        {
+            pc.ForceFace(face);
+        }
+        else
+        {
+            ApplyAnimatorFacing(face, false);
+        }
+    }
+    void ApplyAnimatorFacing(Vector2 face, bool zeroSpeed)
+    {
+        if (anim)
+        {
+            anim.SetFloat("Horizontal", face.x);
+            anim.SetFloat("Vertical", face.y);
+            if (zeroSpeed) anim.SetFloat("Speed", 0f);
+        }
+        if (sprite)
+        {
+            sprite.flipX = face.x < 0f;
+        }
+    }
     public void ApplyToolFacingLockFrame()
     {
-        if (!anim) return;
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical", toolFacing.y);
-        anim.SetFloat("Speed", 0f);
+        ApplyAnimatorFacing(toolFacing, true);
     }
 
     void OnDrawGizmosSelected()
