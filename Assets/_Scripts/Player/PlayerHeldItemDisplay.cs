@@ -30,6 +30,8 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     [Header("Thu hoạch bằng tay")]
     [Tooltip("Vị trí bắt đầu nâng icon khi nhổ cây bằng tay (tọa độ cục bộ).")]
     [SerializeField] Vector2 handHarvestStartOffset = new Vector2(0f, -0.45f);
+    [Tooltip("Khoảng cách icon xuất hiện phía trước mặt người chơi theo hướng đang nhổ.")]
+    [SerializeField, Min(0f)] float handHarvestForwardDistance = 0.6f;
     [Tooltip("Quãng đường tối thiểu icon cần đi lên khi nhổ bằng tay.")]
     [SerializeField, Min(0f)] float handHarvestMinLift = 0.4f;
     [Tooltip("Độ lệch ngang tối đa icon được phép di chuyển về phía người chơi.")]
@@ -55,6 +57,8 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     float overrideHideAt;
     bool isAnimatingHandHarvest;
     Vector3 handHarvestStartLocal;
+    Vector3 handHarvestWorldStart;
+    Vector2 handHarvestFacing;
     float handHarvestStartTime;
     float handHarvestDuration;
 
@@ -312,7 +316,7 @@ public class PlayerHeldItemDisplay : MonoBehaviour
         ShowItem(item);
     }
 
-    public void ShowHandHarvestedItem(ItemSO item, Vector3 worldStartPosition, float liftDuration, float visibleDuration)
+    public void ShowHandHarvestedItem(ItemSO item, Vector3 worldStartPosition, Vector2 facingDirection, float liftDuration, float visibleDuration)
     {
         if (!item || !item.icon) return;
 
@@ -328,17 +332,44 @@ public class PlayerHeldItemDisplay : MonoBehaviour
 
         if (!iconRenderer) return;
 
-        handHarvestStartLocal = CalculateHandHarvestLocalStart(worldStartPosition);
+        handHarvestWorldStart = worldStartPosition;
+        handHarvestFacing = facingDirection;
+        handHarvestStartLocal = CalculateHandHarvestLocalStart();
         iconRenderer.transform.localPosition = handHarvestStartLocal;
         handHarvestStartTime = Time.time;
         handHarvestDuration = raiseTime;
         isAnimatingHandHarvest = true;
     }
 
-    Vector3 CalculateHandHarvestLocalStart(Vector3 worldStartPosition)
+    Vector3 CalculateHandHarvestLocalStart()
     {
-        Vector3 localStart = transform.InverseTransformPoint(worldStartPosition);
-        localStart += (Vector3)handHarvestStartOffset;
+        Vector3 localStart = Vector3.zero;
+        bool hasFacing = handHarvestFacing.sqrMagnitude > 0.0001f;
+
+        if (hasFacing)
+        {
+            Vector3 forwardWorld = new Vector3(handHarvestFacing.x, handHarvestFacing.y, 0f);
+            Vector3 localForward = transform.InverseTransformVector(forwardWorld);
+            localForward.z = 0f;
+
+            float distance = Mathf.Max(0f, handHarvestForwardDistance);
+            if (localForward.sqrMagnitude > 0.0001f && distance > 0f)
+            {
+                localForward = localForward.normalized * distance;
+            }
+            else
+            {
+                localForward = Vector3.zero;
+            }
+
+            localStart = localForward + (Vector3)handHarvestStartOffset;
+        }
+        else
+        {
+            localStart = transform.InverseTransformPoint(handHarvestWorldStart);
+            localStart += (Vector3)handHarvestStartOffset;
+        }
+
         localStart.z = 0f;
 
         float targetY = displayOffset.y;

@@ -15,6 +15,7 @@ public class PlayerPlanting : MonoBehaviour
     ItemSO pendingHarvestItem;
     int pendingHarvestCount;
     Vector3 pendingHarvestWorldPos;
+    Vector2 pendingHarvestFacing;
     [SerializeField, Tooltip("Lớp đối tượng được phép kiểm tra khi tìm cây có thể nhổ bằng tay.")] LayerMask harvestMask = ~0;
     [SerializeField, Min(0f), Tooltip("Khoảng cách tối đa người chơi có thể nhổ cây bằng tay.")] float harvestRange = 1.5f;
     [SerializeField, Min(0f), Tooltip("Thời gian icon thu hoạch được giữ trên đầu người chơi.")] float handHarvestDisplayDuration = 1.2f;
@@ -39,6 +40,7 @@ public class PlayerPlanting : MonoBehaviour
         cam = Camera.main;
         if (!plantSystem) plantSystem = FindFirstObjectByType<PlantSystem>();
         pendingHarvestWorldPos = transform.position;
+        pendingHarvestFacing = Vector2.up;
     }
 
     void Update()
@@ -99,13 +101,32 @@ public class PlayerPlanting : MonoBehaviour
 
         if (!best.TryHarvestByHand(inv, out var harvestedItem, out var harvestedCount)) return false;
 
-        CachePendingHarvest(harvestedItem, harvestedCount, best.transform.position);
-        TriggerHandHarvestAnimation(best.transform.position);
+        Vector2 facingDir = DetermineHandHarvestFacing(best.transform.position);
+        CachePendingHarvest(harvestedItem, harvestedCount, best.transform.position, facingDir);
+        TriggerHandHarvestAnimation(facingDir);
         return true;
     }
 
-    void TriggerHandHarvestAnimation(Vector3 targetPos)
+    Vector2 DetermineHandHarvestFacing(Vector3 targetPos)
     {
+        Vector2 toTarget = (Vector2)targetPos - (Vector2)transform.position;
+        if (toTarget.sqrMagnitude <= 0.0001f)
+        {
+            return pendingHarvestFacing.sqrMagnitude > 0.0001f ? pendingHarvestFacing : Vector2.up;
+        }
+
+        if (Mathf.Abs(toTarget.x) >= Mathf.Abs(toTarget.y))
+        {
+            return new Vector2(Mathf.Sign(toTarget.x), 0f);
+        }
+
+        return new Vector2(0f, Mathf.Sign(toTarget.y));
+    }
+
+    void TriggerHandHarvestAnimation(Vector2 facingDir)
+    {
+        pendingHarvestFacing = facingDir.sqrMagnitude > 0.0001f ? facingDir : Vector2.up;
+
         if (!animator)
         {
             isHandHarvesting = false;
@@ -113,16 +134,11 @@ public class PlayerPlanting : MonoBehaviour
             return;
         }
 
-        Vector2 toTarget = (Vector2)targetPos - (Vector2)transform.position;
-        if (toTarget.sqrMagnitude > 0.0001f)
+        if (pendingHarvestFacing.sqrMagnitude > 0.0001f)
         {
-            Vector2 facing = Mathf.Abs(toTarget.x) >= Mathf.Abs(toTarget.y)
-                ? new Vector2(Mathf.Sign(toTarget.x), 0f)
-                : new Vector2(0f, Mathf.Sign(toTarget.y));
-
-            animator.SetFloat("Horizontal", facing.x);
-            animator.SetFloat("Vertical", facing.y);
-            if (sprite) sprite.flipX = facing.x < 0f;
+            animator.SetFloat("Horizontal", pendingHarvestFacing.x);
+            animator.SetFloat("Vertical", pendingHarvestFacing.y);
+            if (sprite) sprite.flipX = pendingHarvestFacing.x < 0f;
         }
 
         isHandHarvesting = true;
@@ -130,19 +146,21 @@ public class PlayerPlanting : MonoBehaviour
         animator.SetTrigger(HandHarvestTrigger);
     }
 
-    void CachePendingHarvest(ItemSO item, int count, Vector3 worldPosition)
+    void CachePendingHarvest(ItemSO item, int count, Vector3 worldPosition, Vector2 facingDir)
     {
         if (item && count > 0)
         {
             pendingHarvestItem = item;
             pendingHarvestCount = count;
             pendingHarvestWorldPos = worldPosition;
+            pendingHarvestFacing = facingDir.sqrMagnitude > 0.0001f ? facingDir : Vector2.up;
         }
         else
         {
             pendingHarvestItem = null;
             pendingHarvestCount = 0;
             pendingHarvestWorldPos = transform.position;
+            pendingHarvestFacing = Vector2.up;
         }
     }
 
@@ -150,7 +168,7 @@ public class PlayerPlanting : MonoBehaviour
     {
         if (!heldItemDisplay) return;
         if (!item || count <= 0) return;
-        heldItemDisplay.ShowHandHarvestedItem(item, pendingHarvestWorldPos, handHarvestLiftDuration, handHarvestDisplayDuration);
+        heldItemDisplay.ShowHandHarvestedItem(item, pendingHarvestWorldPos, pendingHarvestFacing, handHarvestLiftDuration, handHarvestDisplayDuration);
     }
 
     public void BeginHandHarvestAnimation()
@@ -165,6 +183,7 @@ public class PlayerPlanting : MonoBehaviour
         pendingHarvestItem = null;
         pendingHarvestCount = 0;
         pendingHarvestWorldPos = transform.position;
+        pendingHarvestFacing = Vector2.up;
     }
 
     void FlushPendingHarvestDisplay()
@@ -174,6 +193,7 @@ public class PlayerPlanting : MonoBehaviour
         pendingHarvestItem = null;
         pendingHarvestCount = 0;
         pendingHarvestWorldPos = transform.position;
+        pendingHarvestFacing = Vector2.up;
     }
 
     bool IsWithinHarvestGrid(Vector2 targetPos)
