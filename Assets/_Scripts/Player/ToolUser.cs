@@ -24,6 +24,7 @@ public class ToolUser : MonoBehaviour
     float nextUseTime;
 
     Vector2 aimDir = Vector2.right;
+    Vector2 requestedFacing = Vector2.zero;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
@@ -77,6 +78,7 @@ public class ToolUser : MonoBehaviour
         {
             Vector2 face = Facing4FromVector(toMouse);
             aimDir = face;
+            requestedFacing = face;
             pc?.ForceFace(face);
         }
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước
@@ -104,7 +106,9 @@ public class ToolUser : MonoBehaviour
         toolLocked = true;
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
-        toolFacing = Facing4FromAnim();           // chốt hướng
+        var lockDir = requestedFacing.sqrMagnitude > 1e-4f ? requestedFacing : aimDir;
+        toolFacing = Facing4FromVector(lockDir);           // chốt hướng
+        requestedFacing = Vector2.zero;
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical",   toolFacing.y);
         anim.SetFloat("Speed",      0f);
