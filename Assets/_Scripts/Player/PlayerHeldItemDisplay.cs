@@ -17,15 +17,24 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     [SerializeField] PlayerStamina stamina;
 
     [Header("Hiển thị")]
+    [Tooltip("Vị trí icon hiển thị so với nhân vật khi cầm vật phẩm.")]
     [SerializeField] Vector2 displayOffset = new Vector2(0f, 1.35f);
+    [Tooltip("Độ ưu tiên sorting order so với sprite nhân vật để icon luôn nằm phía trước.")]
     [SerializeField] int sortingOrderOffset = 10;
+    [Tooltip("Chiều cao chuẩn của icon khi tự co giãn theo kích thước sprite.")]
     [SerializeField] float targetIconHeight = 0.75f;
+    [Tooltip("Tự động tạo SpriteRenderer con nếu chưa có sẵn.")]
     [SerializeField] bool autoCreateRenderer = true;
+    [Tooltip("Lật icon theo hướng quay của nhân vật.")]
     [SerializeField] bool flipWithFacing = false;
     [Header("Thu hoạch bằng tay")]
+    [Tooltip("Vị trí bắt đầu nâng icon khi nhổ cây bằng tay (tọa độ cục bộ).")]
     [SerializeField] Vector2 handHarvestStartOffset = new Vector2(0f, -0.45f);
+    [Tooltip("Quãng đường tối thiểu icon cần đi lên khi nhổ bằng tay.")]
     [SerializeField, Min(0f)] float handHarvestMinLift = 0.4f;
+    [Tooltip("Độ lệch ngang tối đa icon được phép di chuyển về phía người chơi.")]
     [SerializeField, Min(0f)] float handHarvestMaxHorizontal = 0.85f;
+    [Tooltip("Đường cong easing điều khiển chuyển động nâng icon từ đất lên đầu.")]
     [SerializeField] AnimationCurve handHarvestLiftCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Animator Holding Layer")]

@@ -7,18 +7,18 @@ public class PlayerPlanting : MonoBehaviour
     public PlantSystem plantSystem;
     Camera cam;
     PlayerInventory inv;
-    [SerializeField] Animator animator;
-    [SerializeField] SpriteRenderer sprite;
-    [SerializeField] PlayerHeldItemDisplay heldItemDisplay;
+    [SerializeField, Tooltip("Animator điều khiển hoạt ảnh trồng và nhổ bằng tay.")] Animator animator;
+    [SerializeField, Tooltip("SpriteRenderer của nhân vật dùng để xác định hướng quay.")] SpriteRenderer sprite;
+    [SerializeField, Tooltip("Tham chiếu tới PlayerHeldItemDisplay để hiển thị vật phẩm vừa thu hoạch.")] PlayerHeldItemDisplay heldItemDisplay;
     static readonly int HandHarvestTrigger = Animator.StringToHash("HandHarvest");
     bool isHandHarvesting;
     ItemSO pendingHarvestItem;
     int pendingHarvestCount;
     Vector3 pendingHarvestWorldPos;
-    [SerializeField] LayerMask harvestMask = ~0;
-    [SerializeField, Min(0f)] float harvestRange = 1.5f;
-    [SerializeField, Min(0f)] float handHarvestDisplayDuration = 1.2f;
-    [SerializeField, Min(0f)] float handHarvestLiftDuration = 0.45f;
+    [SerializeField, Tooltip("Lớp đối tượng được phép kiểm tra khi tìm cây có thể nhổ bằng tay.")] LayerMask harvestMask = ~0;
+    [SerializeField, Min(0f), Tooltip("Khoảng cách tối đa người chơi có thể nhổ cây bằng tay.")] float harvestRange = 1.5f;
+    [SerializeField, Min(0f), Tooltip("Thời gian icon thu hoạch được giữ trên đầu người chơi.")] float handHarvestDisplayDuration = 1.2f;
+    [SerializeField, Min(0f), Tooltip("Thời gian chuyển động nâng icon từ gốc cây lên vị trí cầm.")] float handHarvestLiftDuration = 0.45f;
 
     void Awake(){
         inv = GetComponent<PlayerInventory>();

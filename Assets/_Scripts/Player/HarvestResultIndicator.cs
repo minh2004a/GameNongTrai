@@ -10,28 +10,28 @@ public class HarvestResultIndicator : MonoBehaviour
     enum StorageState { Hotbar, Bag, Ground }
 
     [Header("References")]
-    [SerializeField] PlayerInventory inventory;
-    [SerializeField] SpriteRenderer playerSprite;
-    [SerializeField] SpriteRenderer iconRenderer;
-    [SerializeField] SpriteRenderer stateRenderer;
+    [SerializeField, Tooltip("Kho đồ của người chơi để lắng nghe sự kiện thêm vật phẩm.")] PlayerInventory inventory;
+    [SerializeField, Tooltip("SpriteRenderer nhân vật dùng để đồng bộ sorting order.")] SpriteRenderer playerSprite;
+    [SerializeField, Tooltip("SpriteRenderer hiển thị icon vật phẩm thu hoạch.")] SpriteRenderer iconRenderer;
+    [SerializeField, Tooltip("SpriteRenderer hiển thị trạng thái (hotbar, túi, rơi).")] SpriteRenderer stateRenderer;
 
     [Header("Sprites")]
-    [SerializeField] Sprite hotbarStateSprite;
-    [SerializeField] Sprite bagStateSprite;
-    [SerializeField] Sprite groundStateSprite;
+    [SerializeField, Tooltip("Icon biểu thị vật phẩm vào hotbar.")] Sprite hotbarStateSprite;
+    [SerializeField, Tooltip("Icon biểu thị vật phẩm vào túi.")] Sprite bagStateSprite;
+    [SerializeField, Tooltip("Icon biểu thị vật phẩm rơi xuống đất.")] Sprite groundStateSprite;
 
     [Header("Hiển thị")]
-    [SerializeField] Vector2 iconOffset = new Vector2(0f, 1.6f);
-    [SerializeField] Vector2 stateOffset = new Vector2(0.45f, 0.35f);
-    [SerializeField, Min(0.1f)] float stateScale = 0.5f;
-    [SerializeField, Min(0f)] float displaySeconds = 2.5f;
-    [SerializeField] int sortingOrderOffset = 25;
-    [SerializeField] bool autoCreateRenderers = true;
+    [SerializeField, Tooltip("Độ lệch icon vật phẩm so với nhân vật.")] Vector2 iconOffset = new Vector2(0f, 1.6f);
+    [SerializeField, Tooltip("Độ lệch icon trạng thái so với icon vật phẩm.")] Vector2 stateOffset = new Vector2(0.45f, 0.35f);
+    [SerializeField, Min(0.1f), Tooltip("Tỉ lệ kích thước icon trạng thái.")] float stateScale = 0.5f;
+    [SerializeField, Min(0f), Tooltip("Thời gian hiển thị icon kết quả thu hoạch.")] float displaySeconds = 2.5f;
+    [SerializeField, Tooltip("Mức tăng sorting order để icon nằm trước nhân vật.")] int sortingOrderOffset = 25;
+    [SerializeField, Tooltip("Tự động tạo các SpriteRenderer cần thiết nếu chưa gán.")] bool autoCreateRenderers = true;
 
     [Header("Màu sắc")]
-    [SerializeField] Color hotbarColor = Color.white;
-    [SerializeField] Color bagColor = new Color(0.85f, 0.95f, 1f, 1f);
-    [SerializeField] Color groundColor = new Color(1f, 0.7f, 0.7f, 1f);
+    [SerializeField, Tooltip("Màu icon khi vật phẩm vào hotbar.")] Color hotbarColor = Color.white;
+    [SerializeField, Tooltip("Màu icon khi vật phẩm vào túi.")] Color bagColor = new Color(0.85f, 0.95f, 1f, 1f);
+    [SerializeField, Tooltip("Màu icon khi vật phẩm rơi xuống đất.")] Color groundColor = new Color(1f, 0.7f, 0.7f, 1f);
 
     float hideAtTime;
     bool visible;
