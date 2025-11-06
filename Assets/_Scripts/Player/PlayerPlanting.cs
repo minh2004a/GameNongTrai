@@ -7,11 +7,21 @@ public class PlayerPlanting : MonoBehaviour
     public PlantSystem plantSystem;
     Camera cam;
     PlayerInventory inv;
+    [SerializeField] Animator animator;
+    [SerializeField] SpriteRenderer sprite;
+    static readonly int HandHarvestTrigger = Animator.StringToHash("HandHarvest");
+    bool isHandHarvesting;
     [SerializeField] LayerMask harvestMask = ~0;
     [SerializeField, Min(0f)] float harvestRange = 1.5f;
 
     void Awake(){
         inv = GetComponent<PlayerInventory>();
+        if (!animator) animator = GetComponentInChildren<Animator>();
+        if (!sprite)
+        {
+            var ctrl = GetComponent<PlayerController>();
+            sprite = ctrl ? ctrl.GetComponentInChildren<SpriteRenderer>() : GetComponentInChildren<SpriteRenderer>();
+        }
         cam = Camera.main;
         if (!plantSystem) plantSystem = FindFirstObjectByType<PlantSystem>();
     }
@@ -43,6 +53,8 @@ public class PlayerPlanting : MonoBehaviour
 
     bool TryHarvestAt(Vector2 worldPos)
     {
+        if (isHandHarvesting) return false;
+
         int mask = harvestMask.value;
         if (mask == 0) mask = Physics2D.AllLayers;
 
@@ -70,7 +82,45 @@ public class PlayerPlanting : MonoBehaviour
         if (!IsWithinHarvestGrid(best.transform.position)) return false;
         if (Vector2.Distance(transform.position, best.transform.position) > harvestRange) return false;
 
-        return best.TryHarvestByHand(inv);
+        if (!best.TryHarvestByHand(inv)) return false;
+
+        TriggerHandHarvestAnimation(best.transform.position);
+        return true;
+    }
+
+    void TriggerHandHarvestAnimation(Vector3 targetPos)
+    {
+        if (!animator)
+        {
+            isHandHarvesting = false;
+            return;
+        }
+
+        Vector2 toTarget = (Vector2)targetPos - (Vector2)transform.position;
+        if (toTarget.sqrMagnitude > 0.0001f)
+        {
+            Vector2 facing = Mathf.Abs(toTarget.x) >= Mathf.Abs(toTarget.y)
+                ? new Vector2(Mathf.Sign(toTarget.x), 0f)
+                : new Vector2(0f, Mathf.Sign(toTarget.y));
+
+            animator.SetFloat("Horizontal", facing.x);
+            animator.SetFloat("Vertical", facing.y);
+            if (sprite) sprite.flipX = facing.x < 0f;
+        }
+
+        isHandHarvesting = true;
+        animator.ResetTrigger(HandHarvestTrigger);
+        animator.SetTrigger(HandHarvestTrigger);
+    }
+
+    public void BeginHandHarvestAnimation()
+    {
+        isHandHarvesting = true;
+    }
+
+    public void EndHandHarvestAnimation()
+    {
+        isHandHarvesting = false;
     }
 
     bool IsWithinHarvestGrid(Vector2 targetPos)
