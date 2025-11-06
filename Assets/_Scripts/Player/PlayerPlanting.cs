@@ -46,7 +46,8 @@ public class PlayerPlanting : MonoBehaviour
         int mask = harvestMask.value;
         if (mask == 0) mask = Physics2D.AllLayers;
 
-        var hits = Physics2D.OverlapBoxAll(transform.position, GetHarvestAreaSize(), 0f, mask);
+        float radius = Mathf.Max(0.01f, GetHarvestGridSize()) * 0.5f;
+        var hits = Physics2D.OverlapCircleAll(worldPos, radius, mask);
         if (hits == null || hits.Length == 0) return false;
 
         PlantGrowth best = null;
@@ -66,17 +67,24 @@ public class PlayerPlanting : MonoBehaviour
         }
 
         if (!best) return false;
+        if (!IsWithinHarvestGrid(best.transform.position)) return false;
         if (Vector2.Distance(transform.position, best.transform.position) > harvestRange) return false;
 
         return best.TryHarvestByHand(inv);
     }
 
-    Vector2 GetHarvestAreaSize()
+    bool IsWithinHarvestGrid(Vector2 targetPos)
     {
+        float grid = Mathf.Max(0.01f, GetHarvestGridSize());
+        Vector2 playerPos = transform.position;
+
+        int px = Mathf.FloorToInt(playerPos.x / grid);
+        int py = Mathf.FloorToInt(playerPos.y / grid);
+        int tx = Mathf.FloorToInt(targetPos.x / grid);
+        int ty = Mathf.FloorToInt(targetPos.y / grid);
+
         const int radiusInCells = 1; // 3x3 ô quanh người chơi
-        float grid = GetHarvestGridSize();
-        float cells = radiusInCells * 2 + 1;
-        return new Vector2(grid * cells, grid * cells);
+        return Mathf.Abs(tx - px) <= radiusInCells && Mathf.Abs(ty - py) <= radiusInCells;
     }
 
     float GetHarvestGridSize()
