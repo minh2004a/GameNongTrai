@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 7700877869166976594}
   - component: {fileID: 9170890197009293846}
   - component: {fileID: 1058324450758781111}
+  - component: {fileID: 5403958653213214321}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -496,6 +497,34 @@ MonoBehaviour:
   runningSpeedThreshold: 2.6
   normalAnimatorSpeedMultiplier: 1
   exhaustedAnimatorSpeedMultiplier: 0.6
+--- !u!114 &5403958653213214321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936923126784610755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2920406afe87441c9d54a7d200bb4d83, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  inventory: {fileID: 0}
+  playerSprite: {fileID: 0}
+  iconRenderer: {fileID: 0}
+  stateRenderer: {fileID: 0}
+  hotbarStateSprite: {fileID: 0}
+  bagStateSprite: {fileID: 0}
+  groundStateSprite: {fileID: 0}
+  iconOffset: {x: 0, y: 1.6}
+  stateOffset: {x: 0.45, y: 0.35}
+  stateScale: 0.5
+  displaySeconds: 2.5
+  sortingOrderOffset: 25
+  autoCreateRenderers: 1
+  hotbarColor: {r: 1, g: 1, b: 1, a: 1}
+  bagColor: {r: 0.85, g: 0.95, b: 1, a: 1}
+  groundColor: {r: 1, g: 0.7, b: 0.7, a: 1}
 --- !u!1 &3900807971405855068
 GameObject:
   m_ObjectHideFlags: 0

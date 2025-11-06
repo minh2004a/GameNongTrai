@@ -102,10 +102,25 @@ public class PlantGrowth : MonoBehaviour
 
         if (item && count > 0)
         {
-            int remaining = inv ? inv.AddItem(item, count) : count;
-            if (remaining > 0)
+            InventoryAddResult delivery;
+            if (inv)
             {
-                SpawnPickup(item, remaining);
+                delivery = inv.AddItemDetailed(item, count);
+            }
+            else
+            {
+                delivery = new InventoryAddResult
+                {
+                    requested = count,
+                    remaining = count,
+                    addedToBag = 0,
+                    addedToHotbar = 0
+                };
+            }
+
+            if (delivery.remaining > 0)
+            {
+                SpawnPickup(item, delivery.remaining);
             }
         }
 

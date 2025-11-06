@@ -15,8 +15,8 @@ public class PickupItem2D : MonoBehaviour
         if (!other.CompareTag("Player")) return;
         var inv = other.GetComponent<PlayerInventory>(); if (!inv) return;
 
-        int left = inv.AddItem(item, count);
-        if (left == 0) Destroy(gameObject);
-        else count = left; // kho còn dư chỗ → giữ lại phần chưa nhét được
+        var result = inv.AddItemDetailed(item, count);
+        if (result.remaining <= 0) Destroy(gameObject);
+        else count = result.remaining; // kho còn dư chỗ → giữ lại phần chưa nhét được
     }
 }
