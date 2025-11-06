@@ -128,14 +128,13 @@ public class ToolUser : MonoBehaviour
         facing = DetermineToolFacing(facing);
         aimDir = facing;
         toolFacing = facing;           // chốt hướng
-        if (pc && facing.sqrMagnitude > 0.0001f)
+        if (pc)
         {
             pc.SetMoveLock(true);
-            pc.ForceFace(facing);
-        }
-        else
-        {
-            pc?.SetMoveLock(true);
+            if (facing.sqrMagnitude > 0.0001f)
+                pc.BeginFacingOverride(facing);
+            else
+                pc.ClearFacingOverride();
         }
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical",   toolFacing.y);
@@ -242,6 +241,7 @@ public class ToolUser : MonoBehaviour
         toolLocked = false;
         if (pc)
         {
+            pc.ClearFacingOverride();
             pc.ForceFace(toolFacing);
             pc.SetMoveLock(false);
             pc.ApplyPendingMove();
@@ -306,7 +306,10 @@ public class ToolUser : MonoBehaviour
         }
         if (pc)
         {
-            pc.ForceFace(pendingWaterDir);
+            if (toolLocked)
+                pc.UpdateFacingOverride(pendingWaterDir);
+            else
+                pc.ForceFace(pendingWaterDir);
         }
     }
 

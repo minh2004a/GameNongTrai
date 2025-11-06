@@ -10,11 +10,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] SpriteRenderer sprite;
     public bool canMove = true;
     [SerializeField] PlayerStamina stamina; 
-    float currentSpeed; // magnitude of velocity
+    float currentSpeed; // magnitude của vận tốc
     Rigidbody2D rb;
     Vector2 moveInput;
     Vector2 lastFacing = Vector2.right;
     Vector2 pendingMoveInput;
+    bool facingOverrideActive;
+    Vector2 facingOverride;
     public bool MoveLocked { get; private set; }
     public Vector2 Facing4 => lastFacing;
     public void SetMoveLock(bool locked)
@@ -48,15 +50,13 @@ public class PlayerController : MonoBehaviour
         float speedWorld = currentSpeed;                 // ví dụ 5 hoặc 2.5 khi kiệt sức
         if (anim) anim.SetFloat("Speed", speedWorld);
 
-        // 3) Chỉ ghi hướng khi không bị lock và có input
-        if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f)
+        if (facingOverrideActive)
         {
-            if (anim)
-            {
-                anim.SetFloat("Horizontal", lastFacing.x);
-                anim.SetFloat("Vertical", lastFacing.y);
-            }
-            if (sprite) sprite.flipX = lastFacing.x < 0f;
+            ApplyFacing(facingOverride);
+        }
+        else if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f)
+        {
+            ApplyFacing(lastFacing);
         }
     }
     void FixedUpdate()
@@ -112,6 +112,10 @@ public class PlayerController : MonoBehaviour
     public void OnMove(InputValue v)
     {
         var input = v.Get<Vector2>();
+        if (!MoveLocked && facingOverrideActive && input.sqrMagnitude > 0.0001f)
+        {
+            facingOverrideActive = false;
+        }
         if (!canMove || MoveLocked)
         {          // giữ hướng, không áp vào rb
             pendingMoveInput = input;
@@ -130,13 +134,52 @@ public class PlayerController : MonoBehaviour
             : new Vector2(0, Mathf.Sign(dir.y));
 
         lastFacing = f;
-        if (anim)
+        if (!facingOverrideActive)
         {
-            anim.SetFloat("Horizontal", f.x);
-            anim.SetFloat("Vertical", f.y);
+            ApplyFacing(f);
         }
-        if (sprite) sprite.flipX = f.x < 0f;
-        Debug.Log($"ForceFace -> {f}");
+    }
+
+    public void BeginFacingOverride(Vector2 dir)
+    {
+        if (dir.sqrMagnitude < 1e-4f)
+        {
+            facingOverrideActive = false;
+            return;
+        }
+
+        Vector2 snapped = Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)
+            ? new Vector2(Mathf.Sign(dir.x), 0)
+            : new Vector2(0, Mathf.Sign(dir.y));
+
+        facingOverrideActive = true;
+        facingOverride = snapped;
+        lastFacing = snapped;
+        ApplyFacing(snapped);
+    }
+
+    public void UpdateFacingOverride(Vector2 dir)
+    {
+        if (!facingOverrideActive)
+        {
+            BeginFacingOverride(dir);
+            return;
+        }
+
+        Vector2 snapped = Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)
+            ? new Vector2(Mathf.Sign(dir.x), 0)
+            : new Vector2(0, Mathf.Sign(dir.y));
+
+        if (snapped == facingOverride) return;
+
+        facingOverride = snapped;
+        lastFacing = snapped;
+        ApplyFacing(snapped);
+    }
+
+    public void ClearFacingOverride()
+    {
+        facingOverrideActive = false;
     }
 
 }
