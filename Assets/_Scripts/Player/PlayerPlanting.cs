@@ -5,17 +5,13 @@ using UnityEngine;
 public class PlayerPlanting : MonoBehaviour
 {
     public PlantSystem plantSystem;
-    [SerializeField] PlayerController controller;
     Camera cam;
     PlayerInventory inv;
     [SerializeField] LayerMask harvestMask = ~0;
-    [SerializeField, Min(0f)] float harvestClickRadius = 0.25f;
     [SerializeField, Min(0f)] float harvestRange = 1.5f;
-    [SerializeField, Range(-1f, 1f)] float harvestFacingDotThreshold = 0f;
 
     void Awake(){
         inv = GetComponent<PlayerInventory>();
-        if (!controller) controller = GetComponent<PlayerController>();
         cam = Camera.main;
         if (!plantSystem) plantSystem = FindFirstObjectByType<PlantSystem>();
     }
@@ -47,17 +43,12 @@ public class PlayerPlanting : MonoBehaviour
 
     bool TryHarvestAt(Vector2 worldPos)
     {
-        if (inv && inv.CurrentItem)
-            return false; // phải tay không mới được thu hoạch
-
         int mask = harvestMask.value;
         if (mask == 0) mask = Physics2D.AllLayers;
 
-        float radius = Mathf.Max(0.01f, harvestClickRadius);
-        var hits = Physics2D.OverlapCircleAll(worldPos, radius, mask);
+        var hits = Physics2D.OverlapBoxAll(transform.position, GetHarvestAreaSize(), 0f, mask);
         if (hits == null || hits.Length == 0) return false;
 
-        var facing = GetFacingDirection();
         PlantGrowth best = null;
         float bestDist = float.MaxValue;
 
@@ -66,7 +57,6 @@ public class PlayerPlanting : MonoBehaviour
             if (!h) continue;
             var plant = h.GetComponentInParent<PlantGrowth>();
             if (!plant || !plant.CanHarvestByHand) continue;
-            if (!IsInFrontOfPlayer(plant, facing)) continue;
             float distToCursor = ((Vector2)plant.transform.position - worldPos).sqrMagnitude;
             if (distToCursor < bestDist)
             {
@@ -81,26 +71,22 @@ public class PlayerPlanting : MonoBehaviour
         return best.TryHarvestByHand(inv);
     }
 
-    Vector2 GetFacingDirection()
+    Vector2 GetHarvestAreaSize()
     {
-        if (controller)
+        const int radiusInCells = 1; // 3x3 ô quanh người chơi
+        float grid = GetHarvestGridSize();
+        float cells = radiusInCells * 2 + 1;
+        return new Vector2(grid * cells, grid * cells);
+    }
+
+    float GetHarvestGridSize()
+    {
+        if (plantSystem && plantSystem.soilManager)
         {
-            var dir = controller.Facing4;
-            if (dir.sqrMagnitude > 0.0001f)
-                return dir;
+            return Mathf.Max(0.01f, plantSystem.soilManager.GridSize);
         }
 
-        // mặc định nhìn sang phải nếu không lấy được hướng
-        return Vector2.right;
+        return 1f;
     }
 
-    bool IsInFrontOfPlayer(PlantGrowth plant, Vector2 facing)
-    {
-        var toPlant = ((Vector2)plant.transform.position - (Vector2)transform.position);
-        if (toPlant.sqrMagnitude <= 0.0001f)
-            return true; // nằm cùng vị trí, cho phép
-
-        toPlant.Normalize();
-        return Vector2.Dot(facing, toPlant) >= harvestFacingDotThreshold;
-    }
 }
