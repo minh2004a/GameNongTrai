@@ -25,6 +25,7 @@ public class ToolUser : MonoBehaviour
 
     Vector2 aimDir = Vector2.right;
     Vector2 pendingWaterDir;
+    bool hasPendingWaterDir;
     bool hasPendingWaterTarget;
     Vector3 pendingWaterTargetPosition;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
@@ -75,6 +76,7 @@ public class ToolUser : MonoBehaviour
         if (!v.isPressed) return;
         if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
         pendingWaterDir = Vector2.zero;
+        hasPendingWaterDir = false;
         hasPendingWaterTarget = false;
         pendingWaterTargetPosition = Vector3.zero;
 
@@ -108,6 +110,7 @@ public class ToolUser : MonoBehaviour
         if (it.toolType != ToolType.WateringCan)
         {
             pendingWaterDir = Vector2.zero;
+            hasPendingWaterDir = false;
             hasPendingWaterTarget = false;
             pendingWaterTargetPosition = Vector3.zero;
         }
@@ -122,19 +125,21 @@ public class ToolUser : MonoBehaviour
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
         Vector2 facing = Facing4FromAnim();
-        if (usingItem.toolType == ToolType.WateringCan && pendingWaterDir.sqrMagnitude > 0.0001f)
-        {
-            facing = pendingWaterDir;
-        }
+        facing = DetermineToolFacing(facing);
+        aimDir = facing;
+        toolFacing = facing;           // chốt hướng
         if (pc && facing.sqrMagnitude > 0.0001f)
         {
+            pc.SetMoveLock(true);
             pc.ForceFace(facing);
         }
-        toolFacing = facing;           // chốt hướng
+        else
+        {
+            pc?.SetMoveLock(true);
+        }
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical",   toolFacing.y);
         anim.SetFloat("Speed",      0f);
-        pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
         if (anim)
         {
             switch (usingItem.toolType)
@@ -239,10 +244,13 @@ public class ToolUser : MonoBehaviour
         {
             pc.ForceFace(toolFacing);
             pc.SetMoveLock(false);
+            pc.ApplyPendingMove();
         }
         pendingWaterDir = Vector2.zero;
+        hasPendingWaterDir = false;
         hasPendingWaterTarget = false;
         pendingWaterTargetPosition = Vector3.zero;
+        aimDir = toolFacing;
     }
     Vector2 Facing4FromAnim()
     {
@@ -261,6 +269,7 @@ public class ToolUser : MonoBehaviour
     {
         Vector2 baseFacing = toMouse.sqrMagnitude > 0.0001f ? Facing4FromVector(toMouse) : Facing4FromVector(aimDir);
         Vector2 facing = baseFacing;
+        hasPendingWaterDir = false;
         hasPendingWaterTarget = false;
         pendingWaterTargetPosition = Vector3.zero;
 
@@ -286,7 +295,8 @@ public class ToolUser : MonoBehaviour
     void ApplyPendingWaterFacing(Vector2 desiredFacing)
     {
         pendingWaterDir = desiredFacing;
-        if (pendingWaterDir.sqrMagnitude <= 0.0001f) return;
+        hasPendingWaterDir = pendingWaterDir.sqrMagnitude > 0.0001f;
+        if (!hasPendingWaterDir) return;
 
         aimDir = pendingWaterDir;
         if (anim)
@@ -298,6 +308,24 @@ public class ToolUser : MonoBehaviour
         {
             pc.ForceFace(pendingWaterDir);
         }
+    }
+
+    Vector2 DetermineToolFacing(Vector2 currentFallback)
+    {
+        if (hasPendingWaterDir && usingItem && usingItem.toolType == ToolType.WateringCan)
+            return pendingWaterDir;
+
+        if (pc)
+        {
+            var controllerFacing = pc.Facing4;
+            if (controllerFacing.sqrMagnitude > 0.0001f)
+                return controllerFacing;
+        }
+
+        if (currentFallback.sqrMagnitude > 0.0001f)
+            return Facing4FromVector(currentFallback);
+
+        return Facing4FromVector(aimDir);
     }
 
     static Vector2 Facing4FromVector(Vector2 vec)
