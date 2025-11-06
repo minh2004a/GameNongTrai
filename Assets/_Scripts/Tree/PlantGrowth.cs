@@ -93,8 +93,10 @@ public class PlantGrowth : MonoBehaviour
         PersistState();
     }
 
-    public bool TryHarvestByHand(PlayerInventory inv)
+    public bool TryHarvestByHand(PlayerInventory inv, out ItemSO harvestedItem, out int harvestedCount)
     {
+        harvestedItem = null;
+        harvestedCount = 0;
         if (!CanHarvestByHand) return false;
 
         var item = data.harvestItem;
@@ -102,6 +104,7 @@ public class PlantGrowth : MonoBehaviour
 
         if (item && count > 0)
         {
+            harvestedItem = item;
             InventoryAddResult delivery;
             if (inv)
             {
@@ -118,6 +121,7 @@ public class PlantGrowth : MonoBehaviour
                 };
             }
 
+            harvestedCount = Mathf.Max(0, count - Mathf.Max(0, delivery.remaining));
             if (delivery.remaining > 0)
             {
                 SpawnPickup(item, delivery.remaining);

@@ -12,7 +12,7 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     [SerializeField] PlayerInventory inventory;
     [SerializeField] Animator animator;
     [SerializeField] SpriteRenderer playerSprite;
-    [SerializeField, FormerlySerializedAs("displaySprite")] SpriteRenderer displayRenderer;
+    [SerializeField, FormerlySerializedAs("displaySprite"), FormerlySerializedAs("displayRenderer")] SpriteRenderer iconRenderer;
     [SerializeField, FormerlySerializedAs("body")] Rigidbody2D playerBody;
     [SerializeField] PlayerStamina stamina;
 
@@ -36,6 +36,9 @@ public class PlayerHeldItemDisplay : MonoBehaviour
 
     ItemSO currentItem;
     bool isVisible;
+    bool hasOverride;
+    ItemSO overrideItem;
+    float overrideHideAt;
 
     int holdLayerIndex = -1;
     int holdingBoolHash;
@@ -66,10 +69,10 @@ public class PlayerHeldItemDisplay : MonoBehaviour
 
         baseAnimatorSpeed = animator ? animator.speed : 1f;
 
-        EnsureDisplayRenderer();
+        EnsureIconRenderer();
         CacheAnimatorParameters();
         ApplySorting();
-        HideDisplay();
+        HideIcon();
     }
 
     void OnEnable()
@@ -90,23 +93,28 @@ public class PlayerHeldItemDisplay : MonoBehaviour
             inventory.SelectedChanged -= OnSelectedChanged;
             inventory.HotbarChanged -= OnHotbarChanged;
         }
+        hasOverride = false;
+        overrideItem = null;
+        overrideHideAt = 0f;
+        HideIcon();
         SetHoldLayerWeight(0f);
         RestoreAnimatorSpeed();
     }
 
     void Update()
     {
-        if (displayRenderer && isVisible)
+        if (iconRenderer && isVisible)
         {
-            displayRenderer.transform.localPosition = displayOffset;
+            iconRenderer.transform.localPosition = displayOffset;
             if (flipWithFacing && playerSprite)
             {
-                displayRenderer.flipX = playerSprite.flipX;
+                iconRenderer.flipX = playerSprite.flipX;
             }
             ApplySorting();
         }
 
         UpdateAnimatorState();
+        UpdateTemporaryOverride();
     }
 
     void OnSelectedChanged(int _)
@@ -122,16 +130,17 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     void RefreshDisplay()
     {
         ItemSO nextItem = inventory ? inventory.CurrentItem : null;
-        if (nextItem == currentItem)
+        currentItem = ShouldShow(nextItem) ? nextItem : null;
+
+        if (hasOverride)
         {
-            if (!ShouldShow(nextItem)) HideDisplay();
+            ShowItem(overrideItem);
             return;
         }
 
-        currentItem = nextItem;
-        if (!ShouldShow(currentItem))
+        if (!currentItem)
         {
-            HideDisplay();
+            HideIcon();
             return;
         }
 
@@ -148,25 +157,25 @@ public class PlayerHeldItemDisplay : MonoBehaviour
 
     void ShowItem(ItemSO item)
     {
-        EnsureDisplayRenderer();
-        if (!displayRenderer) return;
+        EnsureIconRenderer();
+        if (!iconRenderer) return;
 
-        displayRenderer.sprite = item.icon;
-        displayRenderer.enabled = displayRenderer.sprite != null;
-        displayRenderer.transform.localPosition = displayOffset;
+        iconRenderer.sprite = item.icon;
+        iconRenderer.enabled = iconRenderer.sprite != null;
+        iconRenderer.transform.localPosition = displayOffset;
         ScaleIcon();
 
-        isVisible = displayRenderer.enabled;
+        isVisible = iconRenderer.enabled;
         if (isVisible) ApplySorting();
         UpdateAnimatorState();
     }
 
-    void HideDisplay()
+    void HideIcon()
     {
-        if (displayRenderer)
+        if (iconRenderer)
         {
-            displayRenderer.sprite = null;
-            displayRenderer.enabled = false;
+            iconRenderer.sprite = null;
+            iconRenderer.enabled = false;
         }
         isVisible = false;
         UpdateAnimatorState();
@@ -174,36 +183,36 @@ public class PlayerHeldItemDisplay : MonoBehaviour
 
     void ScaleIcon()
     {
-        if (!displayRenderer || !displayRenderer.sprite) return;
+        if (!iconRenderer || !iconRenderer.sprite) return;
 
-        float worldHeight = displayRenderer.sprite.rect.height / displayRenderer.sprite.pixelsPerUnit;
+        float worldHeight = iconRenderer.sprite.rect.height / iconRenderer.sprite.pixelsPerUnit;
         float scale = 1f;
         if (worldHeight > 0.001f)
         {
             scale = Mathf.Max(0.01f, targetIconHeight / worldHeight);
         }
-        displayRenderer.transform.localScale = Vector3.one * scale;
+        iconRenderer.transform.localScale = Vector3.one * scale;
     }
 
-    void EnsureDisplayRenderer()
+    void EnsureIconRenderer()
     {
-        if (displayRenderer) return;
+        if (iconRenderer) return;
         if (!autoCreateRenderer) return;
 
-        var go = new GameObject("HeldItemDisplay");
+        var go = new GameObject("PlayerHeldItemDisplayIcon");
         go.transform.SetParent(transform);
         go.transform.localPosition = displayOffset;
-        displayRenderer = go.AddComponent<SpriteRenderer>();
-        displayRenderer.enabled = false;
+        iconRenderer = go.AddComponent<SpriteRenderer>();
+        iconRenderer.enabled = false;
     }
 
     void ApplySorting()
     {
-        if (!displayRenderer) return;
+        if (!iconRenderer) return;
         if (playerSprite)
         {
-            displayRenderer.sortingLayerID = playerSprite.sortingLayerID;
-            displayRenderer.sortingOrder = playerSprite.sortingOrder + sortingOrderOffset;
+            iconRenderer.sortingLayerID = playerSprite.sortingLayerID;
+            iconRenderer.sortingOrder = playerSprite.sortingOrder + sortingOrderOffset;
         }
     }
 
@@ -254,6 +263,28 @@ public class PlayerHeldItemDisplay : MonoBehaviour
 
         SetHoldLayerWeight(isVisible ? holdLayerWeight : 0f);
         ApplyAnimatorSpeed(exhausted && isVisible);
+    }
+
+    void UpdateTemporaryOverride()
+    {
+        if (!hasOverride) return;
+        if (Time.time < overrideHideAt) return;
+
+        hasOverride = false;
+        overrideItem = null;
+        overrideHideAt = 0f;
+        RefreshDisplay();
+    }
+
+    public void ShowTemporaryItem(ItemSO item, float seconds)
+    {
+        if (!item || !item.icon) return;
+        if (seconds <= 0f) seconds = 0.01f;
+
+        overrideItem = item;
+        overrideHideAt = Time.time + seconds;
+        hasOverride = true;
+        ShowItem(item);
     }
 
     void SetHoldLayerWeight(float weight)

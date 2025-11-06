@@ -46,8 +46,8 @@ public class HarvestResultIndicator : MonoBehaviour
     {
         if (!inventory) inventory = GetComponent<PlayerInventory>();
         if (!playerSprite) playerSprite = GetComponentInChildren<SpriteRenderer>();
-        EnsureRenderers();
-        HideImmediate();
+        EnsureIndicatorRenderers();
+        HideIndicator();
     }
 
     void OnEnable()
@@ -59,7 +59,7 @@ public class HarvestResultIndicator : MonoBehaviour
     void OnDisable()
     {
         if (inventory) inventory.ItemAdded -= OnItemAdded;
-        HideImmediate();
+        HideIndicator();
     }
 
     void LateUpdate()
@@ -67,21 +67,21 @@ public class HarvestResultIndicator : MonoBehaviour
         if (!visible) return;
         UpdatePositions();
         ApplySorting();
-        if (Time.time >= hideAtTime) HideImmediate();
+        if (Time.time >= hideAtTime) HideIndicator();
     }
 
-    void EnsureRenderers()
+    void EnsureIndicatorRenderers()
     {
         if (!iconRenderer && autoCreateRenderers)
         {
-            var go = new GameObject("HarvestResultIcon", typeof(SpriteRenderer));
+            var go = new GameObject("HarvestResultIndicatorIcon", typeof(SpriteRenderer));
             go.transform.SetParent(transform);
             go.transform.localScale = Vector3.one;
             iconRenderer = go.GetComponent<SpriteRenderer>();
         }
         if (!stateRenderer && autoCreateRenderers)
         {
-            var go = new GameObject("HarvestStateIcon", typeof(SpriteRenderer));
+            var go = new GameObject("HarvestResultIndicatorState", typeof(SpriteRenderer));
             go.transform.SetParent(transform);
             go.transform.localScale = Vector3.one;
             stateRenderer = go.GetComponent<SpriteRenderer>();
@@ -96,7 +96,7 @@ public class HarvestResultIndicator : MonoBehaviour
         StorageState? state = ResolveState(result);
         if (!state.HasValue)
         {
-            HideImmediate();
+            HideIndicator();
             return;
         }
 
@@ -114,7 +114,7 @@ public class HarvestResultIndicator : MonoBehaviour
 
     void Show(ItemSO item, StorageState state)
     {
-        EnsureRenderers();
+        EnsureIndicatorRenderers();
         if (!iconRenderer) return;
 
         iconRenderer.enabled = true;
@@ -170,7 +170,7 @@ public class HarvestResultIndicator : MonoBehaviour
         }
     }
 
-    void HideImmediate()
+    void HideIndicator()
     {
         visible = false;
         if (iconRenderer) iconRenderer.enabled = false;
