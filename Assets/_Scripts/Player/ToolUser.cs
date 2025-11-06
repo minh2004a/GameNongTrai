@@ -100,17 +100,17 @@ public class ToolUser : MonoBehaviour
         // nếu Exhausted thì vẫn tiếp tục chặt, anim/cooldown đã chậm theo ActionTimeMult()
         usingItem = it;
         nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
-        if (toMouse.HasValue)
+
+        Vector2 facing = CurrentFacing4();
+        if (toMouse.HasValue && TryGetFacingFromClick(toMouse.Value, it, out var clickFacing))
         {
-            TryApplyFacingFromClick(toMouse.Value, it);
+            facing = clickFacing;
         }
+
         toolLocked = true;
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
-        toolFacing = Facing4FromAnim();           // chốt hướng
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical",   toolFacing.y);
-        anim.SetFloat("Speed",      0f);
+        ApplyFacingLock(facing);
         pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
         if (anim)
         {
@@ -201,11 +201,21 @@ public class ToolUser : MonoBehaviour
     }
 
     public void Tool_End()
-    {   
+    {
         if (anim) anim.speed = 1f;
         usingItem = null;
         if (!toolLocked) return;
         toolLocked = false;
+        if (pc)
+        {
+            pc.ForceFace(toolFacing);
+            pc.ApplyPendingMove();
+        }
+        else
+        {
+            ApplyAnimatorFacing(toolFacing);
+        }
+        aimDir = toolFacing;
         pc?.SetMoveLock(false);
     }
     Vector2 Facing4FromAnim()
@@ -219,6 +229,31 @@ public class ToolUser : MonoBehaviour
         if (Mathf.Abs(d.x) >= Mathf.Abs(d.y)) return d.x >= 0 ? Vector2.right : Vector2.left;
         return d.y >= 0 ? Vector2.up : Vector2.down;
     }
+
+    Vector2 CurrentFacing4()
+    {
+        if (pc) return pc.Facing4;
+        return Facing4FromAnim();
+    }
+
+    void ApplyAnimatorFacing(Vector2 facing)
+    {
+        if (!anim) return;
+        anim.SetFloat("Horizontal", facing.x);
+        anim.SetFloat("Vertical", facing.y);
+        anim.SetFloat("Speed", 0f);
+    }
+
+    void ApplyFacingLock(Vector2 facing)
+    {
+        toolFacing = facing;
+        aimDir = facing;
+        if (pc)
+        {
+            pc.ForceFace(facing);
+        }
+        ApplyAnimatorFacing(facing);
+    }
     public void ApplyToolFacingLockFrame()
     {
         if (!anim) return;
@@ -227,8 +262,9 @@ public class ToolUser : MonoBehaviour
         anim.SetFloat("Speed", 0f);
     }
 
-    bool TryApplyFacingFromClick(Vector2 toMouse, ItemSO item)
+    bool TryGetFacingFromClick(Vector2 toMouse, ItemSO item, out Vector2 facing)
     {
+        facing = Vector2.zero;
         if (toMouse.sqrMagnitude <= 1e-6f) return false;
         float baseForward = item.hitboxForward >= 0f ? item.hitboxForward : originDist;
         float effectiveRadius = Mathf.Max(0.01f, item.range) * Mathf.Max(0.01f, item.hitboxScale);
@@ -236,18 +272,7 @@ public class ToolUser : MonoBehaviour
         float maxDist = Mathf.Max(nearClickFacingDistance, baseForward + effectiveRadius + yOffset);
         if (toMouse.sqrMagnitude > maxDist * maxDist) return false;
 
-        Vector2 facing = Facing4FromDir(toMouse);
-        aimDir = facing;
-        if (pc)
-        {
-            pc.ForceFace(toMouse);
-        }
-        else if (anim)
-        {
-            anim.SetFloat("Horizontal", facing.x);
-            anim.SetFloat("Vertical", facing.y);
-            anim.SetFloat("Speed", 0f);
-        }
+        facing = Facing4FromDir(toMouse);
         return true;
     }
 
