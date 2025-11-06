@@ -26,6 +26,12 @@ public class ToolUser : MonoBehaviour
     IToolActionHandler currentHandler;
 
     Vector2 aimDir = Vector2.right;
+    bool hasPendingCursor;
+    Vector2 pendingCursorWorld;
+    bool hasUseFacingOverride;
+    Vector2 useFacingOverride;
+    bool hasUseHitCenterOverride;
+    Vector3 useHitCenterOverride;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
@@ -74,12 +80,21 @@ public class ToolUser : MonoBehaviour
     {
         if (!v.isPressed) return;
         if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
-        Vector2 mouseW = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        Vector2 toMouse = mouseW - (Vector2)transform.position;
+        var cam = Camera.main;
+        var mouse = Mouse.current;
+        if (cam && mouse != null)
+        {
+            pendingCursorWorld = cam.ScreenToWorldPoint(mouse.position.ReadValue());
+            hasPendingCursor = true;
+        }
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước
     }
 
     public void TryUseCurrent(){
+        Vector2 cursorWorld = pendingCursorWorld;
+        bool hadCursor = hasPendingCursor;
+        hasPendingCursor = false;
+        ClearUseOverrides();
         var it = inv?.CurrentItem;
         if (!it || it.category != ItemCategory.Tool) return;
         if (!toolHandlers.TryGetValue(it.toolType, out var handler)) return;
@@ -91,11 +106,15 @@ public class ToolUser : MonoBehaviour
         // nếu Exhausted thì vẫn tiếp tục chặt, anim/cooldown đã chậm theo ActionTimeMult()
         usingItem = it;
         currentHandler = handler;
+        if (it.toolType == ToolType.WateringCan)
+        {
+            ConfigureWateringOverrides(it, hadCursor, cursorWorld);
+        }
         nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
         toolLocked = true;
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
-        toolFacing = Facing4FromAnim();           // chốt hướng
+        toolFacing = hasUseFacingOverride ? useFacingOverride : Facing4FromAnim();           // chốt hướng
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical",   toolFacing.y);
         anim.SetFloat("Speed",      0f);
@@ -122,6 +141,7 @@ public class ToolUser : MonoBehaviour
         if (!toolLocked) return;
         toolLocked = false;
         pc?.SetMoveLock(false);
+        ClearUseOverrides();
         handler?.OnEndUse(this, finishedItem);
     }
     Vector2 Facing4FromAnim()
@@ -173,9 +193,18 @@ public class ToolUser : MonoBehaviour
     public ToolHitContext BuildHitContext(ItemSO item)
     {
         Vector2 dir = toolLocked ? toolFacing : aimDir;
+        if (hasUseFacingOverride) dir = useFacingOverride;
         float fwd = (item.hitboxForward >= 0f) ? item.hitboxForward : originDist;
-        Vector3 center = (Vector2)transform.position + dir * fwd;
-        center += new Vector3(0f, item.hitboxYOffset, 0f);
+        Vector3 center;
+        if (hasUseHitCenterOverride)
+        {
+            center = useHitCenterOverride;
+        }
+        else
+        {
+            center = (Vector2)transform.position + dir * fwd;
+            center += new Vector3(0f, item.hitboxYOffset, 0f);
+        }
         float radius = Mathf.Max(0.01f, item.range) * Mathf.Max(0.01f, item.hitboxScale);
         var hits = Physics2D.OverlapCircleAll(center, radius, hitMask);
         return new ToolHitContext(dir, center, radius, hits);
@@ -201,6 +230,95 @@ public class ToolUser : MonoBehaviour
     }
 
     public Animator ToolAnimator => anim;
+
+    void ClearUseOverrides()
+    {
+        hasUseFacingOverride = false;
+        hasUseHitCenterOverride = false;
+    }
+
+    void ConfigureWateringOverrides(ItemSO item, bool hasCursor, Vector2 cursorWorld)
+    {
+        var soil = EnsureSoilManager();
+        Vector2 fallbackFacing = DetermineAimCardinal();
+        bool hasTargetCell = false;
+        Vector2Int targetCell = default;
+        Vector2 facing = fallbackFacing;
+
+        if (soil && hasCursor)
+        {
+            Vector2Int playerCell = soil.WorldToCell(transform.position);
+            Vector2Int clickCell = soil.WorldToCell(cursorWorld);
+            Vector2Int delta = clickCell - playerCell;
+            if (Mathf.Abs(delta.x) <= 1 && Mathf.Abs(delta.y) <= 1)
+            {
+                targetCell = clickCell;
+                hasTargetCell = true;
+                facing = DetermineFacingFromDelta(delta, fallbackFacing);
+            }
+        }
+
+        if (!hasTargetCell)
+        {
+            facing = fallbackFacing;
+            if (soil)
+            {
+                Vector2Int playerCell = soil.WorldToCell(transform.position);
+                Vector2Int offset = CardinalOffsetFromFacing(facing);
+                targetCell = playerCell + offset;
+                hasTargetCell = true;
+            }
+            else
+            {
+                Vector2 baseCenter = (Vector2)transform.position + facing * ((item.hitboxForward >= 0f) ? item.hitboxForward : originDist);
+                useHitCenterOverride = new Vector3(baseCenter.x, baseCenter.y + item.hitboxYOffset, 0f);
+                hasUseHitCenterOverride = true;
+                useFacingOverride = facing;
+                hasUseFacingOverride = true;
+                return;
+            }
+        }
+
+        if (hasTargetCell && soil)
+        {
+            Vector2 cellCenter2D = soil.CellToWorld(targetCell);
+            useHitCenterOverride = new Vector3(cellCenter2D.x, cellCenter2D.y + item.hitboxYOffset, 0f);
+            hasUseHitCenterOverride = true;
+            useFacingOverride = facing;
+            hasUseFacingOverride = true;
+        }
+    }
+
+    Vector2 DetermineAimCardinal()
+    {
+        Vector2 src = aimDir;
+        if (src.sqrMagnitude <= 0.0001f)
+        {
+            src = toolFacing.sqrMagnitude > 0.0001f ? toolFacing : Vector2.down;
+        }
+        if (Mathf.Abs(src.x) >= Mathf.Abs(src.y))
+        {
+            return src.x >= 0f ? Vector2.right : Vector2.left;
+        }
+        return src.y >= 0f ? Vector2.up : Vector2.down;
+    }
+
+    static Vector2 DetermineFacingFromDelta(Vector2Int delta, Vector2 fallback)
+    {
+        if (delta.y > 0) return Vector2.up;
+        if (delta.y < 0) return Vector2.down;
+        if (delta.x > 0) return Vector2.right;
+        if (delta.x < 0) return Vector2.left;
+        return fallback;
+    }
+
+    static Vector2Int CardinalOffsetFromFacing(Vector2 facing)
+    {
+        if (Vector2.Dot(facing, Vector2.right) > 0.5f) return Vector2Int.right;
+        if (Vector2.Dot(facing, Vector2.left) > 0.5f) return Vector2Int.left;
+        if (Vector2.Dot(facing, Vector2.up) > 0.5f) return Vector2Int.up;
+        return Vector2Int.down;
+    }
 
     public readonly struct ToolHitContext
     {
