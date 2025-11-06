@@ -11,6 +11,7 @@ public class PlantGrowth : MonoBehaviour
     int daysInStage;
     int targetDaysForStage;     // dùng khi RandomRange
     GameObject visual;
+    [SerializeField] PickupItem2D pickupPrefab;
     TimeManager time;
     string plantId;
     bool removeFromSave;
@@ -19,6 +20,7 @@ public class PlantGrowth : MonoBehaviour
     static readonly HashSet<SeedSO> warnedMissingId = new();
 
     public bool IsMature => IsDataValid() && stage >= data.stagePrefabs.Length - 1;
+    public bool CanHarvestByHand => IsDataValid() && data.harvestMethod == HarvestMethod.Hand && IsMature;
     bool RequiresWatering => data && data.requiresWatering;
 
     int CurrentDay
@@ -89,6 +91,41 @@ public class PlantGrowth : MonoBehaviour
         wasWateredToday = true;
         lastWateredDay = today;
         PersistState();
+    }
+
+    public bool TryHarvestByHand(PlayerInventory inv)
+    {
+        if (!CanHarvestByHand) return false;
+
+        var item = data.harvestItem;
+        int count = item ? Mathf.Max(0, data.harvestItemCount) : 0;
+
+        if (item && count > 0)
+        {
+            InventoryAddResult delivery;
+            if (inv)
+            {
+                delivery = inv.AddItemDetailed(item, count);
+            }
+            else
+            {
+                delivery = new InventoryAddResult
+                {
+                    requested = count,
+                    remaining = count,
+                    addedToBag = 0,
+                    addedToHotbar = 0
+                };
+            }
+
+            if (delivery.remaining > 0)
+            {
+                SpawnPickup(item, delivery.remaining);
+            }
+        }
+
+        HandlePostHarvest();
+        return true;
     }
 
     bool IsDataValid()
@@ -222,6 +259,37 @@ public class PlantGrowth : MonoBehaviour
         if (visual) Destroy(visual);
         var prefab = data.stagePrefabs[Mathf.Clamp(stage, 0, data.stagePrefabs.Length - 1)];
         if (prefab) visual = Instantiate(prefab, transform);
+    }
+
+    void HandlePostHarvest()
+    {
+        if (data.destroyOnHarvest)
+        {
+            RemoveFromSave();
+            Destroy(gameObject);
+            return;
+        }
+
+        stage = 0;
+        daysInStage = 0;
+        if (data.growthMode == GrowthMode.RandomRange) PickTargetDays();
+        wasWateredToday = false;
+        int today = Mathf.Max(0, CurrentDay);
+        lastWateredDay = RequiresWatering ? Mathf.Max(0, today - 1) : today;
+        SpawnStage();
+        PersistState();
+    }
+
+    void SpawnPickup(ItemSO item, int count)
+    {
+        if (!item || count <= 0) return;
+        if (!pickupPrefab)
+        {
+            Debug.LogWarning("PlantGrowth: Thiếu pickupPrefab, không thể spawn vật phẩm thu hoạch.");
+            return;
+        }
+        var pickup = Instantiate(pickupPrefab, transform.position, Quaternion.identity);
+        pickup.Set(item, count);
     }
 
     string SceneName => gameObject.scene.IsValid() ? gameObject.scene.name : null;

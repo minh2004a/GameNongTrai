@@ -44,3 +44,8 @@ MonoBehaviour:
   gridSize: 1
   requiresTilledSoil: 1
   requiresWatering: 1
+  harvestMethod: 1
+  requiredTool: 0
+  harvestItem: {fileID: 11400000, guid: cd3b2d2b89333b240b261e664f7916b4, type: 2}
+  harvestItemCount: 1
+  destroyOnHarvest: 1

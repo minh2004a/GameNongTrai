@@ -13,6 +13,7 @@ public class PlayerInventory : MonoBehaviour
 
     public event Action<int> SelectedChanged;   // báo UI khi đổi ô
     public event Action HotbarChanged;          // báo UI khi nội dung ô đổi
+    public event Action<ItemSO, InventoryAddResult> ItemAdded;
 
     public ItemSO CurrentItem =>
         (selected >= 0 && selected < hotbar.Length) ? hotbar[selected].item : null;
@@ -23,9 +24,19 @@ public class PlayerInventory : MonoBehaviour
         selected = i;
         SelectedChanged?.Invoke(i);
     }
+    public InventoryAddResult AddItemDetailed(ItemSO item, int count)
+    {
+        var result = InventoryUtil.AddAutoDetailed(this, item, count);
+        if (item && (result.addedToHotbar > 0 || result.addedToBag > 0 || result.remaining > 0))
+        {
+            ItemAdded?.Invoke(item, result);
+        }
+        return result;
+    }
+
     public int AddItem(ItemSO item, int count)
     {
-        return InventoryUtil.AddAuto(this, item, count); // 0 = ok, >0 = còn dư
+        return AddItemDetailed(item, count).remaining; // 0 = ok, >0 = còn dư
     }
     public void CycleSlot(int d)
     {
