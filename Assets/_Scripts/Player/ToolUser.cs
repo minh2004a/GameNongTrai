@@ -16,12 +16,14 @@ public class ToolUser : MonoBehaviour
     [SerializeField] float exhaustedActionTimeMult = 1.6f;
     [SerializeField, Range(0.1f,1f)] float exhaustedAnimSpeedMult = 0.7f;
     [SerializeField] SoilManager soilManager;
-    bool toolLocked; 
+    bool toolLocked;
     Vector2 toolFacing = Vector2.down;
     [SerializeField] float toolFailSafe = 3f;
     float toolTimer;
     ItemSO usingItem;
     float nextUseTime;
+    readonly Dictionary<ToolType, IToolActionHandler> toolHandlers = new();
+    IToolActionHandler currentHandler;
 
     Vector2 aimDir = Vector2.right;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
@@ -31,9 +33,10 @@ public class ToolUser : MonoBehaviour
         if (!pc) pc = GetComponent<PlayerController>();
         if (!anim) anim = GetComponentInChildren<Animator>();
         if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
+        InitializeToolHandlers();
     }
 
-    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); }
+    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); InitializeToolHandlers(); }
 
     void Update()
     {
@@ -79,21 +82,15 @@ public class ToolUser : MonoBehaviour
     public void TryUseCurrent(){
         var it = inv?.CurrentItem;
         if (!it || it.category != ItemCategory.Tool) return;
-        switch (it.toolType)
-        {
-            case ToolType.Axe:
-            case ToolType.Hoe:
-            case ToolType.WateringCan:
-                break;
-            default:
-                return;
-        }
+        if (!toolHandlers.TryGetValue(it.toolType, out var handler)) return;
+        if (!handler.CanBeginUse(this, it)) return;
         if (Time.time < nextUseTime) return;
         if (!stamina) return;
         var r = stamina.SpendExhaustible(stamina.toolCost);
         if (r == PlayerStamina.SpendResult.Fainted){ sleep.FaintNow(); return; }
         // nếu Exhausted thì vẫn tiếp tục chặt, anim/cooldown đã chậm theo ActionTimeMult()
         usingItem = it;
+        currentHandler = handler;
         nextUseTime = Time.time + Mathf.Max(0.05f, it.cooldown) * ActionTimeMult();
         toolLocked = true;
         toolTimer = toolFailSafe * ActionTimeMult();
@@ -103,101 +100,29 @@ public class ToolUser : MonoBehaviour
         anim.SetFloat("Vertical",   toolFacing.y);
         anim.SetFloat("Speed",      0f);
         pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
-        if (anim)
-        {
-            switch (usingItem.toolType)
-            {
-                case ToolType.Axe:
-                    anim.ResetTrigger("UseHoe");
-                    anim.SetTrigger("UseAxe");
-                    break;
-                case ToolType.Hoe:
-                    anim.ResetTrigger("UseAxe");
-                    anim.SetTrigger("UseHoe");
-                    break;
-                case ToolType.WateringCan:
-                    anim.ResetTrigger("UseAxe");
-                    anim.ResetTrigger("UseHoe");
-                    anim.SetTrigger("UseTool");
-                    break;
-                default:
-                    anim.SetTrigger("UseTool");
-                    break;
-            }
-        }
+        currentHandler?.OnBeginUse(this, usingItem);
     }
 
     public void Tool_DoHit()
     {
         if (!usingItem) return;
+        if (currentHandler == null) return;
 
-        Vector2 dir = toolLocked ? toolFacing : aimDir;
-
-        float fwd = (usingItem.hitboxForward >= 0f) ? usingItem.hitboxForward : originDist;
-        Vector3 center = (Vector2)transform.position + dir * fwd;
-        center += new Vector3(0f, usingItem.hitboxYOffset, 0f);
-
-        float r = Mathf.Max(0.01f, usingItem.range) * Mathf.Max(0.01f, usingItem.hitboxScale);
-
-        var cols = Physics2D.OverlapCircleAll(center, r, hitMask);
-        if (usingItem.toolType == ToolType.WateringCan)
-        {
-            if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
-            var watered = new HashSet<PlantGrowth>();
-            HashSet<Vector2Int> hydratedCells = soilManager ? new HashSet<Vector2Int>() : null;
-            foreach (var c in cols)
-            {
-                var plant = c.GetComponentInParent<PlantGrowth>();
-                if (!plant) continue;
-                if (watered.Add(plant))
-                {
-                    plant.Water();
-                    if (hydratedCells != null)
-                    {
-                        hydratedCells.Add(soilManager.WorldToCell(plant.transform.position));
-                    }
-                }
-            }
-
-            if (hydratedCells != null)
-            {
-                hydratedCells.Add(soilManager.WorldToCell((Vector2)center));
-                foreach (var cell in hydratedCells)
-                {
-                    soilManager.TryWaterCell(cell);
-                }
-            }
-            return;
-        }
-
-        foreach (var c in cols)
-        {
-            var t = c.GetComponent<IToolTarget>();
-            if (t != null)
-            {
-                Vector2 pushDir = (c.transform.position - transform.position).normalized;
-                t.Hit(usingItem.toolType, usingItem.Dame, pushDir);
-            }
-        }
-
-        if (usingItem.toolType == ToolType.Hoe)
-        {
-            if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
-            if (soilManager)
-            {
-                var cell = soilManager.WorldToCell((Vector2)center);
-                soilManager.TryTillCell(cell);
-            }
-        }
+        var context = BuildHitContext(usingItem);
+        currentHandler.OnPerformHit(this, usingItem, context);
     }
 
     public void Tool_End()
-    {   
+    {
         if (anim) anim.speed = 1f;
+        var finishedItem = usingItem;
         usingItem = null;
+        var handler = currentHandler;
+        currentHandler = null;
         if (!toolLocked) return;
         toolLocked = false;
         pc?.SetMoveLock(false);
+        handler?.OnEndUse(this, finishedItem);
     }
     Vector2 Facing4FromAnim()
     {
@@ -228,5 +153,68 @@ public class ToolUser : MonoBehaviour
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(center, r);
+    }
+
+    void InitializeToolHandlers()
+    {
+        currentHandler = null;
+        toolHandlers.Clear();
+        RegisterToolHandler(new AxeToolActionHandler());
+        RegisterToolHandler(new HoeToolActionHandler());
+        RegisterToolHandler(new WateringCanToolActionHandler());
+    }
+
+    void RegisterToolHandler(IToolActionHandler handler)
+    {
+        if (handler == null) return;
+        toolHandlers[handler.ToolType] = handler;
+    }
+
+    public ToolHitContext BuildHitContext(ItemSO item)
+    {
+        Vector2 dir = toolLocked ? toolFacing : aimDir;
+        float fwd = (item.hitboxForward >= 0f) ? item.hitboxForward : originDist;
+        Vector3 center = (Vector2)transform.position + dir * fwd;
+        center += new Vector3(0f, item.hitboxYOffset, 0f);
+        float radius = Mathf.Max(0.01f, item.range) * Mathf.Max(0.01f, item.hitboxScale);
+        var hits = Physics2D.OverlapCircleAll(center, radius, hitMask);
+        return new ToolHitContext(dir, center, radius, hits);
+    }
+
+    public void ApplyDamageToTargets(ItemSO item, Collider2D[] hits)
+    {
+        if (hits == null) return;
+        foreach (var c in hits)
+        {
+            if (!c) continue;
+            var target = c.GetComponent<IToolTarget>();
+            if (target == null) continue;
+            Vector2 pushDir = (c.transform.position - transform.position).normalized;
+            target.Hit(item.toolType, item.Dame, pushDir);
+        }
+    }
+
+    public SoilManager EnsureSoilManager()
+    {
+        if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
+        return soilManager;
+    }
+
+    public Animator ToolAnimator => anim;
+
+    public readonly struct ToolHitContext
+    {
+        public readonly Vector2 Direction;
+        public readonly Vector3 Center;
+        public readonly float Radius;
+        public readonly Collider2D[] Hits;
+
+        public ToolHitContext(Vector2 direction, Vector3 center, float radius, Collider2D[] hits)
+        {
+            Direction = direction;
+            Center = center;
+            Radius = radius;
+            Hits = hits;
+        }
     }
 }
