@@ -22,6 +22,11 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     [SerializeField] float targetIconHeight = 0.75f;
     [SerializeField] bool autoCreateRenderer = true;
     [SerializeField] bool flipWithFacing = false;
+    [Header("Thu hoạch bằng tay")]
+    [SerializeField] Vector2 handHarvestStartOffset = new Vector2(0f, -0.45f);
+    [SerializeField, Min(0f)] float handHarvestMinLift = 0.4f;
+    [SerializeField, Min(0f)] float handHarvestMaxHorizontal = 0.85f;
+    [SerializeField] AnimationCurve handHarvestLiftCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Animator Holding Layer")]
     [SerializeField] string holdingBool = "HoldingItem";
@@ -39,6 +44,10 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     bool hasOverride;
     ItemSO overrideItem;
     float overrideHideAt;
+    bool isAnimatingHandHarvest;
+    Vector3 handHarvestStartLocal;
+    float handHarvestStartTime;
+    float handHarvestDuration;
 
     int holdLayerIndex = -1;
     int holdingBoolHash;
@@ -105,7 +114,11 @@ public class PlayerHeldItemDisplay : MonoBehaviour
     {
         if (iconRenderer && isVisible)
         {
-            iconRenderer.transform.localPosition = displayOffset;
+            UpdateHandHarvestAnimation();
+            if (!isAnimatingHandHarvest)
+            {
+                iconRenderer.transform.localPosition = displayOffset;
+            }
             if (flipWithFacing && playerSprite)
             {
                 iconRenderer.flipX = playerSprite.flipX;
@@ -160,6 +173,7 @@ public class PlayerHeldItemDisplay : MonoBehaviour
         EnsureIconRenderer();
         if (!iconRenderer) return;
 
+        isAnimatingHandHarvest = false;
         iconRenderer.sprite = item.icon;
         iconRenderer.enabled = iconRenderer.sprite != null;
         iconRenderer.transform.localPosition = displayOffset;
@@ -178,6 +192,7 @@ public class PlayerHeldItemDisplay : MonoBehaviour
             iconRenderer.enabled = false;
         }
         isVisible = false;
+        isAnimatingHandHarvest = false;
         UpdateAnimatorState();
     }
 
@@ -284,7 +299,68 @@ public class PlayerHeldItemDisplay : MonoBehaviour
         overrideItem = item;
         overrideHideAt = Time.time + seconds;
         hasOverride = true;
+        isAnimatingHandHarvest = false;
         ShowItem(item);
+    }
+
+    public void ShowHandHarvestedItem(ItemSO item, Vector3 worldStartPosition, float liftDuration, float visibleDuration)
+    {
+        if (!item || !item.icon) return;
+
+        float duration = Mathf.Max(0.01f, visibleDuration);
+        float raiseTime = Mathf.Max(0.01f, liftDuration);
+
+        overrideItem = item;
+        overrideHideAt = Time.time + Mathf.Max(duration, raiseTime);
+        hasOverride = true;
+
+        isAnimatingHandHarvest = false;
+        ShowItem(item);
+
+        if (!iconRenderer) return;
+
+        handHarvestStartLocal = CalculateHandHarvestLocalStart(worldStartPosition);
+        iconRenderer.transform.localPosition = handHarvestStartLocal;
+        handHarvestStartTime = Time.time;
+        handHarvestDuration = raiseTime;
+        isAnimatingHandHarvest = true;
+    }
+
+    Vector3 CalculateHandHarvestLocalStart(Vector3 worldStartPosition)
+    {
+        Vector3 localStart = transform.InverseTransformPoint(worldStartPosition);
+        localStart += (Vector3)handHarvestStartOffset;
+        localStart.z = 0f;
+
+        float targetY = displayOffset.y;
+        float minTargetY = targetY - Mathf.Max(0.01f, handHarvestMinLift);
+        if (localStart.y > minTargetY)
+        {
+            localStart.y = minTargetY;
+        }
+
+        float clampX = Mathf.Max(0.01f, handHarvestMaxHorizontal);
+        localStart.x = Mathf.Clamp(localStart.x, -clampX, clampX);
+
+        return localStart;
+    }
+
+    void UpdateHandHarvestAnimation()
+    {
+        if (!isAnimatingHandHarvest || !iconRenderer)
+            return;
+
+        float elapsed = Time.time - handHarvestStartTime;
+        float t = handHarvestDuration <= 0.0001f ? 1f : Mathf.Clamp01(elapsed / handHarvestDuration);
+        float curved = handHarvestLiftCurve != null ? Mathf.Clamp01(handHarvestLiftCurve.Evaluate(t)) : t;
+        Vector3 pos = Vector3.Lerp(handHarvestStartLocal, (Vector3)displayOffset, curved);
+        iconRenderer.transform.localPosition = pos;
+
+        if (t >= 0.999f)
+        {
+            iconRenderer.transform.localPosition = displayOffset;
+            isAnimatingHandHarvest = false;
+        }
     }
 
     void SetHoldLayerWeight(float weight)
