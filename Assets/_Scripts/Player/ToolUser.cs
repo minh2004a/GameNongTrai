@@ -126,6 +126,10 @@ public class ToolUser : MonoBehaviour
         {
             facing = pendingWaterDir;
         }
+        if (pc && facing.sqrMagnitude > 0.0001f)
+        {
+            pc.ForceFace(facing);
+        }
         toolFacing = facing;           // chốt hướng
         anim.SetFloat("Horizontal", toolFacing.x);
         anim.SetFloat("Vertical",   toolFacing.y);
@@ -276,6 +280,10 @@ public class ToolUser : MonoBehaviour
             {
                 anim.SetFloat("Horizontal", pendingWaterDir.x);
                 anim.SetFloat("Vertical", pendingWaterDir.y);
+            }
+            if (pc)
+            {
+                pc.ForceFace(pendingWaterDir);
             }
         }
     }
