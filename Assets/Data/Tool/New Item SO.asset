@@ -19,6 +19,7 @@ MonoBehaviour:
   stackable: 1
   weaponType: 0
   toolType: 0
+  toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0

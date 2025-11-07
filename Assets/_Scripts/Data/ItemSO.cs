@@ -23,6 +23,9 @@ public class ItemSO : ScriptableObject
     public bool stackable = true;
     public WeaponType weaponType;
     public ToolType toolType = ToolType.None;
+    [Header("Tool Settings")]
+    [Tooltip("Số ô tối đa tính từ người chơi đến mục tiêu khi dùng công cụ này")]
+    [Min(1)] public int toolRangeTiles = 1;
     public int maxStack = 999;   
     [Header("Hitbox Tuning")]
     [Tooltip("Nhân với range để phóng to/thu nhỏ hitbox")]
