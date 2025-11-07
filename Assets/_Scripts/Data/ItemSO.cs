@@ -2,6 +2,15 @@ using UnityEngine;
 // Dữ liệu ScriptableObject cho một loại vật phẩm trong trò chơi
 public enum ItemCategory { Tool, Weapon, Resource, Consumable, Minerals } // thêm loại
 public enum WeaponType { None, Sword, Bow }
+public enum ToolType
+{
+    None = 0,
+    Axe = 1,
+    Hoe = 2,
+    Pickaxe = 3,
+    Scythe = 4,
+    WateringCan = 5
+}
 public interface IDamageable { void TakeHit(int dmg); }
 [CreateAssetMenu(menuName = "Items/Item")]
 public class ItemSO : ScriptableObject
@@ -10,8 +19,9 @@ public class ItemSO : ScriptableObject
     public Sprite icon;
     public SeedSO seedData; // dùng khi type == Seed
     public ItemCategory category;
-    public bool stackable = true; 
-    public WeaponType weaponType;  
+    public bool stackable = true;
+    public WeaponType weaponType;
+    public ToolType toolType = ToolType.None;
     public int maxStack = 999;   
     [Header("Hitbox Tuning")]
     [Tooltip("Nhân với range để phóng to/thu nhỏ hitbox")]
