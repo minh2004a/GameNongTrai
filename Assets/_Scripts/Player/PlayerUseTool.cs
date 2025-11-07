@@ -110,10 +110,11 @@ public class PlayerUseTool : MonoBehaviour
         SoilManager soil = GetSoilManager();
         if (!soil) return;
 
-        Vector2Int playerCell = soil.WorldToCell(transform.position);
+        Vector2 playerWorld = transform.position;
+        Vector2Int playerCell = soil.WorldToCell(playerWorld);
         Vector2Int requestedCell = soil.WorldToCell(clickWorld);
 
-        if (!TryResolveToolTarget(item, playerCell, requestedCell, out var targetCell, out var facing, out var rangeTiles))
+        if (!TryResolveToolTarget(item, playerWorld, clickWorld, playerCell, requestedCell, out var targetCell, out var facing, out var rangeTiles))
         {
             return;
         }
@@ -141,7 +142,7 @@ public class PlayerUseTool : MonoBehaviour
         return !(delta == Vector2Int.zero) && Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y)) <= rangeTiles;
     }
 
-    bool TryResolveToolTarget(ItemSO item, Vector2Int playerCell, Vector2Int requestedCell, out Vector2Int targetCell, out Vector2 facing, out int rangeTiles)
+    bool TryResolveToolTarget(ItemSO item, Vector2 playerWorld, Vector2 clickWorld, Vector2Int playerCell, Vector2Int requestedCell, out Vector2Int targetCell, out Vector2 facing, out int rangeTiles)
     {
         targetCell = requestedCell;
         facing = Vector2.down;
@@ -152,6 +153,11 @@ public class PlayerUseTool : MonoBehaviour
         switch (item.toolType)
         {
             case ToolType.Hoe:
+                if (delta == Vector2Int.zero)
+                {
+                    delta = DetermineFacingDelta(clickWorld - playerWorld);
+                }
+
                 if (!IsHoeOffset(delta))
                 {
                     targetCell = Vector2Int.zero;
@@ -178,6 +184,18 @@ public class PlayerUseTool : MonoBehaviour
     {
         if (delta == Vector2Int.zero) return false;
         return Mathf.Abs(delta.x) <= 1 && Mathf.Abs(delta.y) <= 1;
+    }
+
+    Vector2Int DetermineFacingDelta(Vector2 worldDelta)
+    {
+        if (worldDelta.sqrMagnitude <= 0.0001f) return Vector2Int.zero;
+
+        if (Mathf.Abs(worldDelta.y) >= Mathf.Abs(worldDelta.x))
+        {
+            return worldDelta.y >= 0f ? Vector2Int.up : Vector2Int.down;
+        }
+
+        return worldDelta.x >= 0f ? Vector2Int.right : Vector2Int.left;
     }
 
     Vector2 DetermineFacing(Vector2Int delta)
