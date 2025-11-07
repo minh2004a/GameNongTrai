@@ -27,6 +27,7 @@ public class SoilManager : MonoBehaviour
 
     string sceneName;
     TimeManager time;
+    SeasonManager seasonManager;
 
     void Awake()
     {
@@ -34,17 +35,21 @@ public class SoilManager : MonoBehaviour
         if (!tilledParent) tilledParent = transform;
         sceneName = gameObject.scene.IsValid() ? gameObject.scene.name : null;
         time = FindFirstObjectByType<TimeManager>();
+        seasonManager = FindFirstObjectByType<SeasonManager>();
         RestoreFromSave();
     }
 
     void OnEnable()
     {
         AttachTimeManager(time ?? FindFirstObjectByType<TimeManager>());
+        AttachSeasonManager(seasonManager ?? FindFirstObjectByType<SeasonManager>());
+        ApplySeasonToAllVisuals(GetCurrentSeason());
     }
 
     void OnDisable()
     {
         if (time) time.OnNewDay -= HandleNewDay;
+        if (seasonManager) seasonManager.OnSeasonChanged -= HandleSeasonChanged;
     }
 
     public float GridSize => gridSize;
@@ -169,6 +174,7 @@ public class SoilManager : MonoBehaviour
         var parent = tilledParent ? tilledParent : transform;
         var inst = Instantiate(tilledSoilPrefab, CellToWorld(cell), Quaternion.identity, parent);
         visuals[cell] = inst;
+        ApplySeasonToVisual(inst, GetCurrentSeason());
     }
 
     void RefreshCellAndNeighbors(Vector2Int cell)
@@ -294,5 +300,54 @@ public class SoilManager : MonoBehaviour
         {
             time.OnNewDay += HandleNewDay;
         }
+    }
+
+    void AttachSeasonManager(SeasonManager manager)
+    {
+        if (!manager) return;
+        if (seasonManager) seasonManager.OnSeasonChanged -= HandleSeasonChanged;
+        seasonManager = manager;
+        if (isActiveAndEnabled)
+        {
+            seasonManager.OnSeasonChanged += HandleSeasonChanged;
+        }
+    }
+
+    void HandleSeasonChanged(Season previous, Season current)
+    {
+        ApplySeasonToAllVisuals(current);
+        foreach (var cell in tilledCells)
+        {
+            RefreshCellAndNeighbors(cell);
+        }
+    }
+
+    void ApplySeasonToAllVisuals(Season season)
+    {
+        foreach (var kv in visuals)
+        {
+            ApplySeasonToVisual(kv.Value, season);
+        }
+    }
+
+    void ApplySeasonToVisual(GameObject go, Season season)
+    {
+        if (!go) return;
+        if (go.TryGetComponent<TilledSoilVisual>(out var visual))
+        {
+            visual.ApplySeason(season);
+        }
+    }
+
+    Season GetCurrentSeason()
+    {
+        if (seasonManager) return seasonManager.CurrentSeason;
+        var manager = FindFirstObjectByType<SeasonManager>();
+        if (manager)
+        {
+            AttachSeasonManager(manager);
+            return manager.CurrentSeason;
+        }
+        return Season.Spring;
     }
 }

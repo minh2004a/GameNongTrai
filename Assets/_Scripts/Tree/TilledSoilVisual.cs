@@ -8,6 +8,25 @@ public class TilledSoilVisual : MonoBehaviour
     [SerializeField] SpriteRenderer wetOverlayRenderer;
     [SerializeField] Sprite[] connectionSprites = new Sprite[16];
     [SerializeField] Sprite[] wetConnectionSprites = new Sprite[16];
+    [SerializeField] SeasonalSpriteOverride[] seasonalOverrides = new SeasonalSpriteOverride[0];
+    [SerializeField] bool applySeasonTint = true;
+    [SerializeField] Color springTint = Color.white;
+    [SerializeField] Color summerTint = new Color(0.98f, 0.96f, 0.9f, 1f);
+    [SerializeField] Color fallTint = new Color(0.95f, 0.88f, 0.78f, 1f);
+    [SerializeField] Color winterTint = new Color(0.9f, 0.95f, 1f, 1f);
+
+    [System.Serializable]
+    class SeasonalSpriteOverride
+    {
+        public Season season = Season.Spring;
+        public Sprite[] connectionSprites = new Sprite[16];
+        public Sprite[] wetConnectionSprites = new Sprite[16];
+    }
+
+    int cachedTilledMask = -1;
+    int cachedWetMask = -1;
+    bool cachedIsWet;
+    Season activeSeason = Season.Spring;
 
     void Reset()
     {
@@ -16,15 +35,10 @@ public class TilledSoilVisual : MonoBehaviour
 
     public void ApplyState(int tilledMask, bool isWet, int wetMask)
     {
-        CacheRenderers();
-
-        var drySprite = SelectDrySprite(tilledMask);
-        if (drySprite && spriteRenderer && spriteRenderer.sprite != drySprite)
-        {
-            spriteRenderer.sprite = drySprite;
-        }
-
-        ApplyWetOverlay(isWet, wetMask, tilledMask);
+        cachedTilledMask = Mathf.Clamp(tilledMask, 0, 15);
+        cachedWetMask = Mathf.Clamp(wetMask, 0, 15);
+        cachedIsWet = isWet;
+        UpdateFromCache();
     }
 
     public void ApplyMask(int mask)
@@ -53,6 +67,32 @@ public class TilledSoilVisual : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ApplySeason(Season season)
+    {
+        if (activeSeason == season) return;
+        activeSeason = season;
+        ApplyTint();
+        UpdateFromCache();
+    }
+
+    void UpdateFromCache()
+    {
+        CacheRenderers();
+        ApplyTint();
+        if (cachedTilledMask < 0)
+        {
+            return;
+        }
+
+        var drySprite = SelectDrySprite(cachedTilledMask);
+        if (drySprite && spriteRenderer && spriteRenderer.sprite != drySprite)
+        {
+            spriteRenderer.sprite = drySprite;
+        }
+
+        ApplyWetOverlay(cachedIsWet, cachedWetMask, cachedTilledMask);
     }
 
     Sprite SelectDrySprite(int tilledMask)
@@ -103,7 +143,7 @@ public class TilledSoilVisual : MonoBehaviour
 
     Sprite SelectSprite(int mask, bool wet)
     {
-        var sprites = wet ? wetConnectionSprites : connectionSprites;
+        var sprites = GetSpriteArray(wet);
         if (sprites == null || sprites.Length == 0) return null;
         mask = Mathf.Clamp(mask, 0, Mathf.Min(15, sprites.Length - 1));
         var sprite = sprites[mask];
@@ -112,5 +152,55 @@ public class TilledSoilVisual : MonoBehaviour
             sprite = sprites[0];
         }
         return sprite;
+    }
+
+    void ApplyTint()
+    {
+        if (!applySeasonTint) return;
+        var tint = LookupTint(activeSeason);
+        if (spriteRenderer)
+        {
+            spriteRenderer.color = tint;
+        }
+    }
+
+    Color LookupTint(Season season)
+    {
+        return season switch
+        {
+            Season.Spring => springTint,
+            Season.Summer => summerTint,
+            Season.Fall => fallTint,
+            Season.Winter => winterTint,
+            _ => springTint,
+        };
+    }
+
+    Sprite[] GetSpriteArray(bool wet)
+    {
+        var overrideSet = GetSeasonOverride(activeSeason);
+        if (overrideSet != null)
+        {
+            var seasonalSprites = wet ? overrideSet.wetConnectionSprites : overrideSet.connectionSprites;
+            if (seasonalSprites != null && seasonalSprites.Length > 0)
+            {
+                return seasonalSprites;
+            }
+        }
+        return wet ? wetConnectionSprites : connectionSprites;
+    }
+
+    SeasonalSpriteOverride GetSeasonOverride(Season season)
+    {
+        if (seasonalOverrides == null) return null;
+        for (int i = 0; i < seasonalOverrides.Length; i++)
+        {
+            var entry = seasonalOverrides[i];
+            if (entry != null && entry.season == season)
+            {
+                return entry;
+            }
+        }
+        return null;
     }
 }

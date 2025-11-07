@@ -55,6 +55,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4385706500048074652}
   - component: {fileID: 8658273377928321671}
+  - component: {fileID: 1079545389760517040}
   - component: {fileID: 6227811501634235542}
   m_Layer: 0
   m_Name: Layer1
@@ -13212,6 +13213,24 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1079545389760517040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7033003961832927481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf8cc9abd49044ebaf8e8070b8aed17e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  tilemap: {fileID: 8658273377928321671}
+  includeChildTilemaps: 1
+  springColor: {r: 1, g: 1, b: 1, a: 1}
+  summerColor: {r: 0.98, g: 0.97, b: 0.92, a: 1}
+  fallColor: {r: 0.96, g: 0.9, b: 0.85, a: 1}
+  winterColor: {r: 0.9, g: 0.95, b: 1, a: 1}
 --- !u!483693784 &6227811501634235542
 TilemapRenderer:
   m_ObjectHideFlags: 0
