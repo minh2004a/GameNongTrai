@@ -16,16 +16,17 @@ MonoBehaviour:
   icon: {fileID: 1265783944, guid: 791eb7bc0f0ffb64fb4797b58f8d2767, type: 3}
   seedData: {fileID: 0}
   category: 0
-  toolType: 5
   stackable: 0
   weaponType: 0
+  toolType: 5
+  toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0
   hitboxForward: 0.7
   Dame: 1
   range: 0.35
-  cooldown: 0.4
+  cooldown: 0.45
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10
   projectileMaxDistance: 8

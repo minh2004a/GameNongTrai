@@ -374,6 +374,7 @@ MonoBehaviour:
   bowCost: 27
   swordCost: 0
   hoeCost: 1.5
+  wateringCost: 2
   moveDrainPerSecond: 0
   regenPerSecond: 0
   regenDelay: 0
@@ -528,7 +529,7 @@ MonoBehaviour:
   baseRangeTiles: 1
   bonusRangeTiles: 0
   minToolCooldown: 0.15
-  toolFailSafeSeconds: 0.4
+  toolFailSafeSeconds: 0.5
   exhaustedActionTimeMult: 1.5
   exhaustedAnimSpeedMult: 0.7
 --- !u!1 &3900807971405855068

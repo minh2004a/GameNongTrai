@@ -1,6 +1,7 @@
 
 
 
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,8 +36,12 @@ public class PlayerUseTool : MonoBehaviour
     static readonly int VerticalHash = Animator.StringToHash("Vertical");
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     static readonly int UseHoeHash = Animator.StringToHash("UseHoe");
+    static readonly int UseWateringHash = Animator.StringToHash("UseWatering");
 
     readonly List<Vector2Int> pendingCells = new();
+    readonly HashSet<PlantGrowth> wateredPlantsBuffer = new();
+    bool checkedWateringTrigger;
+    bool hasWateringTrigger;
 
     Camera cachedCamera;
     ItemSO activeTool;
@@ -57,6 +62,8 @@ public class PlayerUseTool : MonoBehaviour
         sprite = GetComponentInChildren<SpriteRenderer>();
         body = GetComponent<Rigidbody2D>();
         stamina = GetComponent<PlayerStamina>();
+        checkedWateringTrigger = false;
+        hasWateringTrigger = false;
     }
 
     void Awake()
@@ -73,6 +80,8 @@ public class PlayerUseTool : MonoBehaviour
         if (!sleep) sleep = FindFirstObjectByType<SleepManager>();
         cachedCamera = Camera.main;
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
+        checkedWateringTrigger = false;
+        hasWateringTrigger = false;
     }
 
     void Update()
@@ -182,6 +191,32 @@ public class PlayerUseTool : MonoBehaviour
                 facing = DetermineFacing(delta);
                 rangeTiles = 1;
                 return true;
+            case ToolType.WateringCan:
+                if (delta == Vector2Int.zero)
+                {
+                    var facingDelta = DetermineFacingDelta(clickWorld - playerWorld);
+                    if (facingDelta != Vector2Int.zero)
+                    {
+                        delta = facingDelta;
+                    }
+                }
+
+                if (delta == Vector2Int.zero)
+                {
+                    targetCell = playerCell;
+                    facing = DetermineFacing(delta);
+                    return true;
+                }
+
+                if (!IsWithinRange(delta, rangeTiles))
+                {
+                    targetCell = Vector2Int.zero;
+                    return false;
+                }
+
+                targetCell = playerCell + delta;
+                facing = DetermineFacing(delta);
+                return true;
             default:
                 if (!IsWithinRange(delta, rangeTiles))
                 {
@@ -241,6 +276,9 @@ public class PlayerUseTool : MonoBehaviour
             case ToolType.Hoe:
                 results.Add(anchorCell);
                 break;
+            case ToolType.WateringCan:
+                results.Add(anchorCell);
+                break;
             default:
                 break;
         }
@@ -255,6 +293,9 @@ public class PlayerUseTool : MonoBehaviour
         {
             case ToolType.Hoe:
                 cost = stamina.hoeCost;
+                break;
+            case ToolType.WateringCan:
+                cost = stamina.wateringCost;
                 break;
         }
 
@@ -316,10 +357,41 @@ public class PlayerUseTool : MonoBehaviour
                 animator.ResetTrigger(UseHoeHash);
                 animator.SetTrigger(UseHoeHash);
                 break;
+            case ToolType.WateringCan:
+                animator.ResetTrigger(UseWateringHash);
+                animator.ResetTrigger(UseHoeHash);
+                if (AnimatorSupportsWateringTrigger())
+                {
+                    animator.SetTrigger(UseWateringHash);
+                }
+                else
+                {
+                    animator.SetTrigger(UseHoeHash);
+                }
+                break;
             default:
                 animator.ResetTrigger(UseHoeHash);
                 break;
         }
+    }
+
+    bool AnimatorSupportsWateringTrigger()
+    {
+        if (!animator) return false;
+        if (!checkedWateringTrigger)
+        {
+            hasWateringTrigger = false;
+            foreach (var parameter in animator.parameters)
+            {
+                if (parameter.type == AnimatorControllerParameterType.Trigger && parameter.nameHash == UseWateringHash)
+                {
+                    hasWateringTrigger = true;
+                    break;
+                }
+            }
+            checkedWateringTrigger = true;
+        }
+        return hasWateringTrigger;
     }
 
     void LockMove(bool on)
@@ -371,6 +443,9 @@ public class PlayerUseTool : MonoBehaviour
             case ToolType.Hoe:
                 PerformHoeHit();
                 break;
+            case ToolType.WateringCan:
+                PerformWatering();
+                break;
             default:
                 break;
         }
@@ -384,6 +459,59 @@ public class PlayerUseTool : MonoBehaviour
         foreach (var cell in pendingCells)
         {
             soil.TryTillCell(cell);
+        }
+    }
+
+    void PerformWatering()
+    {
+        var soil = GetSoilManager();
+        if (!soil) return;
+
+        wateredPlantsBuffer.Clear();
+
+        foreach (var cell in pendingCells)
+        {
+            soil.TryWaterCell(cell);
+            WaterPlantsNearCell(soil, cell);
+        }
+    }
+
+    void WaterPlantsNearCell(SoilManager soil, Vector2Int cell)
+    {
+        Vector2 center = soil.CellToWorld(cell);
+        float radius = Mathf.Max(0.1f, soil.GridSize * 0.45f);
+        bool found = false;
+
+        var hits = Physics2D.OverlapCircleAll(center, radius);
+        if (hits != null)
+        {
+            foreach (var hit in hits)
+            {
+                if (!hit) continue;
+                var plant = hit.GetComponentInParent<PlantGrowth>();
+                if (!plant) continue;
+                if (wateredPlantsBuffer.Add(plant))
+                {
+                    plant.Water();
+                }
+                found = true;
+            }
+        }
+
+        if (found) return;
+
+        float sqrRadius = radius * radius;
+#if UNITY_2023_1_OR_NEWER
+        var allPlants = FindObjectsByType<PlantGrowth>(FindObjectsSortMode.None);
+#else
+        var allPlants = FindObjectsOfType<PlantGrowth>();
+#endif
+        foreach (var plant in allPlants)
+        {
+            if (!plant) continue;
+            if (((Vector2)plant.transform.position - center).sqrMagnitude > sqrRadius) continue;
+            if (!wateredPlantsBuffer.Add(plant)) continue;
+            plant.Water();
         }
     }
 

@@ -15,10 +15,11 @@ MonoBehaviour:
   id: Potato
   icon: {fileID: -851109060, guid: 04f4eed6b8d32cc4b8fa5d816d694f1c, type: 3}
   seedData: {fileID: 0}
-  category: 0
-  toolType: 0
+  category: 2
   stackable: 1
   weaponType: 0
+  toolType: 0
+  toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0

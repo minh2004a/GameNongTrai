@@ -1,4 +1,5 @@
 
+
 // PlayerStamina.cs
 using UnityEngine;
 using UnityEngine.Events;
@@ -10,7 +11,7 @@ public class PlayerStamina : MonoBehaviour
     [SerializeField] float current = 100f;
 
     [Header("Chi phí")]
-    public float bowCost = 12f, swordCost = 8f, hoeCost = 4f;
+    public float bowCost = 12f, swordCost = 8f, hoeCost = 4f, wateringCost = 2f;
 
     [Header("Tiêu hao/Hồi phục")]
     public float moveDrainPerSecond = 0f;
