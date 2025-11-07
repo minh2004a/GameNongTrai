@@ -30,6 +30,7 @@ public class PlantSystem : MonoBehaviour
 
         SoilManager soil = GetSoilManager();
         Vector2Int? tilledCellToClear = null;
+        Vector2Int? plantedCell = null;
 
         if (seed.requiresTilledSoil)
         {
@@ -37,6 +38,7 @@ public class PlantSystem : MonoBehaviour
             var cell = soil.WorldToCell(worldPos);
             if (!soil.IsCellTilled(cell)) return false;
             worldPos = soil.CellToWorld(cell);
+            plantedCell = cell;
         }
         else if (seed.snapToGrid){
             float s = Mathf.Max(0.01f, seed.gridSize);
@@ -53,6 +55,7 @@ public class PlantSystem : MonoBehaviour
             {
                 tilledCellToClear = cell;
                 worldPos = soil.CellToWorld(cell);
+                plantedCell = cell;
             }
         }
 
@@ -61,6 +64,15 @@ public class PlantSystem : MonoBehaviour
         var go = Instantiate(plantRootPrefab, worldPos, Quaternion.identity);
         plant = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
         plant.Init(seed);
+
+        if (seed.requiresTilledSoil && soil)
+        {
+            if (!plantedCell.HasValue)
+            {
+                plantedCell = soil.WorldToCell(worldPos);
+            }
+            plant.AttachToSoil(soil, plantedCell.Value);
+        }
 
         if (tilledCellToClear.HasValue && soil)
         {
@@ -137,9 +149,20 @@ public class PlantSystem : MonoBehaviour
                     pos = new Vector3(center.x, center.y, prefabPos.z);
                 }
             }
+
             var go = Instantiate(plantRootPrefab, pos, Quaternion.identity);
             var growth = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
             growth.Restore(seed, state);
+
+            if (seed.requiresTilledSoil)
+            {
+                var soil = GetSoilManager();
+                if (soil)
+                {
+                    var cell = soil.WorldToCell(pos);
+                    growth.AttachToSoil(soil, cell);
+                }
+            }
         }
     }
 }

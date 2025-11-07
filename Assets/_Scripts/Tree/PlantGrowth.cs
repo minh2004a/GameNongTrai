@@ -13,6 +13,8 @@ public class PlantGrowth : MonoBehaviour
     GameObject visual;
     [SerializeField] PickupItem2D pickupPrefab;
     TimeManager time;
+    SoilManager soil;
+    Vector2Int? linkedSoilCell;
     string plantId;
     bool removeFromSave;
     bool wasWateredToday;
@@ -54,6 +56,7 @@ public class PlantGrowth : MonoBehaviour
 
         SpawnStage();
         PersistState();
+        RefreshSoilLink();
     }
 
     public void Restore(SeedSO seed, SaveStore.PlantState state)
@@ -81,6 +84,7 @@ public class PlantGrowth : MonoBehaviour
         ApplyOfflineGrowth(state.lastUpdatedDay);
         SpawnStage();
         PersistState();
+        RefreshSoilLink();
     }
 
     public void Water()
@@ -137,11 +141,13 @@ public class PlantGrowth : MonoBehaviour
     {
         time = FindFirstObjectByType<TimeManager>();
         if (time) time.OnNewDay += TickDay;
+        RefreshSoilLink();
     }
 
     void OnDisable()
     {
         if (time) time.OnNewDay -= TickDay;
+        DetachFromSoil();
         if (removeFromSave) PersistRemoval();
         else PersistState();
     }
@@ -278,6 +284,7 @@ public class PlantGrowth : MonoBehaviour
         lastWateredDay = RequiresWatering ? Mathf.Max(0, today - 1) : today;
         SpawnStage();
         PersistState();
+        RefreshSoilLink();
     }
 
     void SpawnPickup(ItemSO item, int count)
@@ -332,6 +339,67 @@ public class PlantGrowth : MonoBehaviour
         var scene = SceneName;
         if (string.IsNullOrEmpty(scene)) return;
         SaveStore.RemovePlantPending(scene, plantId);
+    }
+
+    public void AttachToSoil(SoilManager manager, Vector2Int cell)
+    {
+        if (!data || !data.requiresTilledSoil)
+        {
+            DetachFromSoil();
+            return;
+        }
+
+        if (!manager) return;
+
+        if (soil == manager && linkedSoilCell.HasValue && linkedSoilCell.Value == cell) return;
+
+        DetachFromSoil();
+
+        soil = manager;
+        linkedSoilCell = cell;
+        soil.RegisterPlant(cell, this);
+    }
+
+    public void DetachFromSoil()
+    {
+        if (!soil || !linkedSoilCell.HasValue)
+        {
+            soil = null;
+            linkedSoilCell = null;
+            return;
+        }
+
+        var manager = soil;
+        var cell = linkedSoilCell.Value;
+        soil = null;
+        linkedSoilCell = null;
+        manager.UnregisterPlant(this);
+    }
+
+    public void NotifySoilLinkRemoved(SoilManager manager, Vector2Int cell)
+    {
+        if (soil == manager && linkedSoilCell.HasValue && linkedSoilCell.Value == cell)
+        {
+            soil = null;
+            linkedSoilCell = null;
+        }
+    }
+
+    void RefreshSoilLink()
+    {
+        if (!data || !data.requiresTilledSoil)
+        {
+            DetachFromSoil();
+            return;
+        }
+
+        SoilManager target = soil && soil.isActiveAndEnabled ? soil : FindFirstObjectByType<SoilManager>();
+        if (!target) return;
+
+        Vector2Int cell = target.WorldToCell(transform.position);
+        if (soil == target && linkedSoilCell.HasValue && linkedSoilCell.Value == cell) return;
+
+        AttachToSoil(target, cell);
     }
 
     public void RemoveFromSave()

@@ -38,7 +38,6 @@ public class PlayerUseTool : MonoBehaviour
     static readonly int UseWateringHash = Animator.StringToHash("UseWatering");
 
     readonly List<Vector2Int> pendingCells = new();
-    readonly HashSet<PlantGrowth> wateredPlantsBuffer = new();
     bool checkedWateringTrigger;
     bool hasWateringTrigger;
 
@@ -462,51 +461,9 @@ public class PlayerUseTool : MonoBehaviour
         var soil = GetSoilManager();
         if (!soil) return;
 
-        wateredPlantsBuffer.Clear();
-
         foreach (var cell in pendingCells)
         {
             soil.TryWaterCell(cell);
-            WaterPlantsNearCell(soil, cell);
-        }
-    }
-
-    void WaterPlantsNearCell(SoilManager soil, Vector2Int cell)
-    {
-        Vector2 center = soil.CellToWorld(cell);
-        float radius = Mathf.Max(0.1f, soil.GridSize * 0.45f);
-        bool found = false;
-
-        var hits = Physics2D.OverlapCircleAll(center, radius);
-        if (hits != null)
-        {
-            foreach (var hit in hits)
-            {
-                if (!hit) continue;
-                var plant = hit.GetComponentInParent<PlantGrowth>();
-                if (!plant) continue;
-                if (wateredPlantsBuffer.Add(plant))
-                {
-                    plant.Water();
-                }
-                found = true;
-            }
-        }
-
-        if (found) return;
-
-        float sqrRadius = radius * radius;
-#if UNITY_2023_1_OR_NEWER
-        var allPlants = FindObjectsByType<PlantGrowth>(FindObjectsSortMode.None);
-#else
-        var allPlants = FindObjectsOfType<PlantGrowth>();
-#endif
-        foreach (var plant in allPlants)
-        {
-            if (!plant) continue;
-            if (((Vector2)plant.transform.position - center).sqrMagnitude > sqrRadius) continue;
-            if (!wateredPlantsBuffer.Add(plant)) continue;
-            plant.Water();
         }
     }
 

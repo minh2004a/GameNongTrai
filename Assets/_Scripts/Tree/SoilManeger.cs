@@ -24,6 +24,9 @@ public class SoilManager : MonoBehaviour
     readonly Dictionary<Vector2Int, GameObject> visuals = new();
     readonly HashSet<Vector2Int> wetCells = new();
     readonly Dictionary<Vector2Int, int> wetCellDay = new();
+    readonly Dictionary<Vector2Int, HashSet<PlantGrowth>> cellPlants = new();
+    readonly Dictionary<PlantGrowth, Vector2Int> plantCells = new();
+    readonly List<PlantGrowth> plantCleanup = new();
 
     string sceneName;
     TimeManager time;
@@ -124,6 +127,7 @@ public class SoilManager : MonoBehaviour
             SaveStore.MarkSoilWateredPending(sceneName, cell, day);
         }
         RefreshCellAndNeighbors(cell);
+        NotifyPlantsWatered(cell);
         return changed;
     }
 
@@ -185,6 +189,8 @@ public class SoilManager : MonoBehaviour
         if (!tilledCells.Remove(cell)) return;
 
         ClearWetCell(cell, markPending);
+
+        ForgetCellPlants(cell);
 
         if (visuals.TryGetValue(cell, out var go) && go)
         {
@@ -273,6 +279,79 @@ public class SoilManager : MonoBehaviour
         }
         RefreshCellAndNeighbors(cell);
         return true;
+    }
+
+    public void RegisterPlant(Vector2Int cell, PlantGrowth plant)
+    {
+        if (!plant) return;
+        plantCells[plant] = cell;
+        if (!cellPlants.TryGetValue(cell, out var set))
+        {
+            set = new HashSet<PlantGrowth>();
+            cellPlants[cell] = set;
+        }
+        set.Add(plant);
+    }
+
+    public void UnregisterPlant(PlantGrowth plant)
+    {
+        if (!plant) return;
+        if (!plantCells.TryGetValue(plant, out var cell)) return;
+        if (cellPlants.TryGetValue(cell, out var set))
+        {
+            set.RemoveWhere(p => !p || p == plant);
+            if (set.Count == 0)
+            {
+                cellPlants.Remove(cell);
+            }
+        }
+        plantCells.Remove(plant);
+        plant.NotifySoilLinkRemoved(this, cell);
+    }
+
+    void ForgetCellPlants(Vector2Int cell)
+    {
+        if (!cellPlants.TryGetValue(cell, out var set)) return;
+        plantCleanup.Clear();
+        foreach (var plant in set)
+        {
+            if (!plant)
+            {
+                plantCleanup.Add(plant);
+                continue;
+            }
+            plant.NotifySoilLinkRemoved(this, cell);
+            plantCells.Remove(plant);
+        }
+        foreach (var dead in plantCleanup)
+        {
+            set.Remove(dead);
+        }
+        plantCleanup.Clear();
+        cellPlants.Remove(cell);
+    }
+
+    void NotifyPlantsWatered(Vector2Int cell)
+    {
+        if (!cellPlants.TryGetValue(cell, out var set)) return;
+        plantCleanup.Clear();
+        foreach (var plant in set)
+        {
+            if (!plant)
+            {
+                plantCleanup.Add(plant);
+                continue;
+            }
+            plant.Water();
+        }
+        if (plantCleanup.Count > 0)
+        {
+            foreach (var dead in plantCleanup)
+            {
+                set.Remove(dead);
+            }
+            plantCleanup.Clear();
+        }
     }
 
     void HandleNewDay()
