@@ -44,8 +44,6 @@ public class SeedSO : ScriptableObject
     [Header("Thu hoạch")]
     [Tooltip("Phương thức thu hoạch khi cây trưởng thành")]
     public HarvestMethod harvestMethod = HarvestMethod.None;
-    [Tooltip("Công cụ yêu cầu nếu thu hoạch bằng dụng cụ")]
-    public ToolType requiredTool = ToolType.None;
     [Tooltip("Vật phẩm thu được khi thu hoạch")]
     public ItemSO harvestItem;
     [Min(1), Tooltip("Số lượng vật phẩm thu được khi thu hoạch")]

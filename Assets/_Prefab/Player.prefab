@@ -399,7 +399,6 @@ MonoBehaviour:
   current: 270
   bowCost: 27
   swordCost: 0
-  toolCost: 1.5
   moveDrainPerSecond: 0
   regenPerSecond: 0
   regenDelay: 0
