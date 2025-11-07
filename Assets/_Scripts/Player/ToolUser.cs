@@ -16,14 +16,20 @@ public class ToolUser : MonoBehaviour
     [SerializeField] float exhaustedActionTimeMult = 1.6f;
     [SerializeField, Range(0.1f,1f)] float exhaustedAnimSpeedMult = 0.7f;
     [SerializeField] SoilManager soilManager;
-    bool toolLocked; 
+    bool toolLocked;
     Vector2 toolFacing = Vector2.down;
+    Vector2 appliedAnimFacing = Vector2.down;
     [SerializeField] float toolFailSafe = 3f;
     float toolTimer;
     ItemSO usingItem;
     float nextUseTime;
 
     Vector2 aimDir = Vector2.right;
+    [SerializeField] Camera worldCamera;
+    static readonly int UseAxeTrigger = Animator.StringToHash("UseAxe");
+    static readonly int UseHoeTrigger = Animator.StringToHash("UseHoe");
+    static readonly int UseToolTrigger = Animator.StringToHash("UseTool");
+    static readonly Collider2D[] HitBuffer = new Collider2D[32];
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
@@ -31,28 +37,44 @@ public class ToolUser : MonoBehaviour
         if (!pc) pc = GetComponent<PlayerController>();
         if (!anim) anim = GetComponentInChildren<Animator>();
         if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
+        if (!worldCamera) worldCamera = Camera.main;
     }
 
-    void Reset(){ anim = GetComponentInChildren<Animator>(); pc = GetComponent<PlayerController>(); soilManager = FindFirstObjectByType<SoilManager>(); }
+    void Reset()
+    {
+        anim = GetComponentInChildren<Animator>();
+        pc = GetComponent<PlayerController>();
+        soilManager = FindFirstObjectByType<SoilManager>();
+        worldCamera = Camera.main;
+    }
 
     void Update()
     {
         if (toolLocked)
         {
             // ép Animator giữ hướng, đứng yên
-            anim.SetFloat("Horizontal", toolFacing.x);
-            anim.SetFloat("Vertical", toolFacing.y);
-            anim.SetFloat("Speed", 0f);
+            if (appliedAnimFacing != toolFacing)
+            {
+                TopDownAnimatorUtility.ApplyFacing(anim, toolFacing);
+                appliedAnimFacing = toolFacing;
+            }
+            TopDownAnimatorUtility.ApplySpeed(anim, 0f);
             toolTimer -= Time.deltaTime;
             if (toolTimer <= 0f) Tool_End(); // failsafe nếu quên Animation Event
         }
         else
         {
-            var d = new Vector2(anim.GetFloat("Horizontal"), anim.GetFloat("Vertical"));
-            if (d.sqrMagnitude > 0.001f) aimDir = d.normalized;
+            var d = new Vector2(anim.GetFloat(TopDownAnimatorUtility.HorizontalHash),
+                                anim.GetFloat(TopDownAnimatorUtility.VerticalHash));
+            if (d.sqrMagnitude > 0.001f)
+                aimDir = d.normalized;
         }
 
         var dir = toolLocked ? toolFacing : aimDir;                 // dùng hướng đã khóa khi chặt
+        if (dir.sqrMagnitude > 0.0001f)
+            dir.Normalize();
+        else
+            dir = toolFacing;
         float fwd = usingItem ? (usingItem.hitboxForward >= 0f ? usingItem.hitboxForward : originDist)
                       : originDist;
         if (hitOrigin) hitOrigin.localPosition = (Vector3)(dir * fwd);
@@ -61,9 +83,12 @@ public class ToolUser : MonoBehaviour
     {
         if (!toolLocked) return;
         // fallback: nếu script khác đổi sau Animator, vẫn ép lại ở LateUpdate
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical", toolFacing.y);
-        anim.SetFloat("Speed", 0f);
+        if (appliedAnimFacing != toolFacing)
+        {
+            TopDownAnimatorUtility.ApplyFacing(anim, toolFacing);
+            appliedAnimFacing = toolFacing;
+        }
+        TopDownAnimatorUtility.ApplySpeed(anim, 0f);
     }
 
     public Vector2 ToolFacing => toolFacing; // để SMB đọc
@@ -71,8 +96,12 @@ public class ToolUser : MonoBehaviour
     {
         if (!v.isPressed) return;
         if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
-        Vector2 mouseW = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        if (!worldCamera) worldCamera = Camera.main;
+        Vector2 mouseW = worldCamera ? worldCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue())
+                                     : Mouse.current.position.ReadValue();
         Vector2 toMouse = mouseW - (Vector2)transform.position;
+        if (toMouse.sqrMagnitude > 0.0001f)
+            aimDir = toMouse.normalized;
         TryUseCurrent();                    // click xa → giữ hướng cũ như trước
     }
 
@@ -99,29 +128,29 @@ public class ToolUser : MonoBehaviour
         toolTimer = toolFailSafe * ActionTimeMult();
         if (anim) anim.speed = AnimSpeedMult();
         toolFacing = Facing4FromAnim();           // chốt hướng
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical",   toolFacing.y);
-        anim.SetFloat("Speed",      0f);
-        pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này]
+        TopDownAnimatorUtility.ApplyFacing(anim, toolFacing);
+        appliedAnimFacing = toolFacing;
+        TopDownAnimatorUtility.ApplySpeed(anim, 0f);
+        pc?.SetMoveLock(true);                    // nếu PlayerController có hàm này
         if (anim)
         {
             switch (usingItem.toolType)
             {
                 case ToolType.Axe:
-                    anim.ResetTrigger("UseHoe");
-                    anim.SetTrigger("UseAxe");
+                    anim.ResetTrigger(UseHoeTrigger);
+                    anim.SetTrigger(UseAxeTrigger);
                     break;
                 case ToolType.Hoe:
-                    anim.ResetTrigger("UseAxe");
-                    anim.SetTrigger("UseHoe");
+                    anim.ResetTrigger(UseAxeTrigger);
+                    anim.SetTrigger(UseHoeTrigger);
                     break;
                 case ToolType.WateringCan:
-                    anim.ResetTrigger("UseAxe");
-                    anim.ResetTrigger("UseHoe");
-                    anim.SetTrigger("UseTool");
+                    anim.ResetTrigger(UseAxeTrigger);
+                    anim.ResetTrigger(UseHoeTrigger);
+                    anim.SetTrigger(UseToolTrigger);
                     break;
                 default:
-                    anim.SetTrigger("UseTool");
+                    anim.SetTrigger(UseToolTrigger);
                     break;
             }
         }
@@ -132,6 +161,10 @@ public class ToolUser : MonoBehaviour
         if (!usingItem) return;
 
         Vector2 dir = toolLocked ? toolFacing : aimDir;
+        if (dir.sqrMagnitude > 0.0001f)
+            dir.Normalize();
+        else
+            dir = toolFacing;
 
         float fwd = (usingItem.hitboxForward >= 0f) ? usingItem.hitboxForward : originDist;
         Vector3 center = (Vector2)transform.position + dir * fwd;
@@ -139,14 +172,23 @@ public class ToolUser : MonoBehaviour
 
         float r = Mathf.Max(0.01f, usingItem.range) * Mathf.Max(0.01f, usingItem.hitboxScale);
 
-        var cols = Physics2D.OverlapCircleAll(center, r, hitMask);
+        int hitCount = Physics2D.OverlapCircleNonAlloc(center, r, HitBuffer, hitMask);
+        Collider2D[] overflow = null;
+        if (hitCount >= HitBuffer.Length)
+        {
+            overflow = Physics2D.OverlapCircleAll(center, r, hitMask);
+        }
+
         if (usingItem.toolType == ToolType.WateringCan)
         {
             if (!soilManager) soilManager = FindFirstObjectByType<SoilManager>();
             var watered = new HashSet<PlantGrowth>();
             HashSet<Vector2Int> hydratedCells = soilManager ? new HashSet<Vector2Int>() : null;
-            foreach (var c in cols)
+            int total = overflow != null ? overflow.Length : hitCount;
+            for (int i = 0; i < total; i++)
             {
+                var c = overflow != null ? overflow[i] : HitBuffer[i];
+                if (!c) continue;
                 var plant = c.GetComponentInParent<PlantGrowth>();
                 if (!plant) continue;
                 if (watered.Add(plant))
@@ -170,8 +212,11 @@ public class ToolUser : MonoBehaviour
             return;
         }
 
-        foreach (var c in cols)
+        int targetCount = overflow != null ? overflow.Length : hitCount;
+        for (int i = 0; i < targetCount; i++)
         {
+            var c = overflow != null ? overflow[i] : HitBuffer[i];
+            if (!c) continue;
             var t = c.GetComponent<IToolTarget>();
             if (t != null)
             {
@@ -201,16 +246,17 @@ public class ToolUser : MonoBehaviour
     }
     Vector2 Facing4FromAnim()
     {
-        float x = anim.GetFloat("Horizontal"), y = anim.GetFloat("Vertical");
-        if (Mathf.Abs(x) >= Mathf.Abs(y)) return x >= 0 ? Vector2.right : Vector2.left;
-        return y >= 0 ? Vector2.up : Vector2.down;
+        float x = anim.GetFloat(TopDownAnimatorUtility.HorizontalHash);
+        float y = anim.GetFloat(TopDownAnimatorUtility.VerticalHash);
+        var snapped = TopDownAnimatorUtility.SnapToCardinal(new Vector2(x, y));
+        return snapped.sqrMagnitude > 0.0001f ? snapped : toolFacing;
     }
     public void ApplyToolFacingLockFrame()
     {
         if (!anim) return;
-        anim.SetFloat("Horizontal", toolFacing.x);
-        anim.SetFloat("Vertical", toolFacing.y);
-        anim.SetFloat("Speed", 0f);
+        TopDownAnimatorUtility.ApplyFacing(anim, toolFacing);
+        TopDownAnimatorUtility.ApplySpeed(anim, 0f);
+        appliedAnimFacing = toolFacing;
     }
 
     void OnDrawGizmosSelected()
@@ -220,6 +266,10 @@ public class ToolUser : MonoBehaviour
         if (!it) return;
 
         Vector2 dir = toolLocked ? toolFacing : aimDir;
+        if (dir.sqrMagnitude > 0.0001f)
+            dir.Normalize();
+        else
+            dir = toolFacing;
         float fwd = (it.hitboxForward >= 0f) ? it.hitboxForward : originDist;
 
         Vector3 center = (Vector2)transform.position + dir * fwd;

@@ -103,9 +103,7 @@ public class PlayerPlanting : MonoBehaviour
                 ? new Vector2(Mathf.Sign(toTarget.x), 0f)
                 : new Vector2(0f, Mathf.Sign(toTarget.y));
 
-            animator.SetFloat("Horizontal", facing.x);
-            animator.SetFloat("Vertical", facing.y);
-            if (sprite) sprite.flipX = facing.x < 0f;
+            TopDownAnimatorUtility.ApplyFacing(animator, sprite, facing);
         }
 
         isHandHarvesting = true;

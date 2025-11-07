@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rb;
     Vector2 moveInput;
     Vector2 lastFacing = Vector2.right;
+    Vector2 appliedAnimFacing = Vector2.right;
     Vector2 pendingMoveInput;
     public bool MoveLocked { get; private set; }
     public Vector2 Facing4 => lastFacing;
@@ -37,26 +38,23 @@ public class PlayerController : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
     }
-    static readonly int SpeedHash = Animator.StringToHash("Speed");
     void Update()
     {
         // 1) Lưu hướng cuối cùng khi có input (ưu tiên trục ngang/dọc)
         if (moveInput.sqrMagnitude > 0.0001f)
-            UpdateFacingFrom(moveInput);
+            lastFacing = TopDownAnimatorUtility.UpdateFacing(moveInput, lastFacing);
 
         // 2) Nuôi tham số Speed của Animator bằng tốc độ thật
-        float speedWorld = currentSpeed;                 // ví dụ 5 hoặc 2.5 khi kiệt sức
-        if (anim) anim.SetFloat("Speed", speedWorld);
+        TopDownAnimatorUtility.ApplySpeed(anim, currentSpeed);
 
         // 3) Chỉ ghi hướng khi không bị lock và có input
         if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f)
         {
-            if (anim)
+            if (appliedAnimFacing != lastFacing)
             {
-                anim.SetFloat("Horizontal", lastFacing.x);
-                anim.SetFloat("Vertical", lastFacing.y);
+                TopDownAnimatorUtility.ApplyFacing(anim, sprite, lastFacing);
+                appliedAnimFacing = lastFacing;
             }
-            if (sprite) sprite.flipX = lastFacing.x < 0f;
         }
     }
     void FixedUpdate()
@@ -68,39 +66,24 @@ public class PlayerController : MonoBehaviour
         currentSpeed = rb.velocity.magnitude; // nuôi speedWorld cho Update
     }
     // helper
-    void UpdateFacingFrom(Vector2 v)
-    {
-        if (v.sqrMagnitude > 0.0001f)
-            lastFacing = (Mathf.Abs(v.x) >= Mathf.Abs(v.y))
-                ? new Vector2(Mathf.Sign(v.x), 0)
-                : new Vector2(0, Mathf.Sign(v.y));
-
-    }
-
     public Vector2 PendingFacing4()
     {
         var v = pendingMoveInput;
         if (v.sqrMagnitude <= 0.0001f) return Vector2.zero;
-        return (Mathf.Abs(v.x) >= Mathf.Abs(v.y))
-            ? new Vector2(Mathf.Sign(v.x), 0)
-            : new Vector2(0, Mathf.Sign(v.y));
+        return TopDownAnimatorUtility.SnapToCardinal(v);
     }
     void ApplyFacing(Vector2 f)
     {
-        if (anim)
-        {
-            anim.SetFloat("Horizontal", f.x);
-            anim.SetFloat("Vertical", f.y);
-        }
-        if (sprite) sprite.flipX = f.x < 0f;
+        TopDownAnimatorUtility.ApplyFacing(anim, sprite, f);
+        appliedAnimFacing = f;
     }
-    
+
     public void ApplyPendingMove()
     {
         if (pendingMoveInput.sqrMagnitude > 1e-4f)
         {
             moveInput = pendingMoveInput;
-            UpdateFacingFrom(moveInput);
+            lastFacing = TopDownAnimatorUtility.UpdateFacing(moveInput, lastFacing);
         }
         else
         {
@@ -118,25 +101,18 @@ public class PlayerController : MonoBehaviour
             return;
         }
         moveInput = input;
-        UpdateFacingFrom(moveInput);
+        lastFacing = TopDownAnimatorUtility.UpdateFacing(moveInput, lastFacing);
     }
 
     public void ForceFace(Vector2 dir)
     {
         if (dir.sqrMagnitude < 1e-4f) return;
         // snap 4 hướng (đổi sang 8 nếu cần)
-        Vector2 f = Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)
-            ? new Vector2(Mathf.Sign(dir.x), 0)
-            : new Vector2(0, Mathf.Sign(dir.y));
+        Vector2 f = TopDownAnimatorUtility.SnapToCardinal(dir);
 
         lastFacing = f;
-        if (anim)
-        {
-            anim.SetFloat("Horizontal", f.x);
-            anim.SetFloat("Vertical", f.y);
-        }
-        if (sprite) sprite.flipX = f.x < 0f;
-        Debug.Log($"ForceFace -> {f}");
+        TopDownAnimatorUtility.ApplyFacing(anim, sprite, f);
+        appliedAnimFacing = f;
     }
 
 }
