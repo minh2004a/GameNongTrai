@@ -122,7 +122,6 @@ public class PlayerUseTool : MonoBehaviour
         BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
         if (pendingCells.Count == 0) return;
 
-        FaceDirection(facing);
         StartToolUse(item, facing, rangeTiles);
     }
 
@@ -221,13 +220,13 @@ public class PlayerUseTool : MonoBehaviour
         activeToolType = item.toolType;
         activeFacing = facing;
         activeToolRangeTiles = rangeTiles;
-        FaceDirection(activeFacing);
         toolLocked = true;
         toolFailSafeTimer = toolFailSafeSeconds;
         cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown);
 
-        TriggerToolAnimation(activeToolType);
         LockMove(true);
+        FaceDirection(activeFacing);
+        TriggerToolAnimation(activeToolType);
     }
 
     void FaceDirection(Vector2 facing)
