@@ -188,7 +188,7 @@ public class PlayerUseTool : MonoBehaviour
                 }
 
                 targetCell = playerCell + delta;
-                facing = DetermineFacing(delta);
+                facing = DetermineFacing(delta, clickWorld - playerWorld);
                 rangeTiles = 1;
                 return true;
             case ToolType.WateringCan:
@@ -204,7 +204,7 @@ public class PlayerUseTool : MonoBehaviour
                 if (delta == Vector2Int.zero)
                 {
                     targetCell = playerCell;
-                    facing = DetermineFacing(delta);
+                    facing = DetermineFacing(delta, clickWorld - playerWorld);
                     return true;
                 }
 
@@ -215,7 +215,7 @@ public class PlayerUseTool : MonoBehaviour
                 }
 
                 targetCell = playerCell + delta;
-                facing = DetermineFacing(delta);
+                facing = DetermineFacing(delta, clickWorld - playerWorld);
                 return true;
             default:
                 if (!IsWithinRange(delta, rangeTiles))
@@ -224,7 +224,7 @@ public class PlayerUseTool : MonoBehaviour
                     return false;
                 }
 
-                facing = DetermineFacing(delta);
+                facing = DetermineFacing(delta, clickWorld - playerWorld);
                 return true;
         }
     }
@@ -247,10 +247,20 @@ public class PlayerUseTool : MonoBehaviour
         return worldDelta.x >= 0f ? Vector2Int.right : Vector2Int.left;
     }
 
-    Vector2 DetermineFacing(Vector2Int delta)
+    Vector2 DetermineFacing(Vector2Int delta, Vector2 worldDelta)
     {
         if (delta == Vector2Int.zero)
         {
+            if (worldDelta.sqrMagnitude > 0.0001f)
+            {
+                if (Mathf.Abs(worldDelta.y) >= Mathf.Abs(worldDelta.x))
+                {
+                    return worldDelta.y >= 0f ? Vector2.up : Vector2.down;
+                }
+
+                return worldDelta.x >= 0f ? Vector2.right : Vector2.left;
+            }
+
             if (controller)
             {
                 var f = controller.Facing4;
