@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: HoeWood
+  m_Name: New Item SO
   m_EditorClassIdentifier: 
-  id: HoeWood
-  icon: {fileID: 1508434368, guid: 791eb7bc0f0ffb64fb4797b58f8d2767, type: 3}
+  id: 
+  icon: {fileID: 0}
   seedData: {fileID: 0}
   category: 0
-  stackable: 0
+  stackable: 1
   weaponType: 0
-  toolType: 2
+  toolType: 0
   maxStack: 999
   hitboxScale: 1
-  hitboxYOffset: 0.2
-  hitboxForward: 0.8
+  hitboxYOffset: 0
+  hitboxForward: -1
   Dame: 1
-  range: 0.35
-  cooldown: 0.4
+  range: 1
+  cooldown: 0.2
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10
   projectileMaxDistance: 8

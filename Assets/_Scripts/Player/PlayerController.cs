@@ -1,3 +1,4 @@
+﻿﻿
 ﻿﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -136,7 +137,6 @@ public class PlayerController : MonoBehaviour
             anim.SetFloat("Vertical", f.y);
         }
         if (sprite) sprite.flipX = f.x < 0f;
-        Debug.Log($"ForceFace -> {f}");
     }
 
 }

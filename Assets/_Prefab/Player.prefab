@@ -18,7 +18,6 @@ GameObject:
   - component: {fileID: 3709775072873596830}
   - component: {fileID: 1845909153704676813}
   - component: {fileID: 1118344859087931616}
-  - component: {fileID: 4847355743231601365}
   - component: {fileID: 2944587308785528253}
   - component: {fileID: 9196139618529040389}
   - component: {fileID: 8069884629022415873}
@@ -26,6 +25,7 @@ GameObject:
   - component: {fileID: 9170890197009293846}
   - component: {fileID: 1058324450758781111}
   - component: {fileID: 6297676587867245985}
+  - component: {fileID: 1074349766864131868}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -328,32 +328,6 @@ MonoBehaviour:
     m_Bits: 256
   defaultForward: 0.6
   minCooldown: 0.15
---- !u!114 &4847355743231601365
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936923126784610755}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 734bfd2b0b23f804d85dba9c302f8271, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stamina: {fileID: 9196139618529040389}
-  inv: {fileID: 1845909153704676813}
-  anim: {fileID: 2327405225107318857}
-  hitOrigin: {fileID: 6044478509660338191}
-  hitMask:
-    serializedVersion: 2
-    m_Bits: 131328
-  pc: {fileID: 5362268058865736135}
-  sleep: {fileID: 0}
-  originDist: 0.4
-  exhaustedActionTimeMult: 1.6
-  exhaustedAnimSpeedMult: 0.7
-  soilManager: {fileID: 0}
-  toolFailSafe: 0.4
 --- !u!114 &2944587308785528253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,7 +373,6 @@ MonoBehaviour:
   current: 270
   bowCost: 27
   swordCost: 0
-  toolCost: 1.5
   moveDrainPerSecond: 0
   regenPerSecond: 0
   regenDelay: 0
@@ -531,6 +504,28 @@ MonoBehaviour:
   hotbarColor: {r: 1, g: 1, b: 1, a: 1}
   bagColor: {r: 0.85, g: 0.95, b: 1, a: 1}
   groundColor: {r: 1, g: 0.7, b: 0.7, a: 1}
+--- !u!114 &1074349766864131868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936923126784610755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82622559c6f6e5a4ba8c4dfcb61598a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory: {fileID: 1845909153704676813}
+  controller: {fileID: 5362268058865736135}
+  animator: {fileID: 2327405225107318857}
+  sprite: {fileID: 6288386847750319070}
+  soilManager: {fileID: 0}
+  body: {fileID: 8754012071114403644}
+  baseRangeTiles: 1
+  bonusRangeTiles: 1
+  minToolCooldown: 0.15
+  toolFailSafeSeconds: 0.4
 --- !u!1 &3900807971405855068
 GameObject:
   m_ObjectHideFlags: 0
