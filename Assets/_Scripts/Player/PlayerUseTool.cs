@@ -17,6 +17,8 @@ public class PlayerUseTool : MonoBehaviour
     [SerializeField] SpriteRenderer sprite;
     [SerializeField] SoilManager soilManager;
     [SerializeField] Rigidbody2D body;
+    [SerializeField] PlayerStamina stamina;
+    [SerializeField] SleepManager sleep;
 
     [Header("Range")]
     [SerializeField, Min(1)] int baseRangeTiles = 1;
@@ -25,6 +27,8 @@ public class PlayerUseTool : MonoBehaviour
     [Header("Timing")]
     [SerializeField, Min(0.05f)] float minToolCooldown = 0.15f;
     [SerializeField, Min(0.1f)] float toolFailSafeSeconds = 3f;
+    [SerializeField] float exhaustedActionTimeMult = 1.5f;
+    [SerializeField, Range(0.1f, 1f)] float exhaustedAnimSpeedMult = 0.7f;
 
     static readonly int HorizontalHash = Animator.StringToHash("Horizontal");
     static readonly int VerticalHash = Animator.StringToHash("Vertical");
@@ -51,6 +55,7 @@ public class PlayerUseTool : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         sprite = GetComponentInChildren<SpriteRenderer>();
         body = GetComponent<Rigidbody2D>();
+        stamina = GetComponent<PlayerStamina>();
     }
 
     void Awake()
@@ -63,6 +68,8 @@ public class PlayerUseTool : MonoBehaviour
             sprite = controller ? controller.GetComponentInChildren<SpriteRenderer>() : GetComponentInChildren<SpriteRenderer>();
         }
         if (!body) body = GetComponent<Rigidbody2D>();
+        if (!stamina) stamina = GetComponent<PlayerStamina>();
+        if (!sleep) sleep = FindFirstObjectByType<SleepManager>();
         cachedCamera = Camera.main;
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
     }
@@ -122,6 +129,12 @@ public class PlayerUseTool : MonoBehaviour
         pendingCells.Clear();
         BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
         if (pendingCells.Count == 0) return;
+
+        if (!TryConsumeToolCost(item.toolType))
+        {
+            pendingCells.Clear();
+            return;
+        }
 
         StartToolUse(item, facing, rangeTiles);
     }
@@ -232,6 +245,33 @@ public class PlayerUseTool : MonoBehaviour
         }
     }
 
+    bool TryConsumeToolCost(ToolType toolType)
+    {
+        if (!stamina) return true;
+
+        float cost = 0f;
+        switch (toolType)
+        {
+            case ToolType.Hoe:
+                cost = stamina.hoeCost;
+                break;
+        }
+
+        if (cost <= 0f) return true;
+
+        var result = stamina.SpendExhaustible(cost);
+        if (result == PlayerStamina.SpendResult.Fainted)
+        {
+            sleep?.FaintNow();
+            return false;
+        }
+
+        return true;
+    }
+
+    float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
+    float AnimSpeedMult() => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
+
     void StartToolUse(ItemSO item, Vector2 facing, int rangeTiles)
     {
         activeTool = item;
@@ -239,12 +279,13 @@ public class PlayerUseTool : MonoBehaviour
         activeFacing = facing;
         activeToolRangeTiles = rangeTiles;
         toolLocked = true;
-        toolFailSafeTimer = toolFailSafeSeconds;
-        cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown);
+        toolFailSafeTimer = toolFailSafeSeconds * ActionTimeMult();
+        cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown) * ActionTimeMult();
 
         LockMove(true);
         FaceDirection(activeFacing);
         TriggerToolAnimation(activeToolType);
+        if (animator) animator.speed = AnimSpeedMult();
     }
 
     void FaceDirection(Vector2 facing)
@@ -309,6 +350,7 @@ public class PlayerUseTool : MonoBehaviour
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
         LockMove(false);
         controller?.ApplyPendingMove();
+        if (animator) animator.speed = 1f;
     }
 
     // Animation Event: đảm bảo Animator luôn giữ hướng khoá
@@ -356,5 +398,6 @@ public class PlayerUseTool : MonoBehaviour
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
         LockMove(false);
         controller?.ApplyPendingMove();
+        if (animator) animator.speed = 1f;
     }
 }
