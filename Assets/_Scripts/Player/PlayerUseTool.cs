@@ -111,13 +111,12 @@ public class PlayerUseTool : MonoBehaviour
         if (!soil) return;
 
         Vector2Int playerCell = soil.WorldToCell(transform.position);
-        Vector2Int targetCell = soil.WorldToCell(clickWorld);
-        Vector2Int delta = targetCell - playerCell;
+        Vector2Int requestedCell = soil.WorldToCell(clickWorld);
 
-        int rangeTiles = GetToolRangeTiles(item);
-        if (!IsWithinRange(delta, rangeTiles)) return;
-
-        Vector2 facing = DetermineFacing(delta);
+        if (!TryResolveToolTarget(item, playerCell, requestedCell, out var targetCell, out var facing, out var rangeTiles))
+        {
+            return;
+        }
 
         pendingCells.Clear();
         BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
@@ -140,6 +139,45 @@ public class PlayerUseTool : MonoBehaviour
     bool IsWithinRange(Vector2Int delta, int rangeTiles)
     {
         return !(delta == Vector2Int.zero) && Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y)) <= rangeTiles;
+    }
+
+    bool TryResolveToolTarget(ItemSO item, Vector2Int playerCell, Vector2Int requestedCell, out Vector2Int targetCell, out Vector2 facing, out int rangeTiles)
+    {
+        targetCell = requestedCell;
+        facing = Vector2.down;
+        rangeTiles = GetToolRangeTiles(item);
+
+        Vector2Int delta = requestedCell - playerCell;
+
+        switch (item.toolType)
+        {
+            case ToolType.Hoe:
+                if (!IsHoeOffset(delta))
+                {
+                    targetCell = Vector2Int.zero;
+                    return false;
+                }
+
+                targetCell = playerCell + delta;
+                facing = DetermineFacing(delta);
+                rangeTiles = 1;
+                return true;
+            default:
+                if (!IsWithinRange(delta, rangeTiles))
+                {
+                    targetCell = Vector2Int.zero;
+                    return false;
+                }
+
+                facing = DetermineFacing(delta);
+                return true;
+        }
+    }
+
+    bool IsHoeOffset(Vector2Int delta)
+    {
+        if (delta == Vector2Int.zero) return false;
+        return Mathf.Abs(delta.x) <= 1 && Mathf.Abs(delta.y) <= 1;
     }
 
     Vector2 DetermineFacing(Vector2Int delta)
