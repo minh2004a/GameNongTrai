@@ -378,6 +378,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2998a8c59c37e764abb9614ef4e0957d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tool: {fileID: 0}
+  srs: []
+  lockFlipX: 0
 --- !u!206 &-4927567705445862695
 BlendTree:
   m_ObjectHideFlags: 1
@@ -1431,7 +1434,7 @@ BlendTree:
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: 624985ac263cda24f8cb6f95915051d6, type: 2}
     m_Threshold: 0
-    m_Position: {x: 0.05, y: -1.02}
+    m_Position: {x: 0, y: -1}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: Horizontal
@@ -1999,6 +2002,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2998a8c59c37e764abb9614ef4e0957d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tool: {fileID: 0}
+  srs: []
+  lockFlipX: 0
 --- !u!1102 &7921043027756209978
 AnimatorState:
   serializedVersion: 6
@@ -2172,3 +2178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2998a8c59c37e764abb9614ef4e0957d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tool: {fileID: 0}
+  srs: []
+  lockFlipX: 0

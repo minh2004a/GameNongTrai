@@ -1,8 +1,9 @@
 
+
 using UnityEngine;
 
 // Xử lý chặt cây: trừ HP, spawn FX, tạo gốc cây, và lưu trạng thái đã chặt
-public class TreeChopTarget : MonoBehaviour, IToolTarget
+public class TreeChopTarget : MonoBehaviour, IDamageable
 {
     [Header("HP & Drop")]
     public int maxHp = 3;
@@ -20,16 +21,23 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         sr = GetComponentInChildren<SpriteRenderer>();
     }
 
-    public void Hit(ToolType tool, int damage, Vector2 pushDir)
+    public void TakeHit(int damage)
     {
-        if (tool != ToolType.Axe) return;
+        ApplyDamage(damage, Vector2.zero);
+    }
+
+    public void ApplyDamage(int damage, Vector2 pushDir)
+    {
+        if (hp <= 0) return;
 
         hp = Mathf.Max(0, hp - Mathf.Max(1, damage));
 
-        // FX mỗi nhát chém
+        // FX mỗi lần bị đánh
         SpawnChopFX(transform.position);
 
         if (hp > 0) return;
+
+        Vector2 scatterDir = pushDir.sqrMagnitude > 0.001f ? pushDir.normalized : Vector2.zero;
 
         // Hết HP: tạo gốc cây
         var drop = GetComponent<DropLootOnDeath>();
@@ -37,7 +45,7 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         if (sTag)
         {
             SaveStore.MarkStumpClearedPending(gameObject.scene.name, sTag.treeId);
-            if (drop) drop.SetScatterDirection(pushDir);
+            if (scatterDir != Vector2.zero) drop?.SetScatterDirection(scatterDir);
             drop?.Drop();
             Destroy(gameObject);
             return;
@@ -50,7 +58,7 @@ public class TreeChopTarget : MonoBehaviour, IToolTarget
         var plant = GetComponentInParent<PlantGrowth>();
         if (uid) SaveStore.MarkTreeChoppedPending(gameObject.scene.name, uid.Id);
 
-        if (drop) drop.SetScatterDirection(pushDir);
+        if (scatterDir != Vector2.zero) drop?.SetScatterDirection(scatterDir);
 
         if (stumpPrefab)
         {
