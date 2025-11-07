@@ -27,7 +27,6 @@ public class PlayerUseTool : MonoBehaviour
     [SerializeField, Min(0)] int bonusRangeTiles = 0;
 
     [Header("Timing")]
-    [SerializeField, Min(0.05f)] float minToolCooldown = 0.15f;
     [SerializeField, Min(0.1f)] float toolFailSafeSeconds = 3f;
     [SerializeField] float exhaustedActionTimeMult = 1.5f;
     [SerializeField, Range(0.1f, 1f)] float exhaustedAnimSpeedMult = 0.7f;
@@ -49,7 +48,6 @@ public class PlayerUseTool : MonoBehaviour
     Vector2 activeFacing = Vector2.down;
     bool toolLocked;
     float toolFailSafeTimer;
-    float cooldownTimer;
     int activeToolRangeTiles = 1;
 
     public int CurrentToolRangeTiles => activeToolRangeTiles;
@@ -86,8 +84,6 @@ public class PlayerUseTool : MonoBehaviour
 
     void Update()
     {
-        if (cooldownTimer > 0f) cooldownTimer -= Time.deltaTime;
-
         if (toolLocked)
         {
             toolFailSafeTimer -= Time.deltaTime;
@@ -111,7 +107,7 @@ public class PlayerUseTool : MonoBehaviour
 
     void TryBeginToolUse()
     {
-        if (toolLocked || cooldownTimer > 0f) return;
+        if (toolLocked) return;
         if (UIInputGuard.BlockInputNow()) return;
 
         var item = inventory ? inventory.CurrentItem : null;
@@ -322,7 +318,6 @@ public class PlayerUseTool : MonoBehaviour
         activeToolRangeTiles = rangeTiles;
         toolLocked = true;
         toolFailSafeTimer = toolFailSafeSeconds * ActionTimeMult();
-        cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown) * ActionTimeMult();
 
         LockMove(true);
         FaceDirection(activeFacing);

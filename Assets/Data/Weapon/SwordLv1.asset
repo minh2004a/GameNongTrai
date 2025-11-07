@@ -25,7 +25,6 @@ MonoBehaviour:
   hitboxForward: 0.7
   Dame: 8
   range: 0.45
-  cooldown: 0.4
   projectilePrefab: {fileID: 0}
   projectileSpeed: 10
   projectileMaxDistance: 8

@@ -528,7 +528,6 @@ MonoBehaviour:
   sleep: {fileID: 0}
   baseRangeTiles: 1
   bonusRangeTiles: 0
-  minToolCooldown: 0.15
   toolFailSafeSeconds: 0.5
   exhaustedActionTimeMult: 1.5
   exhaustedAnimSpeedMult: 0.7

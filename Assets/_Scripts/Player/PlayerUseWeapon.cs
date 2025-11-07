@@ -27,8 +27,7 @@ public class PlayerUseWeapon : MonoBehaviour
     Vector2 swordFacing;
     float bowTimer;
     [SerializeField] float defaultForward = 0.6f;   // NEW: khoảng cách tâm hitbox mặc định cho kiếm
-    [SerializeField] float minCooldown = 0.15f;
-    Rigidbody2D rb; Vector2 move, lastFacing = Vector2.down; float cd;
+    Rigidbody2D rb; Vector2 move, lastFacing = Vector2.down;
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult()   => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
     void Awake()
@@ -38,8 +37,6 @@ public class PlayerUseWeapon : MonoBehaviour
         if (!inv) inv = GetComponent<PlayerInventory>();
     }
     void Update(){
-    if (cd > 0) cd -= Time.deltaTime;
-   
     if (bowLocked){ bowTimer -= Time.deltaTime; if (bowTimer <= 0f) BowEnd(); }
     if (swordLocked){ swordTimer -= Time.deltaTime; if (swordTimer <= 0f) AttackEnd(); }
 
@@ -89,13 +86,12 @@ public class PlayerUseWeapon : MonoBehaviour
     }
 
     public void OnUse(InputValue v){
-    if (!v.isPressed || cd > 0 || swordLocked || bowLocked) return;
+    if (!v.isPressed || swordLocked || bowLocked) return;
     if (UIInputGuard.BlockInputNow()) return;   // <— THÊM DÒNG NÀY
     var it = inv?.CurrentItem; if (it==null || it.category!=ItemCategory.Weapon) return;
 
     if (it.weaponType == WeaponType.Bow)
         {
-        cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
         if (!stamina) return;
         var r1 = stamina.SpendExhaustible(stamina.bowCost);
         if (r1 == PlayerStamina.SpendResult.Fainted) { sleep.FaintNow(); return; }
@@ -105,17 +101,14 @@ public class PlayerUseWeapon : MonoBehaviour
         ApplyFacingAndFlip(face);            // cập nhật Animator + flip
         anim?.ResetTrigger("Shoot");
         anim?.SetTrigger("Shoot");
-        cd = Mathf.Max(minCooldown, it.cooldown);
         return;
     }
         if (it.weaponType == WeaponType.Sword)
         {
-           cd = Mathf.Max(minCooldown, it.cooldown) * ActionTimeMult();
             if (!stamina) return;
             var r2 = stamina.SpendExhaustible(stamina.swordCost);
             if (r2 == PlayerStamina.SpendResult.Fainted){ sleep.FaintNow(); return; }
             anim?.ResetTrigger("Attack"); anim?.SetTrigger("Attack");
-            cd = Mathf.Max(minCooldown, it.cooldown);
             return;
         }
     // Rìu

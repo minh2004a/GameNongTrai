@@ -41,8 +41,6 @@ public class ItemSO : ScriptableObject
     public int Dame = 1;
     public float range = 1f;
     // public float radius = 0.35f;
-    public float cooldown = 0.2f;
-
     // cho Bow (để null với vũ khí/công cụ khác)
     public GameObject projectilePrefab;
     public float projectileSpeed = 10f;
