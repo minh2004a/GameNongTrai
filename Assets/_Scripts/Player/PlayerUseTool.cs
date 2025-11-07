@@ -122,6 +122,7 @@ public class PlayerUseTool : MonoBehaviour
         BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
         if (pendingCells.Count == 0) return;
 
+        FaceDirection(facing);
         StartToolUse(item, facing, rangeTiles);
     }
 
@@ -220,25 +221,30 @@ public class PlayerUseTool : MonoBehaviour
         activeToolType = item.toolType;
         activeFacing = facing;
         activeToolRangeTiles = rangeTiles;
+        FaceDirection(activeFacing);
         toolLocked = true;
         toolFailSafeTimer = toolFailSafeSeconds;
         cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown);
 
-        ApplyFacing();
         TriggerToolAnimation(activeToolType);
         LockMove(true);
     }
 
-    void ApplyFacing()
+    void FaceDirection(Vector2 facing)
     {
-        if (controller) controller.ForceFace(activeFacing);
+        if (controller) controller.ForceFace(facing);
         if (animator)
         {
-            animator.SetFloat(HorizontalHash, activeFacing.x);
-            animator.SetFloat(VerticalHash, activeFacing.y);
+            animator.SetFloat(HorizontalHash, facing.x);
+            animator.SetFloat(VerticalHash, facing.y);
             animator.SetFloat(SpeedHash, 0f);
         }
-        if (sprite) sprite.flipX = activeFacing.x < 0f;
+        if (sprite) sprite.flipX = facing.x < 0f;
+    }
+
+    void ApplyFacing()
+    {
+        FaceDirection(activeFacing);
     }
 
     void TriggerToolAnimation(ToolType type)
