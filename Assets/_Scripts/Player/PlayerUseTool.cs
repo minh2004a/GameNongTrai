@@ -1,4 +1,5 @@
 
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,8 +40,9 @@ public class PlayerUseTool : MonoBehaviour
     bool toolLocked;
     float toolFailSafeTimer;
     float cooldownTimer;
+    int activeToolRangeTiles = 1;
 
-    int TotalRangeTiles => Mathf.Max(1, baseRangeTiles + bonusRangeTiles);
+    public int CurrentToolRangeTiles => activeToolRangeTiles;
 
     void Reset()
     {
@@ -62,6 +64,7 @@ public class PlayerUseTool : MonoBehaviour
         }
         if (!body) body = GetComponent<Rigidbody2D>();
         cachedCamera = Camera.main;
+        activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
     }
 
     void Update()
@@ -86,6 +89,7 @@ public class PlayerUseTool : MonoBehaviour
     public void SetBonusRange(int bonusTiles)
     {
         bonusRangeTiles = Mathf.Max(0, bonusTiles);
+        activeToolRangeTiles = GetToolRangeTiles(activeTool);
     }
 
     void TryBeginToolUse()
@@ -110,7 +114,8 @@ public class PlayerUseTool : MonoBehaviour
         Vector2Int targetCell = soil.WorldToCell(clickWorld);
         Vector2Int delta = targetCell - playerCell;
 
-        if (!IsWithinRange(delta)) return;
+        int rangeTiles = GetToolRangeTiles(item);
+        if (!IsWithinRange(delta, rangeTiles)) return;
 
         Vector2 facing = DetermineFacing(delta);
 
@@ -118,13 +123,23 @@ public class PlayerUseTool : MonoBehaviour
         BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
         if (pendingCells.Count == 0) return;
 
-        StartToolUse(item, facing);
+        StartToolUse(item, facing, rangeTiles);
     }
 
-    bool IsWithinRange(Vector2Int delta)
+    int GetToolRangeTiles(ItemSO item)
     {
-        int r = TotalRangeTiles;
-        return !(delta == Vector2Int.zero) && Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y)) <= r;
+        int baseTiles = baseRangeTiles;
+        if (item && item.toolRangeTiles > 0)
+        {
+            baseTiles = item.toolRangeTiles;
+        }
+
+        return Mathf.Max(1, baseTiles + bonusRangeTiles);
+    }
+
+    bool IsWithinRange(Vector2Int delta, int rangeTiles)
+    {
+        return !(delta == Vector2Int.zero) && Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y)) <= rangeTiles;
     }
 
     Vector2 DetermineFacing(Vector2Int delta)
@@ -161,11 +176,12 @@ public class PlayerUseTool : MonoBehaviour
         }
     }
 
-    void StartToolUse(ItemSO item, Vector2 facing)
+    void StartToolUse(ItemSO item, Vector2 facing, int rangeTiles)
     {
         activeTool = item;
         activeToolType = item.toolType;
         activeFacing = facing;
+        activeToolRangeTiles = rangeTiles;
         toolLocked = true;
         toolFailSafeTimer = toolFailSafeSeconds;
         cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown);
@@ -229,6 +245,7 @@ public class PlayerUseTool : MonoBehaviour
         pendingCells.Clear();
         activeTool = null;
         activeToolType = ToolType.None;
+        activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
         LockMove(false);
         controller?.ApplyPendingMove();
     }
@@ -275,6 +292,7 @@ public class PlayerUseTool : MonoBehaviour
         pendingCells.Clear();
         activeTool = null;
         activeToolType = ToolType.None;
+        activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
         LockMove(false);
         controller?.ApplyPendingMove();
     }

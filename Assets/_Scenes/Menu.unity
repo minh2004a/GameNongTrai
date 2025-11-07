@@ -2105,8 +2105,12 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 1074349766864131868, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+      propertyPath: bonusRangeTiles
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1074349766864131868, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: toolFailSafeSeconds
-      value: 0.4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8600441533436656489, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: m_LocalPosition.x

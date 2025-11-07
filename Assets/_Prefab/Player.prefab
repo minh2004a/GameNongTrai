@@ -523,7 +523,7 @@ MonoBehaviour:
   soilManager: {fileID: 0}
   body: {fileID: 8754012071114403644}
   baseRangeTiles: 1
-  bonusRangeTiles: 1
+  bonusRangeTiles: 0
   minToolCooldown: 0.15
   toolFailSafeSeconds: 0.4
 --- !u!1 &3900807971405855068
