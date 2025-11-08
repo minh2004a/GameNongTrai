@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-2716735836827864070
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
+  m_Name: Ground_Spring (Override)
+  m_EditorClassIdentifier: 
+  m_DefaultSprite: {fileID: 856507941, guid: 527c1d345ee3fcf42a6f8babad82dcac, type: 3}
+  m_DefaultGameObject: {fileID: 0}
+  m_DefaultColliderType: 1
+  m_TilingRules: []
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c779848d9dd029409ca676b49e10a18, type: 3}
+  m_Name: Ground_Winter
+  m_EditorClassIdentifier: 
+  m_Tile: {fileID: 11400000, guid: c8da41cb52027e04fb91b1fcac94d554, type: 2}
+  m_Sprites:
+  - m_OriginalSprite: {fileID: 17448727, guid: 137acbf97ee98e1449448e782745d916, type: 3}
+    m_OverrideSprite: {fileID: 856507941, guid: 527c1d345ee3fcf42a6f8babad82dcac, type: 3}
+  m_GameObjects: []
+  m_InstanceTile: {fileID: -2716735836827864070}

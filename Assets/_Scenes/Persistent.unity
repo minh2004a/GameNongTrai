@@ -4030,6 +4030,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1425422338}
   - component: {fileID: 1425422339}
+  - component: {fileID: 1425422340}
   m_Layer: 0
   m_Name: Time
   m_TagString: Untagged
@@ -4073,6 +4074,32 @@ MonoBehaviour:
   minutesPerRealSecond: 1.7
   timeText: {fileID: 1392092091}
   dayText: {fileID: 1880043497}
+--- !u!114 &1425422340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425422337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fae9f56426ccf2f4c9e25a68aa80edc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useFixedCycle: 1
+  daysPerSeason: 1
+  defaultSeason: 0
+  seasonSchedule:
+  - season: 0
+    startDay: 1
+  - season: 1
+    startDay: 2
+  - season: 2
+    startDay: 3
+  - season: 3
+    startDay: 4
+  tilemapTargets: []
+  applyImmediatelyOnStart: 1
 --- !u!1 &1444200540
 GameObject:
   m_ObjectHideFlags: 0
