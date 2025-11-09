@@ -54,6 +54,7 @@
   <Project Path="Unity.2D.Common.Editor.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.2D.Internal.csproj" />
   <Project Path="Unity.2D.PixelPerfect.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Unity.2D.PixelPerfect.Editor.csproj" />
   <Project Path="Unity.InputSystem.DocCodeSamples.csproj" />
   <Project Path="Unity.2D.Common.Runtime.csproj" />
@@ -66,7 +67,6 @@
   <Project Path="Unity.VisualScripting.Shared.Editor.csproj" />
   <Project Path="Unity.Collections.DocCodeSamples.csproj" />
   <Project Path="Unity.Collections.BurstCompatibilityGen.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Config.Runtime.csproj" />
   <Project Path="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.csproj" />
   <Project Path="Unity.RenderPipelines.Core.ShaderLibrary.csproj" />

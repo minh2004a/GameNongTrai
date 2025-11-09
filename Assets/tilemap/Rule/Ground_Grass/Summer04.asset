@@ -15,7 +15,7 @@ MonoBehaviour:
   m_Tile: {fileID: 11400000, guid: 6d89d29c1aef52f40ab8ce3ace8b8310, type: 2}
   m_Sprites:
   - m_OriginalSprite: {fileID: -1157995285, guid: 137acbf97ee98e1449448e782745d916, type: 3}
-    m_OverrideSprite: {fileID: 520616492, guid: 137acbf97ee98e1449448e782745d916, type: 3}
+    m_OverrideSprite: {fileID: 466659249, guid: 835bbd9ac914fd447a93100e69219d6b, type: 3}
   m_GameObjects: []
   m_InstanceTile: {fileID: 1230848078713236997}
 --- !u!114 &1230848078713236997
@@ -28,9 +28,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
-  m_Name: Ground_Grass_Spring04 (Override)
+  m_Name: Spring04 (Override)
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: 520616492, guid: 137acbf97ee98e1449448e782745d916, type: 3}
+  m_DefaultSprite: {fileID: 466659249, guid: 835bbd9ac914fd447a93100e69219d6b, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules: []

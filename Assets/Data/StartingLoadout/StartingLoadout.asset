@@ -33,12 +33,12 @@ MonoBehaviour:
     amount: 99
     equip: 0
     hotbarSlot: 3
-  - item: {fileID: 11400000, guid: 581cb79b7b7443b4baaf2d03e9af133b, type: 2}
+  - item: {fileID: 11400000, guid: dbbcff6029ee4174f9759cebd6e038d2, type: 2}
     itemKey: 
-    amount: 1
+    amount: 99
     equip: 0
     hotbarSlot: 4
-  - item: {fileID: 11400000, guid: f197e2442a6ea4042a90a0f1a6a236d6, type: 2}
+  - item: {fileID: 0}
     itemKey: 
     amount: 1
     equip: 0
@@ -53,23 +53,3 @@ MonoBehaviour:
     amount: 0
     equip: 0
     hotbarSlot: 7
-  - item: {fileID: 0}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 6
-  - item: {fileID: 0}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 6
-  - item: {fileID: 0}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 6
-  - item: {fileID: 0}
-    itemKey: 
-    amount: 1
-    equip: 0
-    hotbarSlot: 6

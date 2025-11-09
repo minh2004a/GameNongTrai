@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SeedPotato
+  m_Name: Carrot
   m_EditorClassIdentifier: 
-  id: SeedPotato
-  icon: {fileID: -1623039414, guid: 04f4eed6b8d32cc4b8fa5d816d694f1c, type: 3}
-  seedData: {fileID: 11400000, guid: 9f2081d6c1b7db349840e16cb71cc8ba, type: 2}
-  category: 2
-  toolType: 0
+  id: Carrot
+  icon: {fileID: -52693575, guid: 04f4eed6b8d32cc4b8fa5d816d694f1c, type: 3}
+  seedData: {fileID: 0}
+  category: 3
   stackable: 1
   weaponType: 0
+  toolType: 0
+  toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0

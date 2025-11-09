@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
   m_Name: TreeBirch
   m_EditorClassIdentifier: 
-  seedId: "C\xE2y b\u1EA1ch d\u01B0\u01A1ng"
+  seedId: TreeBirch
   stagePrefabs:
   - {fileID: 3651510212793087248, guid: 4413c099cc7e45a4d84f49b9da6be883, type: 3}
   - {fileID: 9150040079066797203, guid: f6234b89f06831943a37cf9f8a220eac, type: 3}
@@ -38,3 +38,8 @@ MonoBehaviour:
   gridSize: 1
   requiresTilledSoil: 0
   requiresWatering: 0
+  harvestMethod: 0
+  harvestItem: {fileID: 0}
+  harvestItemCount: 1
+  destroyOnHarvest: 1
+  allowedSeasons: 

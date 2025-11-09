@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
   m_Name: Spring06 (Override)
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: -1391392138, guid: 835bbd9ac914fd447a93100e69219d6b, type: 3}
+  m_DefaultSprite: {fileID: 1615642502, guid: 835bbd9ac914fd447a93100e69219d6b, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules: []
@@ -31,6 +31,6 @@ MonoBehaviour:
   m_Tile: {fileID: 11400000, guid: 44d1749e63ce468468a8a1867f14ceab, type: 2}
   m_Sprites:
   - m_OriginalSprite: {fileID: 931368986, guid: 137acbf97ee98e1449448e782745d916, type: 3}
-    m_OverrideSprite: {fileID: -1391392138, guid: 835bbd9ac914fd447a93100e69219d6b, type: 3}
+    m_OverrideSprite: {fileID: 1615642502, guid: 835bbd9ac914fd447a93100e69219d6b, type: 3}
   m_GameObjects: []
   m_InstanceTile: {fileID: -2136358401988838471}

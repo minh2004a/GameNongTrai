@@ -15,10 +15,11 @@ MonoBehaviour:
   id: PineTree
   icon: {fileID: -334667441, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
   seedData: {fileID: 11400000, guid: 097c4a6721bc5474fb0cfd05f1783217, type: 2}
-  category: 4
-  toolType: 0
+  category: 5
   stackable: 1
   weaponType: 0
+  toolType: 0
+  toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0

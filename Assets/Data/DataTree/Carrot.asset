@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
-  m_Name: Potato
+  m_Name: Carrot
   m_EditorClassIdentifier: 
-  seedId: Potato
+  seedId: Carrot
   stagePrefabs:
-  - {fileID: 7930887471044461919, guid: 86a29f611b4faca44be477731aa42489, type: 3}
-  - {fileID: 7561514577489064249, guid: c5e729e873083674d9bb45537acd8ab6, type: 3}
-  - {fileID: 8101671915225503, guid: 9d0455ee94867cb42813e4d9e342f944, type: 3}
-  - {fileID: 7919579596319810351, guid: 0d9df97cb56bf8e4c945a7eaeac7dac2, type: 3}
-  - {fileID: 24607235231259619, guid: 762f849761d0bb44c88273d72baf5945, type: 3}
-  - {fileID: 5208824497724448737, guid: 9a64a38b4e2a81b45aa3b3ca74b0fecf, type: 3}
+  - {fileID: 8047980016238943565, guid: 0e6c3ae58317860499d1b1c1d3f02c15, type: 3}
+  - {fileID: 206236199596652127, guid: e74fdf1cc832d3f4e80db56037864173, type: 3}
+  - {fileID: 9119173159020786449, guid: 51d00874707bb9641aec17256b4ab80e, type: 3}
+  - {fileID: 6351277451325251780, guid: 77f12202f9905bd43a7bbe47bce05eae, type: 3}
+  - {fileID: 6539389337701898987, guid: e45d76589040beb4288bde91fc12ca4d, type: 3}
+  - {fileID: 624509626774247083, guid: c05e9ce1a6590dd4a84fbb694cad6884, type: 3}
   stageDays: 010000000100000001000000010000000100000001000000
   growthMode: 0
   stageAdvanceChance:
@@ -45,7 +45,7 @@ MonoBehaviour:
   requiresTilledSoil: 1
   requiresWatering: 1
   harvestMethod: 1
-  requiredTool: 0
-  harvestItem: {fileID: 11400000, guid: cd3b2d2b89333b240b261e664f7916b4, type: 2}
+  harvestItem: {fileID: 11400000, guid: 7df588defedaabe4b9fad2bf270139eb, type: 2}
   harvestItemCount: 1
   destroyOnHarvest: 1
+  allowedSeasons: 00000000

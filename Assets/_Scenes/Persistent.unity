@@ -4087,7 +4087,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useFixedCycle: 1
-  daysPerSeason: 1
+  daysPerSeason: 28
   defaultSeason: 0
   seasonSchedule:
   - season: 0
