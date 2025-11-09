@@ -10,12 +10,29 @@ public class PlantSystem : MonoBehaviour
     public GameObject plantRootPrefab;
     [Header("Đất canh tác")]
     public SoilManager soilManager;
+    [Header("Quản lý mùa vụ")]
+    public SeasonManager seasonManager;
 
     SoilManager GetSoilManager()
     {
         if (soilManager && soilManager.isActiveAndEnabled) return soilManager;
         soilManager = FindFirstObjectByType<SoilManager>();
         return soilManager;
+    }
+
+    SeasonManager GetSeasonManager()
+    {
+        if (seasonManager && seasonManager.isActiveAndEnabled) return seasonManager;
+        seasonManager = FindFirstObjectByType<SeasonManager>();
+        return seasonManager;
+    }
+
+    bool IsSeasonAllowed(SeedSO seed)
+    {
+        if (!seed) return false;
+        var sm = GetSeasonManager();
+        if (!sm) return true;
+        return seed.AllowsSeason(sm.CurrentSeason);
     }
 
     void Start()
@@ -27,6 +44,8 @@ public class PlantSystem : MonoBehaviour
     {
         plant = null; if (!seed || !plantRootPrefab) return false;
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
+
+        if (!IsSeasonAllowed(seed)) return false;
 
         SoilManager soil = GetSoilManager();
         Vector2Int? tilledCellToClear = null;
@@ -95,6 +114,12 @@ public class PlantSystem : MonoBehaviour
         {
             bool tilledOk = soil && soil.IsTilled(snapped);
             blocked = blocked || !tilledOk;
+        }
+
+        if (!blocked && !IsSeasonAllowed(seed))
+        {
+            blocked = true;
+            return false;
         }
 
         float grid = seed.requiresTilledSoil && soil ? soil.GridSize : s;

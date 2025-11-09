@@ -42,6 +42,10 @@ public class SeedSO : ScriptableObject
     [Tooltip("Phải tưới nước mỗi ngày mới phát triển")]
     public bool requiresWatering = false;
 
+    [Header("Giới hạn theo mùa")]
+    [Tooltip("Để trống nếu có thể trồng ở mọi mùa. Nếu chỉ định, chỉ những mùa này mới trồng được.")]
+    public SeasonManager.Season[] allowedSeasons;
+
     [Header("Thu hoạch")]
     [Tooltip("Phương thức thu hoạch khi cây trưởng thành")]
     public HarvestMethod harvestMethod = HarvestMethod.None;
@@ -67,6 +71,16 @@ public class SeedSO : ScriptableObject
             byId[s.seedId] = s;
         }
         return byId.TryGetValue(id, out seed) ? seed : null;
+    }
+
+    public bool AllowsSeason(SeasonManager.Season season)
+    {
+        if (allowedSeasons == null || allowedSeasons.Length == 0) return true;
+        for (int i = 0; i < allowedSeasons.Length; i++)
+        {
+            if (allowedSeasons[i] == season) return true;
+        }
+        return false;
     }
 #if UNITY_EDITOR
 void OnValidate(){

@@ -13,6 +13,7 @@ public class PlantGrowth : MonoBehaviour
     GameObject visual;
     [SerializeField] PickupItem2D pickupPrefab;
     TimeManager time;
+    SeasonManager seasonManager;
     string plantId;
     bool removeFromSave;
     bool wasWateredToday;
@@ -54,6 +55,7 @@ public class PlantGrowth : MonoBehaviour
 
         SpawnStage();
         PersistState();
+        EvaluateSeasonRestriction();
     }
 
     public void Restore(SeedSO seed, SaveStore.PlantState state)
@@ -81,6 +83,7 @@ public class PlantGrowth : MonoBehaviour
         ApplyOfflineGrowth(state.lastUpdatedDay);
         SpawnStage();
         PersistState();
+        EvaluateSeasonRestriction();
     }
 
     public void Water()
@@ -137,13 +140,58 @@ public class PlantGrowth : MonoBehaviour
     {
         time = FindFirstObjectByType<TimeManager>();
         if (time) time.OnNewDay += TickDay;
+        AttachSeasonManager();
+        EvaluateSeasonRestriction();
     }
 
     void OnDisable()
     {
         if (time) time.OnNewDay -= TickDay;
+        if (seasonManager) seasonManager.OnSeasonChanged -= HandleSeasonChanged;
         if (removeFromSave) PersistRemoval();
         else PersistState();
+    }
+
+    void AttachSeasonManager()
+    {
+        var current = seasonManager && seasonManager.isActiveAndEnabled ? seasonManager : null;
+        if (!current)
+        {
+            current = FindFirstObjectByType<SeasonManager>();
+        }
+
+        if (current == seasonManager) return;
+
+        if (seasonManager) seasonManager.OnSeasonChanged -= HandleSeasonChanged;
+
+        seasonManager = current;
+        if (seasonManager) seasonManager.OnSeasonChanged += HandleSeasonChanged;
+    }
+
+    void HandleSeasonChanged(SeasonManager.Season newSeason)
+    {
+        EvaluateSeasonRestriction(newSeason);
+    }
+
+    void EvaluateSeasonRestriction(SeasonManager.Season? overrideSeason = null)
+    {
+        if (!IsDataValid()) return;
+        if (removeFromSave) return;
+        var sm = seasonManager && seasonManager.isActiveAndEnabled ? seasonManager : null;
+        if (!sm)
+        {
+            AttachSeasonManager();
+            sm = seasonManager && seasonManager.isActiveAndEnabled ? seasonManager : null;
+        }
+
+        var seasonToCheck = overrideSeason ?? (sm ? sm.CurrentSeason : (SeasonManager.Season?)null);
+        if (!seasonToCheck.HasValue) return;
+
+        if (!data.AllowsSeason(seasonToCheck.Value))
+        {
+            RemoveFromSave();
+            Destroy(gameObject);
+        }
     }
 
     void TickDay()
