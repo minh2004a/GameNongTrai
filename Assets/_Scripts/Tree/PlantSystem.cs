@@ -18,6 +18,23 @@ public class PlantSystem : MonoBehaviour
         return soilManager;
     }
 
+    SeasonManager seasonManager;
+
+    SeasonManager GetSeasonManager()
+    {
+        if (seasonManager && seasonManager.isActiveAndEnabled) return seasonManager;
+        seasonManager = FindFirstObjectByType<SeasonManager>();
+        return seasonManager;
+    }
+
+    bool IsSeedAllowedInCurrentSeason(SeedSO seed)
+    {
+        if (!seed || !seed.HasSeasonRestrictions) return true;
+        var sm = GetSeasonManager();
+        if (!sm) return true;
+        return seed.IsSeasonAllowed(sm.CurrentSeason);
+    }
+
     void Start()
     {
         RestorePlantsFromSave();
@@ -27,6 +44,7 @@ public class PlantSystem : MonoBehaviour
     {
         plant = null; if (!seed || !plantRootPrefab) return false;
         if (EventSystem.current && EventSystem.current.IsPointerOverGameObject()) return false; // tránh click UI
+        if (!IsSeedAllowedInCurrentSeason(seed)) return false;
 
         SoilManager soil = GetSoilManager();
         Vector2Int? tilledCellToClear = null;
@@ -97,6 +115,11 @@ public class PlantSystem : MonoBehaviour
             blocked = blocked || !tilledOk;
         }
 
+        if (!IsSeedAllowedInCurrentSeason(seed))
+        {
+            blocked = true;
+        }
+
         float grid = seed.requiresTilledSoil && soil ? soil.GridSize : s;
         int ix = Mathf.FloorToInt(snapped.x / grid),  iy = Mathf.FloorToInt(snapped.y / grid);
         int px = Mathf.FloorToInt(playerPos.x / grid), py = Mathf.FloorToInt(playerPos.y / grid);
@@ -121,6 +144,15 @@ public class PlantSystem : MonoBehaviour
             if (!seed)
             {
                 Debug.LogWarning($"PlantSystem: Không tìm thấy SeedSO với id '{state.seedId}' để khôi phục.");
+                continue;
+            }
+
+            if (!IsSeedAllowedInCurrentSeason(seed))
+            {
+                if (!string.IsNullOrEmpty(state.id))
+                {
+                    SaveStore.RemovePlantPending(scene, state.id);
+                }
                 continue;
             }
 

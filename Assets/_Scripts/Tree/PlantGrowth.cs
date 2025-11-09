@@ -13,11 +13,13 @@ public class PlantGrowth : MonoBehaviour
     GameObject visual;
     [SerializeField] PickupItem2D pickupPrefab;
     TimeManager time;
+    SeasonManager season;
     string plantId;
     bool removeFromSave;
     bool wasWateredToday;
     int lastWateredDay;
     static readonly HashSet<SeedSO> warnedMissingId = new();
+    bool seasonRemovalPending;
 
     public bool IsMature => IsDataValid() && stage >= data.stagePrefabs.Length - 1;
     public bool CanHarvestByHand => IsDataValid() && data.harvestMethod == HarvestMethod.Hand && IsMature;
@@ -53,7 +55,10 @@ public class PlantGrowth : MonoBehaviour
         else targetDaysForStage = 0;
 
         SpawnStage();
-        PersistState();
+        if (EnsureSeasonSurvival())
+        {
+            PersistState();
+        }
     }
 
     public void Restore(SeedSO seed, SaveStore.PlantState state)
@@ -80,7 +85,10 @@ public class PlantGrowth : MonoBehaviour
 
         ApplyOfflineGrowth(state.lastUpdatedDay);
         SpawnStage();
-        PersistState();
+        if (EnsureSeasonSurvival())
+        {
+            PersistState();
+        }
     }
 
     public void Water()
@@ -137,11 +145,14 @@ public class PlantGrowth : MonoBehaviour
     {
         time = FindFirstObjectByType<TimeManager>();
         if (time) time.OnNewDay += TickDay;
+        season = FindFirstObjectByType<SeasonManager>();
+        if (season) season.OnSeasonChanged += HandleSeasonChanged;
     }
 
     void OnDisable()
     {
         if (time) time.OnNewDay -= TickDay;
+        if (season) season.OnSeasonChanged -= HandleSeasonChanged;
         if (removeFromSave) PersistRemoval();
         else PersistState();
     }
@@ -338,6 +349,31 @@ public class PlantGrowth : MonoBehaviour
     {
         removeFromSave = true;
         PersistRemoval();
+    }
+
+    bool EnsureSeasonSurvival()
+    {
+        if (!data || !data.HasSeasonRestrictions) return true;
+        var sm = season && season.isActiveAndEnabled ? season : FindFirstObjectByType<SeasonManager>();
+        if (!sm) return true;
+        if (data.IsSeasonAllowed(sm.CurrentSeason)) return true;
+        RemoveForSeason();
+        return false;
+    }
+
+    void HandleSeasonChanged(SeasonManager.Season newSeason)
+    {
+        if (!data || !data.HasSeasonRestrictions) return;
+        if (data.IsSeasonAllowed(newSeason)) return;
+        RemoveForSeason();
+    }
+
+    void RemoveForSeason()
+    {
+        if (seasonRemovalPending) return;
+        seasonRemovalPending = true;
+        RemoveFromSave();
+        Destroy(gameObject);
     }
 
     void ApplyOfflineGrowth(int lastRecordedDay)

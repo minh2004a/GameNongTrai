@@ -51,6 +51,22 @@ public class SeedSO : ScriptableObject
     public int harvestItemCount = 1;
     [Tooltip("Xóa cây sau khi thu hoạch thành công")]
     public bool destroyOnHarvest = true;
+
+    [Header("Mùa vụ")]
+    [Tooltip("Danh sách mùa mà hạt giống có thể trồng và tồn tại. Để trống để cho phép quanh năm." )]
+    public SeasonManager.Season[] allowedSeasons;
+
+    public bool HasSeasonRestrictions => allowedSeasons != null && allowedSeasons.Length > 0;
+
+    public bool IsSeasonAllowed(SeasonManager.Season season)
+    {
+        if (allowedSeasons == null || allowedSeasons.Length == 0) return true;
+        for (int i = 0; i < allowedSeasons.Length; i++)
+        {
+            if (allowedSeasons[i] == season) return true;
+        }
+        return false;
+    }
     void OnEnable(){
         if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
     }
