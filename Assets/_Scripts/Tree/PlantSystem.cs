@@ -85,6 +85,11 @@ public class PlantSystem : MonoBehaviour
         {
             soil.TryClearCell(tilledCellToClear.Value);
         }
+        else if (seed.requiresTilledSoil && soil)
+        {
+            var cell = soil.WorldToCell(worldPos);
+            soil.SetCellHasPlant(cell, true);
+        }
 
         return true;
     }
@@ -173,6 +178,15 @@ public class PlantSystem : MonoBehaviour
             var go = Instantiate(plantRootPrefab, pos, Quaternion.identity);
             var growth = go.GetComponent<PlantGrowth>() ?? go.AddComponent<PlantGrowth>();
             growth.Restore(seed, state);
+            if (seed.requiresTilledSoil)
+            {
+                var soil = GetSoilManager();
+                if (soil)
+                {
+                    var cell = soil.WorldToCell(pos);
+                    soil.SetCellHasPlant(cell, true);
+                }
+            }
         }
     }
 }
