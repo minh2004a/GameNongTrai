@@ -10,7 +10,9 @@ public class SoilManager : MonoBehaviour
     [SerializeField] GameObject tilledSoilPrefab;
     [SerializeField] Transform tilledParent;
     [SerializeField] LayerMask tillableMask;
+    [SerializeField] LayerMask blockMask;
     [SerializeField, Range(0.05f, 1f)] float maskCheckRadiusMultiplier = 0.45f;
+    [SerializeField, Range(0.05f, 1f)] float blockCheckRadiusMultiplier = 0.45f;
 
     static readonly Vector2Int[] CardinalOffsets =
     {
@@ -24,6 +26,7 @@ public class SoilManager : MonoBehaviour
     readonly Dictionary<Vector2Int, GameObject> visuals = new();
     readonly HashSet<Vector2Int> wetCells = new();
     readonly Dictionary<Vector2Int, int> wetCellDay = new();
+    readonly Collider2D[] blockCheckResults = new Collider2D[8];
 
     string sceneName;
     TimeManager time;
@@ -135,10 +138,47 @@ public class SoilManager : MonoBehaviour
     bool CanTillCell(Vector2Int cell)
     {
         if (tilledCells.Contains(cell)) return false;
+        if (!IsCellTillable(cell)) return false;
+        if (IsCellBlocked(cell)) return false;
+        return true;
+    }
+
+    bool IsCellTillable(Vector2Int cell)
+    {
         if (tillableMask.value == 0) return true;
         Vector2 center = CellToWorld(cell);
         float radius = Mathf.Max(0.01f, gridSize) * Mathf.Clamp(maskCheckRadiusMultiplier, 0.05f, 1f);
         return Physics2D.OverlapCircle(center, radius, tillableMask);
+    }
+
+    bool IsCellBlocked(Vector2Int cell)
+    {
+        if (blockMask.value == 0) return false;
+
+        Vector2 center = CellToWorld(cell);
+        float radius = Mathf.Max(0.01f, gridSize) * Mathf.Clamp(blockCheckRadiusMultiplier, 0.05f, 1f);
+
+        var filter = new ContactFilter2D
+        {
+            useTriggers = false,
+            useLayerMask = true,
+            layerMask = blockMask
+        };
+
+        Transform ignoreRoot = tilledParent ? tilledParent : transform;
+        int hits = Physics2D.OverlapCircle(center, radius, filter, blockCheckResults);
+        for (int i = 0; i < hits; ++i)
+        {
+            var col = blockCheckResults[i];
+            blockCheckResults[i] = null;
+            if (!col) continue;
+
+            if (ignoreRoot && col.transform.IsChildOf(ignoreRoot)) continue;
+
+            return true;
+        }
+
+        return false;
     }
 
     void AddCell(Vector2Int cell, bool markPending)
