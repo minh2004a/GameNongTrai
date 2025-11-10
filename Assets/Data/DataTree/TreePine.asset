@@ -33,8 +33,13 @@ MonoBehaviour:
   blockCheckRadius: 0.35
   blockMask:
     serializedVersion: 2
-    m_Bits: 172368
+    m_Bits: 139600
   snapToGrid: 1
   gridSize: 1
   requiresTilledSoil: 0
   requiresWatering: 0
+  harvestMethod: 0
+  harvestItem: {fileID: 0}
+  harvestItemCount: 1
+  destroyOnHarvest: 1
+  allowedSeasons: 
