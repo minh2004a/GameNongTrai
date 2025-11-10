@@ -13,6 +13,10 @@ public class ScenePortal : MonoBehaviour
     public string targetScene;
     public string targetSpawnId;
 
+    [Header("Audio")]
+    public AudioSource openAudioSource;
+    public AudioClip openSound;
+
     [Header("Input System")]
     public InputActionReference interact; // trỏ tới action "Interact" trong .inputactions
 
@@ -30,6 +34,7 @@ public class ScenePortal : MonoBehaviour
         {
             busy = true;
             if (SceneLoaderHost.IsSwitching) return;
+            PlayOpenSound();
             SceneLoaderHost.I.Switch(targetScene, targetSpawnId);  // gọi host
         }
     }
@@ -42,6 +47,7 @@ public class ScenePortal : MonoBehaviour
         {
             busy = true;
             if (SceneLoaderHost.IsSwitching) return;
+            PlayOpenSound();
             SceneLoaderHost.I.Switch(targetScene, targetSpawnId);  // gọi host
         }
     }
@@ -49,6 +55,8 @@ public class ScenePortal : MonoBehaviour
     {
         if (busy) yield break;
         busy = true;
+
+        PlayOpenSound();
 
         var fader = ScreenFader.I;
         if (fader != null) yield return fader.FadeOut(0.35f);
@@ -77,5 +85,24 @@ public class ScenePortal : MonoBehaviour
 
         if (fader != null) yield return fader.FadeIn(0.35f);
         busy = false;
+    }
+
+    void PlayOpenSound()
+    {
+        if (openAudioSource != null)
+        {
+            if (openSound != null)
+            {
+                openAudioSource.PlayOneShot(openSound);
+            }
+            else
+            {
+                openAudioSource.Play();
+            }
+        }
+        else if (openSound != null)
+        {
+            AudioSource.PlayClipAtPoint(openSound, transform.position);
+        }
     }
 }
