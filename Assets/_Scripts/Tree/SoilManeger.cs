@@ -80,6 +80,13 @@ public class SoilManager : MonoBehaviour
 
     public bool IsCellTilled(Vector2Int cell) => tilledCells.Contains(cell);
 
+    public bool IsWet(Vector2 worldPos) => IsCellWet(WorldToCell(worldPos));
+
+    public bool IsCellWet(Vector2Int cell)
+    {
+        return wetCells.Contains(cell);
+    }
+
     public bool TryTillAt(Vector2 worldPos)
     {
         return TryTillCell(WorldToCell(worldPos));
