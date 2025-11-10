@@ -55386,7 +55386,16 @@ MonoBehaviour:
   tillableMask:
     serializedVersion: 2
     m_Bits: 16384
+  blockMask:
+    serializedVersion: 2
+    m_Bits: 12560
+  grassBlockMask:
+    serializedVersion: 2
+    m_Bits: 32768
   maskCheckRadiusMultiplier: 0.45
+  blockCheckRadiusMultiplier: 0.45
+  grassBlockCheckRadiusMultiplier: 0.45
+  grassMaskIncludesTriggers: 1
 --- !u!4 &1298670000
 Transform:
   m_ObjectHideFlags: 0

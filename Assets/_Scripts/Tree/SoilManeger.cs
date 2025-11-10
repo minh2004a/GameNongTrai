@@ -1,4 +1,5 @@
 
+
 // SoilManager.cs
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,14 @@ public class SoilManager : MonoBehaviour
     [SerializeField] GameObject tilledSoilPrefab;
     [SerializeField] Transform tilledParent;
     [SerializeField] LayerMask tillableMask;
+    [SerializeField] LayerMask blockMask;
+    [SerializeField] LayerMask grassBlockMask;
     [SerializeField, Range(0.05f, 1f)] float maskCheckRadiusMultiplier = 0.45f;
+    [SerializeField, Range(0.05f, 1f)] float blockCheckRadiusMultiplier = 0.45f;
+    [SerializeField, Range(0.05f, 1f)] float grassBlockCheckRadiusMultiplier = 0.45f;
+    [SerializeField] bool grassMaskIncludesTriggers = true;
+    [SerializeField, Min(1)] int daysUntilRevert = 3;
+    [SerializeField, Range(0.05f, 1f)] float plantPresenceCheckRadiusMultiplier = 0.45f;
 
     static readonly Vector2Int[] CardinalOffsets =
     {
@@ -24,6 +32,10 @@ public class SoilManager : MonoBehaviour
     readonly Dictionary<Vector2Int, GameObject> visuals = new();
     readonly HashSet<Vector2Int> wetCells = new();
     readonly Dictionary<Vector2Int, int> wetCellDay = new();
+    readonly Dictionary<Vector2Int, int> tilledCellDay = new();
+    readonly HashSet<Vector2Int> plantedCells = new();
+    readonly Collider2D[] blockCheckResults = new Collider2D[8];
+    readonly Collider2D[] plantCheckResults = new Collider2D[8];
 
     string sceneName;
     TimeManager time;
@@ -77,7 +89,7 @@ public class SoilManager : MonoBehaviour
     public bool TryTillCell(Vector2Int cell)
     {
         if (!CanTillCell(cell)) return false;
-        AddCell(cell, true);
+        AddCell(cell, true, CurrentDay, false);
         return true;
     }
 
@@ -93,9 +105,9 @@ public class SoilManager : MonoBehaviour
         return true;
     }
 
-    public void EnsureCellTilledFromSave(Vector2Int cell)
+    public void EnsureCellTilledFromSave(Vector2Int cell, int? tilledDay = null, bool? hasPlant = null)
     {
-        AddCell(cell, false);
+        AddCell(cell, false, tilledDay, hasPlant);
     }
 
     public void EnsureCellWateredFromSave(Vector2Int cell, int day)
@@ -135,13 +147,68 @@ public class SoilManager : MonoBehaviour
     bool CanTillCell(Vector2Int cell)
     {
         if (tilledCells.Contains(cell)) return false;
+        if (!IsCellTillable(cell)) return false;
+        if (IsCellBlocked(cell)) return false;
+        return true;
+    }
+
+    bool IsCellTillable(Vector2Int cell)
+    {
         if (tillableMask.value == 0) return true;
         Vector2 center = CellToWorld(cell);
         float radius = Mathf.Max(0.01f, gridSize) * Mathf.Clamp(maskCheckRadiusMultiplier, 0.05f, 1f);
         return Physics2D.OverlapCircle(center, radius, tillableMask);
     }
 
-    void AddCell(Vector2Int cell, bool markPending)
+    bool IsCellBlocked(Vector2Int cell)
+    {
+        Vector2 center = CellToWorld(cell);
+        float baseRadius = Mathf.Max(0.01f, gridSize);
+
+        float blockRadius = baseRadius * Mathf.Clamp(blockCheckRadiusMultiplier, 0.05f, 1f);
+        if (CheckBlockingMask(center, blockRadius, blockMask, false))
+        {
+            return true;
+        }
+
+        float grassRadius = baseRadius * Mathf.Clamp(grassBlockCheckRadiusMultiplier, 0.05f, 1f);
+        if (CheckBlockingMask(center, grassRadius, grassBlockMask, grassMaskIncludesTriggers))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool CheckBlockingMask(Vector2 center, float radius, LayerMask mask, bool includeTriggers)
+    {
+        if (mask.value == 0) return false;
+
+        var filter = new ContactFilter2D
+        {
+            useTriggers = includeTriggers,
+            useLayerMask = true,
+            layerMask = mask
+        };
+
+        Transform ignoreRoot = tilledParent ? tilledParent : transform;
+        int hits = Physics2D.OverlapCircle(center, radius, filter, blockCheckResults);
+        for (int i = 0; i < hits; ++i)
+        {
+            var col = blockCheckResults[i];
+            if (!col) continue;
+
+            if (ignoreRoot && col.transform.IsChildOf(ignoreRoot)) continue;
+
+            System.Array.Clear(blockCheckResults, 0, blockCheckResults.Length);
+            return true;
+        }
+
+        System.Array.Clear(blockCheckResults, 0, blockCheckResults.Length);
+        return false;
+    }
+
+    void AddCell(Vector2Int cell, bool markPending, int? tilledDayOverride = null, bool? hasPlant = null)
     {
         bool added = tilledCells.Add(cell);
         SpawnVisual(cell);
@@ -149,10 +216,33 @@ public class SoilManager : MonoBehaviour
         {
             wetCells.Remove(cell);
             wetCellDay.Remove(cell);
+            int day = tilledDayOverride ?? CurrentDay;
+            tilledCellDay[cell] = day;
         }
+        else if (tilledDayOverride.HasValue)
+        {
+            tilledCellDay[cell] = tilledDayOverride.Value;
+        }
+        else if (!tilledCellDay.ContainsKey(cell))
+        {
+            tilledCellDay[cell] = CurrentDay;
+        }
+
+        if (hasPlant.HasValue)
+        {
+            if (hasPlant.Value) plantedCells.Add(cell);
+            else plantedCells.Remove(cell);
+        }
+        else if (added)
+        {
+            plantedCells.Remove(cell);
+        }
+
         if (added && markPending && !string.IsNullOrEmpty(sceneName))
         {
-            SaveStore.MarkSoilTilledPending(sceneName, cell);
+            int day = tilledCellDay.TryGetValue(cell, out var storedDay) ? storedDay : CurrentDay;
+            bool planted = plantedCells.Contains(cell);
+            SaveStore.MarkSoilTilledPending(sceneName, cell, day, planted);
         }
         RefreshCellAndNeighbors(cell);
     }
@@ -185,6 +275,8 @@ public class SoilManager : MonoBehaviour
         if (!tilledCells.Remove(cell)) return;
 
         ClearWetCell(cell, markPending);
+        tilledCellDay.Remove(cell);
+        plantedCells.Remove(cell);
 
         if (visuals.TryGetValue(cell, out var go) && go)
         {
@@ -198,6 +290,28 @@ public class SoilManager : MonoBehaviour
         }
 
         RefreshCellAndNeighbors(cell);
+    }
+
+    public void SetCellHasPlant(Vector2Int cell, bool hasPlant)
+    {
+        if (!tilledCells.Contains(cell)) return;
+        if (hasPlant) plantedCells.Add(cell);
+        else plantedCells.Remove(cell);
+
+        if (!tilledCellDay.ContainsKey(cell))
+        {
+            tilledCellDay[cell] = CurrentDay;
+        }
+        else if (!hasPlant)
+        {
+            tilledCellDay[cell] = CurrentDay;
+        }
+
+        if (HasScene)
+        {
+            int day = tilledCellDay.TryGetValue(cell, out var storedDay) ? storedDay : CurrentDay;
+            SaveStore.UpdateSoilTilePending(sceneName, cell, day, hasPlant);
+        }
     }
 
     void RefreshVisual(Vector2Int cell)
@@ -236,9 +350,10 @@ public class SoilManager : MonoBehaviour
     void RestoreFromSave()
     {
         if (string.IsNullOrEmpty(sceneName)) return;
-        foreach (var cell in SaveStore.GetTilledSoilInScene(sceneName))
+        foreach (var state in SaveStore.GetTilledSoilInScene(sceneName))
         {
-            AddCell(cell, false);
+            var cell = new Vector2Int(state.x, state.y);
+            AddCell(cell, false, state.tilledDay, state.hasPlant);
         }
         foreach (var state in SaveStore.GetWateredSoilInScene(sceneName))
         {
@@ -277,12 +392,9 @@ public class SoilManager : MonoBehaviour
 
     void HandleNewDay()
     {
-        if (wetCells.Count == 0) return;
-        var toDry = new List<Vector2Int>(wetCells);
-        foreach (var cell in toDry)
-        {
-            ClearWetCell(cell, true);
-        }
+        DryWetSoil();
+        SyncPlantedCellsWithScene();
+        RevertExpiredTilledCells();
     }
 
     void AttachTimeManager(TimeManager tm)
@@ -293,6 +405,85 @@ public class SoilManager : MonoBehaviour
         if (isActiveAndEnabled)
         {
             time.OnNewDay += HandleNewDay;
+        }
+    }
+
+    void DryWetSoil()
+    {
+        if (wetCells.Count == 0) return;
+        var toDry = new List<Vector2Int>(wetCells);
+        foreach (var cell in toDry)
+        {
+            ClearWetCell(cell, true);
+        }
+    }
+
+    void SyncPlantedCellsWithScene()
+    {
+        if (plantedCells.Count == 0) return;
+        var toCheck = new List<Vector2Int>(plantedCells);
+        foreach (var cell in toCheck)
+        {
+            if (IsPlantPresentAtCell(cell)) continue;
+            plantedCells.Remove(cell);
+            tilledCellDay[cell] = CurrentDay;
+            if (HasScene)
+            {
+                int day = tilledCellDay.TryGetValue(cell, out var storedDay) ? storedDay : CurrentDay;
+                SaveStore.UpdateSoilTilePending(sceneName, cell, day, false);
+            }
+        }
+    }
+
+    bool IsPlantPresentAtCell(Vector2Int cell)
+    {
+        Vector2 center = CellToWorld(cell);
+        float radius = Mathf.Max(0.01f, gridSize) * Mathf.Clamp(plantPresenceCheckRadiusMultiplier, 0.05f, 1f);
+
+        var filter = new ContactFilter2D
+        {
+            useTriggers = true,
+            useLayerMask = false
+        };
+
+        int hits = Physics2D.OverlapCircle(center, radius, filter, plantCheckResults);
+        Transform ignoreRoot = tilledParent ? tilledParent : transform;
+        for (int i = 0; i < hits; ++i)
+        {
+            var col = plantCheckResults[i];
+            if (!col) continue;
+            if (ignoreRoot && col.transform.IsChildOf(ignoreRoot)) continue;
+            if (col.GetComponentInParent<PlantGrowth>())
+            {
+                System.Array.Clear(plantCheckResults, 0, plantCheckResults.Length);
+                return true;
+            }
+        }
+
+        System.Array.Clear(plantCheckResults, 0, plantCheckResults.Length);
+        return false;
+    }
+
+    void RevertExpiredTilledCells()
+    {
+        if (tilledCells.Count == 0) return;
+        int today = CurrentDay;
+        int threshold = Mathf.Max(1, daysUntilRevert);
+        var toClear = new List<Vector2Int>();
+
+        foreach (var cell in tilledCells)
+        {
+            if (plantedCells.Contains(cell)) continue;
+            if (!tilledCellDay.TryGetValue(cell, out var tilledDay)) continue;
+            if (today - tilledDay >= threshold)
+            {
+                toClear.Add(cell);
+            }
+        }
+
+        foreach (var cell in toClear)
+        {
+            TryClearCell(cell);
         }
     }
 }
