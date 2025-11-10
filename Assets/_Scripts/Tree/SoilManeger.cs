@@ -11,8 +11,11 @@ public class SoilManager : MonoBehaviour
     [SerializeField] Transform tilledParent;
     [SerializeField] LayerMask tillableMask;
     [SerializeField] LayerMask blockMask;
+    [SerializeField] LayerMask grassBlockMask;
     [SerializeField, Range(0.05f, 1f)] float maskCheckRadiusMultiplier = 0.45f;
     [SerializeField, Range(0.05f, 1f)] float blockCheckRadiusMultiplier = 0.45f;
+    [SerializeField, Range(0.05f, 1f)] float grassBlockCheckRadiusMultiplier = 0.45f;
+    [SerializeField] bool grassMaskIncludesTriggers = true;
 
     static readonly Vector2Int[] CardinalOffsets =
     {
@@ -153,16 +156,33 @@ public class SoilManager : MonoBehaviour
 
     bool IsCellBlocked(Vector2Int cell)
     {
-        if (blockMask.value == 0) return false;
-
         Vector2 center = CellToWorld(cell);
-        float radius = Mathf.Max(0.01f, gridSize) * Mathf.Clamp(blockCheckRadiusMultiplier, 0.05f, 1f);
+        float baseRadius = Mathf.Max(0.01f, gridSize);
+
+        float blockRadius = baseRadius * Mathf.Clamp(blockCheckRadiusMultiplier, 0.05f, 1f);
+        if (CheckBlockingMask(center, blockRadius, blockMask, false))
+        {
+            return true;
+        }
+
+        float grassRadius = baseRadius * Mathf.Clamp(grassBlockCheckRadiusMultiplier, 0.05f, 1f);
+        if (CheckBlockingMask(center, grassRadius, grassBlockMask, grassMaskIncludesTriggers))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool CheckBlockingMask(Vector2 center, float radius, LayerMask mask, bool includeTriggers)
+    {
+        if (mask.value == 0) return false;
 
         var filter = new ContactFilter2D
         {
-            useTriggers = false,
+            useTriggers = includeTriggers,
             useLayerMask = true,
-            layerMask = blockMask
+            layerMask = mask
         };
 
         Transform ignoreRoot = tilledParent ? tilledParent : transform;
@@ -170,14 +190,15 @@ public class SoilManager : MonoBehaviour
         for (int i = 0; i < hits; ++i)
         {
             var col = blockCheckResults[i];
-            blockCheckResults[i] = null;
             if (!col) continue;
 
             if (ignoreRoot && col.transform.IsChildOf(ignoreRoot)) continue;
 
+            System.Array.Clear(blockCheckResults, 0, blockCheckResults.Length);
             return true;
         }
 
+        System.Array.Clear(blockCheckResults, 0, blockCheckResults.Length);
         return false;
     }
 
