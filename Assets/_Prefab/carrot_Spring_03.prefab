@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6784517175272556260}
   - component: {fileID: 6649565340646657425}
   - component: {fileID: 2499465976823549639}
+  - component: {fileID: 7526243526259448358}
   m_Layer: 17
   m_Name: carrot_Spring_03
   m_TagString: Untagged
@@ -120,3 +121,20 @@ CapsuleCollider2D:
   m_Offset: {x: -0.009950608, y: 0.00889227}
   m_Size: {x: 0.30336672, y: 0.20808753}
   m_Direction: 1
+--- !u!114 &7526243526259448358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9119173159020786449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af1453bcd7fa32341bb544cb880f479b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swayRoot: {fileID: 0}
+  playerTag: Player
+  maxAngle: 12
+  swayDuration: 1
+  cooldown: 0

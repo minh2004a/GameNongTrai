@@ -219,6 +219,24 @@ MonoBehaviour:
   - {fileID: -856037497, guid: cba53c7816b4e4549b00f2d0f4f3a206, type: 3}
   - {fileID: 268816761, guid: cba53c7816b4e4549b00f2d0f4f3a206, type: 3}
   - {fileID: 1303293382, guid: cba53c7816b4e4549b00f2d0f4f3a206, type: 3}
+  cornerSprites:
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  wetCornerSprites:
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
+  - renderer: {fileID: 0}
+    sprite: {fileID: 0}
 --- !u!61 &3419929408569927441
 BoxCollider2D:
   m_ObjectHideFlags: 0

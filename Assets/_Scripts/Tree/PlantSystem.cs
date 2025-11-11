@@ -90,6 +90,10 @@ public class PlantSystem : MonoBehaviour
         {
             var cell = soil.WorldToCell(worldPos);
             soil.SetCellHasPlant(cell, true);
+            if (soil.IsCellWet(cell))
+            {
+                plant.Water();
+            }
         }
 
         return true;

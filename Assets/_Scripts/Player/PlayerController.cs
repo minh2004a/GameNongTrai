@@ -41,22 +41,19 @@ public class PlayerController : MonoBehaviour
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     void Update()
     {
-        // 1) Lưu hướng cuối cùng khi có input (ưu tiên trục ngang/dọc)
-        if (moveInput.sqrMagnitude > 0.0001f)
+        // 1) LƯU Ý: đừng cập nhật hướng khi đang bị lock
+        if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f)
             UpdateFacingFrom(moveInput);
 
-        // 2) Nuôi tham số Speed của Animator bằng tốc độ thật
-        float speedWorld = currentSpeed;                 // ví dụ 5 hoặc 2.5 khi kiệt sức
+        // nuôi Speed như cũ
+        float speedWorld = currentSpeed;
         if (anim) anim.SetFloat("Speed", speedWorld);
 
-        // 3) Chỉ ghi hướng khi không bị lock và có input
+        // 3) ghi hướng lên Animator chỉ khi không lock và có input
         if (!MoveLocked && moveInput.sqrMagnitude > 0.0001f)
         {
-            if (anim)
-            {
-                anim.SetFloat("Horizontal", lastFacing.x);
-                anim.SetFloat("Vertical", lastFacing.y);
-            }
+            anim.SetFloat("Horizontal", lastFacing.x);
+            anim.SetFloat("Vertical", lastFacing.y);
             if (sprite) sprite.flipX = lastFacing.x < 0f;
         }
     }
@@ -71,13 +68,21 @@ public class PlayerController : MonoBehaviour
     // helper
     void UpdateFacingFrom(Vector2 v)
     {
-        if (v.sqrMagnitude > 0.0001f)
-            lastFacing = (Mathf.Abs(v.x) >= Mathf.Abs(v.y))
-                ? new Vector2(Mathf.Sign(v.x), 0)
-                : new Vector2(0, Mathf.Sign(v.y));
+        if (v.sqrMagnitude <= 1e-4f) return;
+        Vector2 dir = v.normalized;
+        Vector2 f = Mathf.Abs(dir.x) >= Mathf.Abs(dir.y)
+            ? new Vector2(Mathf.Sign(dir.x), 0)
+            : new Vector2(0, Mathf.Sign(dir.y));
+        lastFacing = f;
 
+        if (MoveLocked) return;      // ⬅️ quan trọng
+        if (anim)
+        {
+            anim.SetFloat("Horizontal", f.x);
+            anim.SetFloat("Vertical", f.y);
+        }
+        if (sprite) sprite.flipX = f.x < 0f;
     }
-
     public Vector2 PendingFacing4()
     {
         var v = pendingMoveInput;

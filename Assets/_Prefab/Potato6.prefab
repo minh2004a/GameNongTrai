@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8758998631128032247}
   - component: {fileID: 1115818595548803520}
   - component: {fileID: 2836358386742432721}
+  - component: {fileID: 3534827943319037542}
   m_Layer: 17
   m_Name: Potato6
   m_TagString: Untagged
@@ -120,3 +121,20 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0.14458966}
   serializedVersion: 2
   m_Radius: 0.33379245
+--- !u!114 &3534827943319037542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5208824497724448737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af1453bcd7fa32341bb544cb880f479b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swayRoot: {fileID: 0}
+  playerTag: Player
+  maxAngle: 6
+  swayDuration: 1
+  cooldown: 0

@@ -102,7 +102,11 @@ public class PlayerUseTool : MonoBehaviour
             TryBeginToolUse();
         }
     }
-
+    void LateUpdate()
+    {
+        // Đang vung tool thì cứ khóa hướng mỗi frame
+        if (toolLocked) ApplyFacing(); // ApplyFacing() đã gọi FaceDirection(activeFacing)
+    }
     public void SetBonusRange(int bonusTiles)
     {
         bonusRangeTiles = Mathf.Max(0, bonusTiles);
