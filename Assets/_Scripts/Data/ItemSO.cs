@@ -10,7 +10,8 @@ public enum ToolType
     Hoe = 2,
     Pickaxe = 3,
     Scythe = 4,
-    WateringCan = 5
+    WateringCan = 5,
+    FishingRod = 6
 }
 public interface IDamageable { void TakeHit(int dmg); }
 [CreateAssetMenu(menuName = "Items/Item")]
