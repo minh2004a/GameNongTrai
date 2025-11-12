@@ -1,4 +1,5 @@
 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,6 +36,7 @@ public class PlayerUseTool : MonoBehaviour
     static readonly int UseHoeHash = Animator.StringToHash("UseHoe");
     static readonly int UseWateringHash = Animator.StringToHash("UseWatering");
     static readonly int UseAxeHash = Animator.StringToHash("UseAxe");
+    static readonly int UseFishingHash = Animator.StringToHash("UseFishing");
 
     readonly List<Vector2Int> pendingCells = new();
     readonly HashSet<PlantGrowth> wateredPlantsBuffer = new();
@@ -52,6 +54,8 @@ public class PlayerUseTool : MonoBehaviour
     float toolFailSafeTimer;
     float cooldownTimer;
     int activeToolRangeTiles = 1;
+    Coroutine fishingRoutine;
+    Vector2 fishingCastPoint;
 
     public int CurrentToolRangeTiles => activeToolRangeTiles;
 
@@ -67,6 +71,8 @@ public class PlayerUseTool : MonoBehaviour
         hasWateringTrigger = false;
         activeToolHitPoint = Vector2.zero;
         activeToolHasHitPoint = false;
+        fishingRoutine = null;
+        fishingCastPoint = Vector2.zero;
     }
 
     void Awake()
@@ -87,6 +93,8 @@ public class PlayerUseTool : MonoBehaviour
         hasWateringTrigger = false;
         activeToolHitPoint = Vector2.zero;
         activeToolHasHitPoint = false;
+        fishingRoutine = null;
+        fishingCastPoint = Vector2.zero;
     }
 
     void Update()
@@ -238,6 +246,23 @@ public class PlayerUseTool : MonoBehaviour
                 hitPoint = soil.CellToWorld(targetCell);
                 hasHitPoint = true;
                 return true;
+            case ToolType.FishingRod:
+            {
+                float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
+                float maxDistance = Mathf.Max(tileSize, rangeTiles * tileSize);
+                Vector2 worldDelta = clickWorld - playerWorld;
+                Vector2 clamped = worldDelta;
+                if (clamped.sqrMagnitude > maxDistance * maxDistance)
+                {
+                    clamped = clamped.normalized * maxDistance;
+                }
+
+                Vector2 target = playerWorld + clamped;
+                facing = DetermineFacing(DetermineFacingDelta(worldDelta));
+                hitPoint = target;
+                hasHitPoint = true;
+                return true;
+            }
             case ToolType.Axe:
             {
                 Vector2 worldDelta = clickWorld - playerWorld;
@@ -345,6 +370,9 @@ public class PlayerUseTool : MonoBehaviour
             case ToolType.WateringCan:
                 cost = stamina.wateringCost;
                 break;
+            case ToolType.FishingRod:
+                cost = stamina.fishingCost;
+                break;
         }
 
         if (cost <= 0f) return true;
@@ -425,6 +453,20 @@ public class PlayerUseTool : MonoBehaviour
                     animator.SetTrigger(UseHoeHash);
                 }
                 break;
+            case ToolType.FishingRod:
+                animator.ResetTrigger(UseFishingHash);
+                animator.ResetTrigger(UseHoeHash);
+                animator.ResetTrigger(UseAxeHash);
+                animator.ResetTrigger(UseWateringHash);
+                if (AnimatorHasTrigger(UseFishingHash))
+                {
+                    animator.SetTrigger(UseFishingHash);
+                }
+                else
+                {
+                    animator.SetTrigger(UseHoeHash);
+                }
+                break;
             default:
                 animator.ResetTrigger(UseAxeHash);
                 animator.ResetTrigger(UseHoeHash);
@@ -451,6 +493,19 @@ public class PlayerUseTool : MonoBehaviour
         return hasWateringTrigger;
     }
 
+    bool AnimatorHasTrigger(int triggerHash)
+    {
+        if (!animator) return false;
+        foreach (var parameter in animator.parameters)
+        {
+            if (parameter.type == AnimatorControllerParameterType.Trigger && parameter.nameHash == triggerHash)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void LockMove(bool on)
     {
         if (controller)
@@ -472,17 +527,9 @@ public class PlayerUseTool : MonoBehaviour
 
     void CancelToolUse()
     {
-        if (!toolLocked) return;
-        toolLocked = false;
-        pendingCells.Clear();
-        activeTool = null;
-        activeToolType = ToolType.None;
-        activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
-        activeToolHasHitPoint = false;
-        activeToolHitPoint = Vector2.zero;
-        LockMove(false);
-        controller?.ApplyPendingMove();
-        if (animator) animator.speed = 1f;
+        if (!toolLocked && fishingRoutine == null) return;
+        StopFishingRoutine();
+        ResetToolState(true);
     }
 
     // Animation Event: đảm bảo Animator luôn giữ hướng khoá
@@ -507,6 +554,9 @@ public class PlayerUseTool : MonoBehaviour
                 break;
             case ToolType.WateringCan:
                 PerformWatering();
+                break;
+            case ToolType.FishingRod:
+                PerformFishingCast();
                 break;
             default:
                 break;
@@ -630,11 +680,81 @@ public class PlayerUseTool : MonoBehaviour
         }
     }
 
-    // Animation Event: kết thúc hành động
-    public void Tool_End()
+    void PerformFishingCast()
     {
-        if (!toolLocked) return;
+        SoilManager soil = GetSoilManager();
+        float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
+        float searchRadius = Mathf.Max(tileSize * 0.5f, activeToolRangeTiles * tileSize * 0.5f);
+        Vector2 desiredPoint = activeToolHasHitPoint ? activeToolHitPoint : (Vector2)transform.position;
 
+        if (!FishingSpot.TryGetSpot(desiredPoint, searchRadius, out var spot, out var resolvedPoint))
+        {
+            StopFishingRoutine();
+            ResetToolState(true);
+            return;
+        }
+
+        StopFishingRoutine();
+        fishingCastPoint = resolvedPoint;
+
+        float waitSeconds = spot ? spot.RandomBiteDelay() : 0f;
+        toolFailSafeTimer = Mathf.Max(toolFailSafeTimer, waitSeconds + 1.5f);
+        fishingRoutine = StartCoroutine(FishingRoutine(spot, waitSeconds));
+    }
+
+    IEnumerator FishingRoutine(FishingSpot spot, float waitSeconds)
+    {
+        float timer = 0f;
+        while (timer < waitSeconds)
+        {
+            if (!toolLocked || activeToolType != ToolType.FishingRod)
+            {
+                fishingRoutine = null;
+                yield break;
+            }
+
+            if (!spot || !spot.isActiveAndEnabled)
+            {
+                fishingRoutine = null;
+                ResetToolState(true);
+                yield break;
+            }
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        if (!toolLocked || activeToolType != ToolType.FishingRod)
+        {
+            fishingRoutine = null;
+            yield break;
+        }
+
+        if (!spot || !spot.isActiveAndEnabled)
+        {
+            fishingRoutine = null;
+            ResetToolState(true);
+            yield break;
+        }
+
+        if (spot.TryRollCatch(out var item, out var count) && item)
+        {
+            spot.GiveCatch(inventory, item, count, fishingCastPoint);
+        }
+
+        fishingRoutine = null;
+        ResetToolState(true);
+    }
+
+    void StopFishingRoutine()
+    {
+        if (fishingRoutine == null) return;
+        StopCoroutine(fishingRoutine);
+        fishingRoutine = null;
+    }
+
+    void ResetToolState(bool unlockMove)
+    {
         toolLocked = false;
         pendingCells.Clear();
         activeTool = null;
@@ -642,8 +762,19 @@ public class PlayerUseTool : MonoBehaviour
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
         activeToolHasHitPoint = false;
         activeToolHitPoint = Vector2.zero;
-        LockMove(false);
+        fishingCastPoint = Vector2.zero;
+        toolFailSafeTimer = 0f;
+        if (unlockMove) LockMove(false);
         controller?.ApplyPendingMove();
         if (animator) animator.speed = 1f;
+    }
+
+    // Animation Event: kết thúc hành động
+    public void Tool_End()
+    {
+        if (activeToolType == ToolType.FishingRod && fishingRoutine != null) return;
+        if (!toolLocked) return;
+
+        ResetToolState(true);
     }
 }
