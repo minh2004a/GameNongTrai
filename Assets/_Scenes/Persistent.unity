@@ -5815,6 +5815,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 152460042}
     - target: {fileID: 9196139618529040389, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+      propertyPath: axeCost
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9196139618529040389, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: OnStamina01.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1223590759}
