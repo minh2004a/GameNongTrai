@@ -310,7 +310,7 @@ public static class SaveStore
         }
         data.meta = meta;
         File.WriteAllText(PathFile, JsonUtility.ToJson(data, true));
-    }
+     }
     // đánh dấu PENDING trong phiên
     public static void MarkTreeChoppedPending(string scene, string id){
         if (!pendingTrees.TryGetValue(scene, out var s)) pendingTrees[scene] = s = new HashSet<string>();
