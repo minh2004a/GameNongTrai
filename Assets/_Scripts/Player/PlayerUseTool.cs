@@ -37,9 +37,11 @@ public class PlayerUseTool : MonoBehaviour
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     static readonly int UseHoeHash = Animator.StringToHash("UseHoe");
     static readonly int UseWateringHash = Animator.StringToHash("UseWatering");
+    static readonly int UseAxeHash = Animator.StringToHash("UseAxe");
 
     readonly List<Vector2Int> pendingCells = new();
     readonly HashSet<PlantGrowth> wateredPlantsBuffer = new();
+    readonly HashSet<Component> axeHitBuffer = new();
     bool checkedWateringTrigger;
     bool hasWateringTrigger;
 
@@ -47,6 +49,8 @@ public class PlayerUseTool : MonoBehaviour
     ItemSO activeTool;
     ToolType activeToolType = ToolType.None;
     Vector2 activeFacing = Vector2.down;
+    Vector2 activeToolHitPoint;
+    bool activeToolHasHitPoint;
     bool toolLocked;
     float toolFailSafeTimer;
     float cooldownTimer;
@@ -64,6 +68,8 @@ public class PlayerUseTool : MonoBehaviour
         stamina = GetComponent<PlayerStamina>();
         checkedWateringTrigger = false;
         hasWateringTrigger = false;
+        activeToolHitPoint = Vector2.zero;
+        activeToolHasHitPoint = false;
     }
 
     void Awake()
@@ -82,6 +88,8 @@ public class PlayerUseTool : MonoBehaviour
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
         checkedWateringTrigger = false;
         hasWateringTrigger = false;
+        activeToolHitPoint = Vector2.zero;
+        activeToolHasHitPoint = false;
     }
 
     void Update()
@@ -129,20 +137,22 @@ public class PlayerUseTool : MonoBehaviour
         Vector2 clickWorld = new(world3.x, world3.y);
 
         SoilManager soil = GetSoilManager();
-        if (!soil) return;
 
         Vector2 playerWorld = transform.position;
-        Vector2Int playerCell = soil.WorldToCell(playerWorld);
-        Vector2Int requestedCell = soil.WorldToCell(clickWorld);
+        Vector2Int playerCell = soil ? soil.WorldToCell(playerWorld) : Vector2Int.zero;
+        Vector2Int requestedCell = soil ? soil.WorldToCell(clickWorld) : Vector2Int.zero;
 
-        if (!TryResolveToolTarget(item, playerWorld, clickWorld, playerCell, requestedCell, out var targetCell, out var facing, out var rangeTiles))
+        if (!TryResolveToolTarget(item, soil, playerWorld, clickWorld, playerCell, requestedCell, out var targetCell, out var facing, out var rangeTiles, out var hitPoint, out var hasHitPoint))
         {
             return;
         }
 
         pendingCells.Clear();
-        BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
-        if (pendingCells.Count == 0) return;
+        if (ToolUsesCellTargets(item.toolType))
+        {
+            BuildTargetCells(item.toolType, targetCell, facing, pendingCells);
+            if (pendingCells.Count == 0) return;
+        }
 
         if (!TryConsumeToolCost(item.toolType))
         {
@@ -150,7 +160,7 @@ public class PlayerUseTool : MonoBehaviour
             return;
         }
 
-        StartToolUse(item, facing, rangeTiles);
+        StartToolUse(item, facing, rangeTiles, hitPoint, hasHitPoint);
     }
 
     int GetToolRangeTiles(ItemSO item)
@@ -169,17 +179,20 @@ public class PlayerUseTool : MonoBehaviour
         return !(delta == Vector2Int.zero) && Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y)) <= rangeTiles;
     }
 
-    bool TryResolveToolTarget(ItemSO item, Vector2 playerWorld, Vector2 clickWorld, Vector2Int playerCell, Vector2Int requestedCell, out Vector2Int targetCell, out Vector2 facing, out int rangeTiles)
+    bool TryResolveToolTarget(ItemSO item, SoilManager soil, Vector2 playerWorld, Vector2 clickWorld, Vector2Int playerCell, Vector2Int requestedCell, out Vector2Int targetCell, out Vector2 facing, out int rangeTiles, out Vector2 hitPoint, out bool hasHitPoint)
     {
         targetCell = requestedCell;
         facing = Vector2.down;
         rangeTiles = GetToolRangeTiles(item);
+        hitPoint = clickWorld;
+        hasHitPoint = false;
 
         Vector2Int delta = requestedCell - playerCell;
 
         switch (item.toolType)
         {
             case ToolType.Hoe:
+                if (!soil) return false;
                 if (delta == Vector2Int.zero)
                 {
                     delta = DetermineFacingDelta(clickWorld - playerWorld);
@@ -194,8 +207,11 @@ public class PlayerUseTool : MonoBehaviour
                 targetCell = playerCell + delta;
                 facing = DetermineFacing(delta);
                 rangeTiles = 1;
+                hitPoint = soil.CellToWorld(targetCell);
+                hasHitPoint = true;
                 return true;
             case ToolType.WateringCan:
+                if (!soil) return false;
                 if (delta == Vector2Int.zero)
                 {
                     var facingDelta = DetermineFacingDelta(clickWorld - playerWorld);
@@ -209,6 +225,8 @@ public class PlayerUseTool : MonoBehaviour
                 {
                     targetCell = playerCell;
                     facing = DetermineFacing(delta);
+                    hitPoint = soil.CellToWorld(targetCell);
+                    hasHitPoint = true;
                     return true;
                 }
 
@@ -220,7 +238,28 @@ public class PlayerUseTool : MonoBehaviour
 
                 targetCell = playerCell + delta;
                 facing = DetermineFacing(delta);
+                hitPoint = soil.CellToWorld(targetCell);
+                hasHitPoint = true;
                 return true;
+            case ToolType.Axe:
+            {
+                Vector2 worldDelta = clickWorld - playerWorld;
+                Vector2Int facingDelta = DetermineFacingDelta(worldDelta);
+                facing = DetermineFacing(facingDelta);
+
+                float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
+                float maxDistance = Mathf.Max(tileSize, rangeTiles * tileSize);
+                Vector2 clamped = Vector2.ClampMagnitude(worldDelta, maxDistance);
+                if (clamped.sqrMagnitude <= 0.0001f)
+                {
+                    Vector2 fallbackFacing = facing.sqrMagnitude > 0.0001f ? facing : Vector2.down;
+                    clamped = fallbackFacing.normalized * Mathf.Min(maxDistance, tileSize);
+                }
+
+                hitPoint = playerWorld + clamped;
+                hasHitPoint = true;
+                return true;
+            }
             default:
                 if (!IsWithinRange(delta, rangeTiles))
                 {
@@ -288,6 +327,11 @@ public class PlayerUseTool : MonoBehaviour
         }
     }
 
+    bool ToolUsesCellTargets(ToolType type)
+    {
+        return type == ToolType.Hoe || type == ToolType.WateringCan;
+    }
+
     bool TryConsumeToolCost(ToolType toolType)
     {
         if (!stamina) return true;
@@ -295,6 +339,9 @@ public class PlayerUseTool : MonoBehaviour
         float cost = 0f;
         switch (toolType)
         {
+            case ToolType.Axe:
+                cost = stamina.axeCost;
+                break;
             case ToolType.Hoe:
                 cost = stamina.hoeCost;
                 break;
@@ -318,12 +365,14 @@ public class PlayerUseTool : MonoBehaviour
     float ActionTimeMult() => (stamina && stamina.IsExhausted) ? exhaustedActionTimeMult : 1f;
     float AnimSpeedMult() => (stamina && stamina.IsExhausted) ? exhaustedAnimSpeedMult : 1f;
 
-    void StartToolUse(ItemSO item, Vector2 facing, int rangeTiles)
+    void StartToolUse(ItemSO item, Vector2 facing, int rangeTiles, Vector2 hitPoint, bool hasHitPoint)
     {
         activeTool = item;
         activeToolType = item.toolType;
         activeFacing = facing;
         activeToolRangeTiles = rangeTiles;
+        activeToolHitPoint = hitPoint;
+        activeToolHasHitPoint = hasHitPoint;
         toolLocked = true;
         toolFailSafeTimer = toolFailSafeSeconds * ActionTimeMult();
         cooldownTimer = Mathf.Max(minToolCooldown, item ? item.cooldown : minToolCooldown) * ActionTimeMult();
@@ -357,6 +406,12 @@ public class PlayerUseTool : MonoBehaviour
 
         switch (type)
         {
+            case ToolType.Axe:
+                animator.ResetTrigger(UseAxeHash);
+                animator.ResetTrigger(UseWateringHash);
+                animator.ResetTrigger(UseHoeHash);
+                animator.SetTrigger(UseAxeHash);
+                break;
             case ToolType.Hoe:
                 animator.ResetTrigger(UseHoeHash);
                 animator.SetTrigger(UseHoeHash);
@@ -374,6 +429,7 @@ public class PlayerUseTool : MonoBehaviour
                 }
                 break;
             default:
+                animator.ResetTrigger(UseAxeHash);
                 animator.ResetTrigger(UseHoeHash);
                 break;
         }
@@ -425,6 +481,8 @@ public class PlayerUseTool : MonoBehaviour
         activeTool = null;
         activeToolType = ToolType.None;
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
+        activeToolHasHitPoint = false;
+        activeToolHitPoint = Vector2.zero;
         LockMove(false);
         controller?.ApplyPendingMove();
         if (animator) animator.speed = 1f;
@@ -444,6 +502,9 @@ public class PlayerUseTool : MonoBehaviour
 
         switch (activeToolType)
         {
+            case ToolType.Axe:
+                PerformAxeHit();
+                break;
             case ToolType.Hoe:
                 PerformHoeHit();
                 break;
@@ -463,6 +524,59 @@ public class PlayerUseTool : MonoBehaviour
         foreach (var cell in pendingCells)
         {
             soil.TryTillCell(cell);
+        }
+    }
+
+    void PerformAxeHit()
+    {
+        if (!activeTool) return;
+
+        float radius = Mathf.Max(0.05f, activeTool.range) * Mathf.Max(0.05f, activeTool.hitboxScale);
+        Vector2 center = activeToolHasHitPoint ? activeToolHitPoint : (Vector2)transform.position;
+        if (!activeToolHasHitPoint)
+        {
+            Vector2 forward = activeFacing.sqrMagnitude > 0.0001f ? activeFacing.normalized : Vector2.down;
+            float forwardDist = activeTool.hitboxForward >= 0f ? activeTool.hitboxForward : Mathf.Max(0.1f, radius);
+            center += forward * forwardDist;
+        }
+        center += new Vector2(0f, activeTool.hitboxYOffset);
+
+        var hits = Physics2D.OverlapCircleAll(center, radius);
+        if (hits == null || hits.Length == 0) return;
+
+        axeHitBuffer.Clear();
+        int damage = Mathf.Max(1, activeTool.Dame);
+        Vector2 pushDir = activeFacing.sqrMagnitude > 0.0001f ? activeFacing.normalized : Vector2.down;
+
+        foreach (var hit in hits)
+        {
+            if (!hit) continue;
+
+            var tree = hit.GetComponentInParent<TreeChopTarget>();
+            if (tree && axeHitBuffer.Add(tree))
+            {
+                tree.ApplyDamage(damage, pushDir);
+                continue;
+            }
+
+            var behaviours = hit.GetComponentsInParent<MonoBehaviour>(true);
+            foreach (var behaviour in behaviours)
+            {
+                if (!behaviour) continue;
+                if (!axeHitBuffer.Add(behaviour)) continue;
+
+                if (behaviour is IChoppable choppable)
+                {
+                    choppable.Chop(damage, pushDir);
+                    break;
+                }
+
+                if (behaviour is IDamageable damageable)
+                {
+                    damageable.TakeHit(damage);
+                    break;
+                }
+            }
         }
     }
 
@@ -529,6 +643,8 @@ public class PlayerUseTool : MonoBehaviour
         activeTool = null;
         activeToolType = ToolType.None;
         activeToolRangeTiles = Mathf.Max(1, baseRangeTiles);
+        activeToolHasHitPoint = false;
+        activeToolHitPoint = Vector2.zero;
         LockMove(false);
         controller?.ApplyPendingMove();
         if (animator) animator.speed = 1f;
