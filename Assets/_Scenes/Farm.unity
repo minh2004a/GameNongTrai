@@ -56320,6 +56320,7 @@ GameObject:
   - component: {fileID: 565111464}
   - component: {fileID: 565111463}
   - component: {fileID: 565111465}
+  - component: {fileID: 565111466}
   m_Layer: 0
   m_Name: Water
   m_TagString: Untagged
@@ -57537,6 +57538,24 @@ TilemapCollider2D:
   m_MaximumTileChangeCount: 1000
   m_ExtrusionFactor: 0
   m_UseDelaunayMesh: 0
+--- !u!114 &565111466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565111461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce33f8b6caf3ca549abf53ee88abf2df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 565111464}
+  pairs:
+  - spring: {fileID: 11400000, guid: f231ad1511b79594198529bc1af8b055, type: 2}
+    summer: {fileID: 11400000, guid: f231ad1511b79594198529bc1af8b055, type: 2}
+    fall: {fileID: 11400000, guid: f231ad1511b79594198529bc1af8b055, type: 2}
+    winter: {fileID: 11400000, guid: c61111408a9bbba42a41568b42dc8264, type: 2}
 --- !u!1001 &585140005
 PrefabInstance:
   m_ObjectHideFlags: 0
