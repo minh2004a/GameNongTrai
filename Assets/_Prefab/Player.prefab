@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 5362268058865736135}
   - component: {fileID: 3709775072873596830}
   - component: {fileID: 1845909153704676813}
+  - component: {fileID: 9363897624026122612}
   - component: {fileID: 1118344859087931616}
   - component: {fileID: 2944587308785528253}
   - component: {fileID: 9196139618529040389}
@@ -299,6 +300,21 @@ MonoBehaviour:
     count: 0
   - item: {fileID: 0}
     count: 0
+--- !u!114 &9363897624026122612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936923126784610755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ce3d779f13743aba17e3e1a823cc965, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  inventory: {fileID: 1845909153704676813}
+  health: {fileID: 2944587308785528253}
+  stamina: {fileID: 9196139618529040389}
 --- !u!114 &1118344859087931616
 MonoBehaviour:
   m_ObjectHideFlags: 0
