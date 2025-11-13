@@ -10,19 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: Carrot
+  m_Name: Fishing Rod
   m_EditorClassIdentifier: 
-  id: Carrot
-  icon: {fileID: -52693575, guid: 04f4eed6b8d32cc4b8fa5d816d694f1c, type: 3}
+  id: 
+  icon: {fileID: -1400563832, guid: 0aa5aee32af1c79419410c4e0547b04e, type: 3}
   seedData: {fileID: 0}
-  category: 3
-  stackable: 1
+  category: 0
+  stackable: 0
   weaponType: 0
-  toolType: 0
-  healthRestore: 50
-  staminaRestore: 100
-  sellPrice: 0
-  toolRangeTiles: 1
+  toolType: 6
+  toolRangeTiles: 3
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0

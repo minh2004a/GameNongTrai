@@ -18,9 +18,9 @@ TagManager:
   - Enemy
   - Harvestable
   - Tree
-  - Ghost
+  - Bobber
   - Items
-  - ChopFX
+  - WaterBlocker
   - Stump
   - Floor
   - Ground

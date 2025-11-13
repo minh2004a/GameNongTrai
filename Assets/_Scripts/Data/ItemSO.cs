@@ -1,4 +1,5 @@
 
+
 using UnityEngine;
 // Dữ liệu ScriptableObject cho một loại vật phẩm trong trò chơi
 public enum ItemCategory { Tool, Weapon, Resource, Consumable, Minerals, Seed } // thêm loại
@@ -23,10 +24,17 @@ public class ItemSO : ScriptableObject
     public bool stackable = true;
     public WeaponType weaponType;
     public ToolType toolType = ToolType.None;
+    [Header("Consumable Settings")]
+    [Tooltip("Lượng HP hồi lại khi sử dụng vật phẩm này.")]
+    public int healthRestore;
+    [Tooltip("Lượng thể lực hồi lại khi sử dụng vật phẩm này.")]
+    public float staminaRestore;
+    [Tooltip("Giá bán mỗi vật phẩm khi bán.")]
+    public int sellPrice;
     [Header("Tool Settings")]
     [Tooltip("Số ô tối đa tính từ người chơi đến mục tiêu khi dùng công cụ này")]
     [Min(1)] public int toolRangeTiles = 1;
-    public int maxStack = 999;   
+    public int maxStack = 999;
     [Header("Hitbox Tuning")]
     [Tooltip("Nhân với range để phóng to/thu nhỏ hitbox")]
     public float hitboxScale = 1f;

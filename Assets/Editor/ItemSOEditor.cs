@@ -1,3 +1,4 @@
+
 using UnityEditor;
 using UnityEngine;
 
@@ -23,6 +24,9 @@ public class ItemSOEditor : Editor
     SerializedProperty projectileSpeedProp;
     SerializedProperty projectileMaxDistanceProp;
     SerializedProperty projectileHitVFXProp;
+    SerializedProperty healthRestoreProp;
+    SerializedProperty staminaRestoreProp;
+    SerializedProperty sellPriceProp;
 
     void OnEnable()
     {
@@ -45,6 +49,9 @@ public class ItemSOEditor : Editor
         projectileSpeedProp = serializedObject.FindProperty("projectileSpeed");
         projectileMaxDistanceProp = serializedObject.FindProperty("projectileMaxDistance");
         projectileHitVFXProp = serializedObject.FindProperty("projectileHitVFX");
+        healthRestoreProp = serializedObject.FindProperty("healthRestore");
+        staminaRestoreProp = serializedObject.FindProperty("staminaRestore");
+        sellPriceProp = serializedObject.FindProperty("sellPrice");
     }
 
     public override void OnInspectorGUI()
@@ -65,6 +72,9 @@ public class ItemSOEditor : Editor
                 break;
             case ItemCategory.Tool:
                 DrawToolFields();
+                break;
+            case ItemCategory.Consumable:
+                DrawConsumableFields();
                 break;
             case ItemCategory.Seed:
                 DrawSeedFields();
@@ -120,6 +130,16 @@ public class ItemSOEditor : Editor
         {
             EditorGUILayout.HelpBox("Chọn dữ liệu hạt giống (SeedSO) tương ứng cho vật phẩm hạt giống.", MessageType.Warning);
         }
+        DrawStackableFields();
+    }
+
+    void DrawConsumableFields()
+    {
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Consumable Settings", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(healthRestoreProp, new GUIContent("Health Restore"));
+        EditorGUILayout.PropertyField(staminaRestoreProp, new GUIContent("Stamina Restore"));
+        EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
         DrawStackableFields();
     }
 

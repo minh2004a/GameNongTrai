@@ -19,6 +19,9 @@ MonoBehaviour:
   stackable: 1
   weaponType: 0
   toolType: 0
+  healthRestore: 50
+  staminaRestore: 100
+  sellPrice: 0
   toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1

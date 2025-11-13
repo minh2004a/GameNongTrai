@@ -95,12 +95,12 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 419432099498450197}
-  m_BodyType: 2
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 5
+  m_LinearDrag: 4
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -164,7 +164,7 @@ MonoBehaviour:
   iconRenderer: {fileID: 2906587178447297865}
   item: {fileID: 0}
   count: 1
-  impactDamping: 0.35
+  impactDamping: 0.3
   settleDeceleration: 8
   stopSpeed: 0.05
   settleFrames: 12

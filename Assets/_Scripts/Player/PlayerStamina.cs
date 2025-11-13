@@ -1,6 +1,7 @@
 
 
 
+
 // PlayerStamina.cs
 using UnityEngine;
 using UnityEngine.Events;
@@ -79,4 +80,14 @@ public class PlayerStamina : MonoBehaviour
     public void SetPercent(float p){ p = Mathf.Clamp01(p); current = max * p; OnStamina01?.Invoke(p); }
     public void RecoverMissingPercent(float p){ p = Mathf.Clamp01(p); current = Mathf.Min(max, current + (max - current)*p); OnStamina01?.Invoke(Mathf.Clamp01(current/max)); }
     public void ClearExhaustionFlag() => exhaustedSinceLastSleep = false;
+
+    public float Restore(float amount)
+    {
+        if (amount <= 0f) return 0f;
+        float before = current;
+        current = Mathf.Min(max, current + amount);
+        regenTimer = 0f;
+        OnStamina01?.Invoke(Mathf.Clamp01(current / max));
+        return current - before;
+    }
 }

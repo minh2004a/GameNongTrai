@@ -1,15 +1,18 @@
+
 // HotbarUI.cs
 using System.Linq;
 using UnityEngine;
 // Quản lý giao diện thanh công cụ (hotbar) của người chơi
 public class HotbarUI : MonoBehaviour
-{
+{ 
     [SerializeField] PlayerInventory inv;
     [SerializeField] HotbarSlotUI[] slots;
+    PlayerUseConsumable consumableUser;
 
     void Awake()
     {
         if (!inv) inv = FindObjectOfType<PlayerInventory>();
+        if (inv) consumableUser = inv.GetComponent<PlayerUseConsumable>();
         if (slots == null || slots.Length == 0 || slots.Any(s => s == null))
             slots = GetComponentsInChildren<HotbarSlotUI>(true)
                     .OrderBy(s => s.transform.GetSiblingIndex()).ToArray();
@@ -32,6 +35,14 @@ public class HotbarUI : MonoBehaviour
     void OnChanged() { Refresh(); }
 
     public void OnClickSlot(int i) { inv?.SelectSlot(i); }
+
+    public void OnRightClickSlot(int i)
+    {
+        if (!inv) return;
+        inv.SelectSlot(i);
+        if (!consumableUser && inv) consumableUser = inv.GetComponent<PlayerUseConsumable>();
+        consumableUser?.TryUseSelected(ignoreUiGuard: true);
+    }
 
     public void Refresh()
     {

@@ -3,7 +3,7 @@ guid: 86a5b2b161b32f848891c2bbf457cfd6
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
-  serializedVersion: 12
+  serializedVersion: 13
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -34,7 +34,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -43,12 +43,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -72,7 +72,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -121,7 +121,511 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: Hooked_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9685e77dcd8b4374f92b16e880934388
+      internalID: 160410730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_1
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f65f5764268d2d44faea35cae5b666c3
+      internalID: -759034460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_2
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8824022b7f075fb4db17242420cdc385
+      internalID: 2011400916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_3
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ca7660e80c8cf5408643d6130bd1656
+      internalID: 498787598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_4
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15f8dcf075d65f34782402c68aed7e48
+      internalID: 1103540009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_5
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41c4bebe86251f84aabd1a41b5334859
+      internalID: 1708864901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_6
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eec78c8dcf880cd48acd98b1f183f518
+      internalID: -830163491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_7
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 138.66666
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d42beabc257f03c409cb8fe5c2c9f59d
+      internalID: 1396576143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ce07fd5613063a45a9fdaa757c3c942
+      internalID: -1835698522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_9
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd49ba852d9257949a53c9f448b204b9
+      internalID: 996170308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_10
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80936613fe08a6649b65e44fcf863af3
+      internalID: -1241563514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_11
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2369a4e305676684fa8b595aa37b9aeb
+      internalID: 463325987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_12
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fe808ec31b6677e4db4988345c57968e
+      internalID: -1060509650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_13
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a9d7138ad66f70c4b94f76d14cc4ed2b
+      internalID: -457085620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_14
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9369d4d08a806b445a3108504e29a586
+      internalID: 2105702200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_15
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 69.666664
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4629f85bed7d9b64bab86a2b5b323112
+      internalID: -251227424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f5fb3a4ff59ddb740af0371523ae971e
+      internalID: -1431333570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_17
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 640a4d8f04c9b114fae6633da66e765d
+      internalID: -1279697937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_18
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 306a017a566270745805121b88b6692d
+      internalID: -1075554085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_19
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bfcf09bb02c04014b9040e81215222ef
+      internalID: -1949416710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_20
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e342283de19d2148aa5a559c44c0719
+      internalID: 683185345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_21
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce1e180fd4b5fb34bbc510716f34b5f6
+      internalID: 294771192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_22
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df2f486df3f86e347b8c1e50ab0e7847
+      internalID: -1596989185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hooked_23
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 0.6666641
+        width: 64
+        height: 69.333336
+      alignment: 9
+      pivot: {x: 0.5, y: 0.41}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b8c6ed4868dfe8429878c8c3a4cbfba
+      internalID: -272131623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -132,7 +636,31 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Hooked_0: 160410730
+      Hooked_1: -759034460
+      Hooked_10: -1241563514
+      Hooked_11: 463325987
+      Hooked_12: -1060509650
+      Hooked_13: -457085620
+      Hooked_14: 2105702200
+      Hooked_15: -251227424
+      Hooked_16: -1431333570
+      Hooked_17: -1279697937
+      Hooked_18: -1075554085
+      Hooked_19: -1949416710
+      Hooked_2: 2011400916
+      Hooked_20: 683185345
+      Hooked_21: 294771192
+      Hooked_22: -1596989185
+      Hooked_23: -272131623
+      Hooked_3: 498787598
+      Hooked_4: 1103540009
+      Hooked_5: 1708864901
+      Hooked_6: -830163491
+      Hooked_7: 1396576143
+      Hooked_8: -1835698522
+      Hooked_9: 996170308
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

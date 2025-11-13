@@ -547,7 +547,7 @@ public class PlayerUseTool : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (!hit) continue;
+           if (!hit || hit.isTrigger) continue;
 
             var tree = hit.GetComponentInParent<TreeChopTarget>();
             if (tree && axeHitBuffer.Add(tree))

@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -102,6 +103,12 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
                 if (target) break;
             }
             if (target && owner) owner.RequestMoveOrMerge(idx, target.Index);
+            return;
+        }
+
+        if (e.button == PointerEventData.InputButton.Right)
+        {
+            owner?.OnRightClickSlot(idx);
             return;
         }
 
