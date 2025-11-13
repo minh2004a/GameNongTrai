@@ -105,6 +105,12 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
             return;
         }
 
+        if (e.button == PointerEventData.InputButton.Right)
+        {
+            owner?.OnRightClickSlot(idx);
+            return;
+        }
+
         if (!suppressClick)
         {
             if (owner) owner.OnClickSlot(idx);
