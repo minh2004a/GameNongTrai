@@ -10,12 +10,17 @@ public class PlayerUseConsumable : MonoBehaviour
     [SerializeField] PlayerInventory inventory;
     [SerializeField] PlayerHealth health;
     [SerializeField] PlayerStamina stamina;
+    [SerializeField] ConsumableConfirmUI confirmUI;
+
+    ItemSO pendingItem;
+    int pendingSlot = -1;
 
     void Awake()
     {
         if (!inventory) inventory = GetComponent<PlayerInventory>();
         if (!health) health = GetComponent<PlayerHealth>();
         if (!stamina) stamina = GetComponent<PlayerStamina>();
+        if (!confirmUI) confirmUI = FindObjectOfType<ConsumableConfirmUI>(true);
     }
 
     void Update()
@@ -34,13 +39,56 @@ public class PlayerUseConsumable : MonoBehaviour
         if (!inventory) return false;
         if (!ignoreUiGuard && UIInputGuard.BlockInputNow()) return false;
 
-        var item = inventory.CurrentItem;
+        int slot = inventory.selected;
+        if ((uint)slot >= (uint)inventory.hotbar.Length) return false;
+
+        var stack = inventory.hotbar[slot];
+        var item = stack.item;
         if (!item || item.category != ItemCategory.Consumable) return false;
 
-        bool applied = ApplyEffects(item);
-        if (!applied) return false;
+        if (confirmUI)
+        {
+            pendingSlot = slot;
+            pendingItem = item;
+            confirmUI.Show(item, OnConfirmUsePending, OnCancelUsePending);
+            return false;
+        }
+
+        if (!ApplyEffects(item)) return false;
 
         return inventory.ConsumeSelected();
+    }
+
+    void OnConfirmUsePending()
+    {
+        if (!inventory)
+        {
+            ClearPending();
+            return;
+        }
+
+        int slot = pendingSlot;
+        var item = pendingItem;
+        ClearPending();
+
+        if ((uint)slot >= (uint)inventory.hotbar.Length) return;
+
+        var stack = inventory.hotbar[slot];
+        if (stack.item != item) return;
+
+        if (inventory.selected != slot) inventory.SelectSlot(slot);
+
+        if (!ApplyEffects(item)) return;
+
+        inventory.ConsumeSelected();
+    }
+
+    void OnCancelUsePending() => ClearPending();
+
+    void ClearPending()
+    {
+        pendingItem = null;
+        pendingSlot = -1;
     }
 
     bool ApplyEffects(ItemSO item)
