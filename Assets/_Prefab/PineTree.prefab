@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 5603696174726296168}
   - component: {fileID: 1372191706524904266}
   - component: {fileID: 5806192009882370390}
+  - component: {fileID: -4406614052689402204}
   - component: {fileID: 2092108020899245305}
   - component: {fileID: 6073621166513563435}
   - component: {fileID: 6506601577548889661}
@@ -220,10 +221,38 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 389d33f019b5c654eb57caaf2e5fca89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   maxHp: 20
   stumpPrefab: {fileID: 5888336983269139626, guid: aed8a007881b70947a5ecf653e2f512a, type: 3}
   chopFxPrefab: {fileID: 3010065389849468160, guid: b31b0d6f65716594893b523a1cc4886b, type: 3}
+--- !u!114 &-4406614052689402204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8731117239119827141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c69e44d5707088145b391f59edabb53a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  enabledSeasons:
+  - 0
+  - 1
+  - 2
+  - 3
+  disableRendererWhenOutOfSeason: 0
+  seasonalSprites:
+  - season: 0
+    sprite: {fileID: 1017353347, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  - season: 1
+    sprite: {fileID: -999080955, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  - season: 2
+    sprite: {fileID: 615850253, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  - season: 3
+    sprite: {fileID: -275280967, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  fallbackSprite: {fileID: 1017353347, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
 --- !u!114 &6073621166513563435
 MonoBehaviour:
   m_ObjectHideFlags: 0
