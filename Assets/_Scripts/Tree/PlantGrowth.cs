@@ -14,6 +14,7 @@ public class PlantGrowth : MonoBehaviour
     int targetDaysForStage;     // dùng khi RandomRange
     GameObject visual;
     [SerializeField] PickupItem2D pickupPrefab;
+    [SerializeField] LootThrower2D lootThrower;
     TimeManager time;
     SeasonManager season;
     string plantId;
@@ -331,6 +332,12 @@ public class PlantGrowth : MonoBehaviour
             Debug.LogWarning("PlantGrowth: Thiếu pickupPrefab, không thể spawn vật phẩm thu hoạch.");
             return;
         }
+        if (lootThrower)
+        {
+            lootThrower.Throw(item, count, transform.position, pickupPrefab);
+            return;
+        }
+
         var pickup = Instantiate(pickupPrefab, transform.position, Quaternion.identity);
         pickup.Set(item, count);
     }
