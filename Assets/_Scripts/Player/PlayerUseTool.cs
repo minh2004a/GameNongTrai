@@ -185,14 +185,18 @@ public class PlayerUseTool : MonoBehaviour
         hasHitPoint = false;
 
         Vector2Int delta = requestedCell - playerCell;
+        Vector2 worldDelta = clickWorld - playerWorld;
+        bool hasMouseDirection = worldDelta.sqrMagnitude > 0.0001f;
+        Vector2 facingFromMouse = DetermineFacingFromWorld(worldDelta);
+        Vector2Int facingDelta = DetermineFacingDelta(worldDelta);
 
         switch (item.toolType)
         {
             case ToolType.Hoe:
                 if (!soil) return false;
-                if (delta == Vector2Int.zero)
+                if (delta == Vector2Int.zero && hasMouseDirection)
                 {
-                    delta = DetermineFacingDelta(clickWorld - playerWorld);
+                    delta = facingDelta;
                 }
 
                 if (!IsHoeOffset(delta))
@@ -202,26 +206,22 @@ public class PlayerUseTool : MonoBehaviour
                 }
 
                 targetCell = playerCell + delta;
-                facing = DetermineFacing(delta);
+                facing = facingFromMouse;
                 rangeTiles = 1;
                 hitPoint = soil.CellToWorld(targetCell);
                 hasHitPoint = true;
                 return true;
             case ToolType.WateringCan:
                 if (!soil) return false;
-                if (delta == Vector2Int.zero)
+                if (delta == Vector2Int.zero && hasMouseDirection)
                 {
-                    var facingDelta = DetermineFacingDelta(clickWorld - playerWorld);
-                    if (facingDelta != Vector2Int.zero)
-                    {
-                        delta = facingDelta;
-                    }
+                    delta = facingDelta;
                 }
 
                 if (delta == Vector2Int.zero)
                 {
                     targetCell = playerCell;
-                    facing = DetermineFacing(delta);
+                    facing = facingFromMouse;
                     hitPoint = soil.CellToWorld(targetCell);
                     hasHitPoint = true;
                     return true;
@@ -234,15 +234,13 @@ public class PlayerUseTool : MonoBehaviour
                 }
 
                 targetCell = playerCell + delta;
-                facing = DetermineFacing(delta);
+                facing = facingFromMouse;
                 hitPoint = soil.CellToWorld(targetCell);
                 hasHitPoint = true;
                 return true;
             case ToolType.Axe:
             {
-                Vector2 worldDelta = clickWorld - playerWorld;
-                Vector2Int facingDelta = DetermineFacingDelta(worldDelta);
-                facing = DetermineFacing(facingDelta);
+                facing = facingFromMouse;
 
                 float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
                 float maxDistance = Mathf.Max(tileSize, rangeTiles * tileSize);
@@ -264,7 +262,7 @@ public class PlayerUseTool : MonoBehaviour
                     return false;
                 }
 
-                facing = DetermineFacing(delta);
+                facing = facingFromMouse;
                 return true;
         }
     }
@@ -273,18 +271,6 @@ public class PlayerUseTool : MonoBehaviour
     {
         if (delta == Vector2Int.zero) return false;
         return Mathf.Abs(delta.x) <= 1 && Mathf.Abs(delta.y) <= 1;
-    }
-
-    Vector2Int DetermineFacingDelta(Vector2 worldDelta)
-    {
-        if (worldDelta.sqrMagnitude <= 0.0001f) return Vector2Int.zero;
-
-        if (Mathf.Abs(worldDelta.y) >= Mathf.Abs(worldDelta.x))
-        {
-            return worldDelta.y >= 0f ? Vector2Int.up : Vector2Int.down;
-        }
-
-        return worldDelta.x >= 0f ? Vector2Int.right : Vector2Int.left;
     }
 
     Vector2 DetermineFacing(Vector2Int delta)
@@ -305,6 +291,40 @@ public class PlayerUseTool : MonoBehaviour
         }
 
         return delta.x >= 0 ? Vector2.right : Vector2.left;
+    }
+
+    Vector2Int DetermineFacingDelta(Vector2 worldDelta)
+    {
+        if (worldDelta.sqrMagnitude > 0.0001f)
+        {
+            if (Mathf.Abs(worldDelta.y) >= Mathf.Abs(worldDelta.x))
+            {
+                return worldDelta.y >= 0f ? Vector2Int.up : Vector2Int.down;
+            }
+
+            return worldDelta.x >= 0f ? Vector2Int.right : Vector2Int.left;
+        }
+
+        Vector2 fallback = controller ? controller.Facing4 : Vector2.down;
+        if (fallback.sqrMagnitude <= 0.0001f)
+        {
+            fallback = Vector2.down;
+        }
+
+        int fx = Mathf.Clamp(Mathf.RoundToInt(fallback.x), -1, 1);
+        int fy = Mathf.Clamp(Mathf.RoundToInt(fallback.y), -1, 1);
+        if (fx == 0 && fy == 0)
+        {
+            fy = -1;
+        }
+
+        return new Vector2Int(fx, fy);
+    }
+
+    Vector2 DetermineFacingFromWorld(Vector2 worldDelta)
+    {
+        Vector2Int delta = DetermineFacingDelta(worldDelta);
+        return DetermineFacing(delta);
     }
 
     void BuildTargetCells(ToolType type, Vector2Int anchorCell, Vector2 facing, List<Vector2Int> results)
