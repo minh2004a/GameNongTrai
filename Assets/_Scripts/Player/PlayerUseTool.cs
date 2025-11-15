@@ -110,7 +110,11 @@ public class PlayerUseTool : MonoBehaviour
     void LateUpdate()
     {
         // Đang vung tool thì cứ khóa hướng mỗi frame
-        if (toolLocked) ApplyFacing(); // ApplyFacing() đã gọi FaceDirection(activeFacing)
+        if (toolLocked)
+        {
+            UpdateFacingWhileLocked();
+            ApplyFacing(); // ApplyFacing() đã gọi FaceDirection(activeFacing)
+        }
     }
     public void SetBonusRange(int bonusTiles)
     {
@@ -305,12 +309,7 @@ public class PlayerUseTool : MonoBehaviour
             return worldDelta.x >= 0f ? Vector2Int.right : Vector2Int.left;
         }
 
-        Vector2 fallback = controller ? controller.Facing4 : Vector2.down;
-        if (fallback.sqrMagnitude <= 0.0001f)
-        {
-            fallback = Vector2.down;
-        }
-
+        Vector2 fallback = DetermineFallbackFacing();
         int fx = Mathf.Clamp(Mathf.RoundToInt(fallback.x), -1, 1);
         int fy = Mathf.Clamp(Mathf.RoundToInt(fallback.y), -1, 1);
         if (fx == 0 && fy == 0)
@@ -325,6 +324,19 @@ public class PlayerUseTool : MonoBehaviour
     {
         Vector2Int delta = DetermineFacingDelta(worldDelta);
         return DetermineFacing(delta);
+    }
+
+    Vector2 DetermineFallbackFacing()
+    {
+        if (!controller) return Vector2.down;
+
+        Vector2 pending = controller.PendingFacing4();
+        if (pending.sqrMagnitude > 0.0001f) return pending;
+
+        Vector2 facing = controller.Facing4;
+        if (facing.sqrMagnitude > 0.0001f) return facing;
+
+        return Vector2.down;
     }
 
     void BuildTargetCells(ToolType type, Vector2Int anchorCell, Vector2 facing, List<Vector2Int> results)
@@ -415,6 +427,17 @@ public class PlayerUseTool : MonoBehaviour
     void ApplyFacing()
     {
         FaceDirection(activeFacing);
+    }
+
+    void UpdateFacingWhileLocked()
+    {
+        if (!controller) return;
+
+        Vector2 pending = controller.PendingFacing4();
+        if (pending.sqrMagnitude > 0.0001f)
+        {
+            activeFacing = pending;
+        }
     }
 
     void TriggerToolAnimation(ToolType type)
