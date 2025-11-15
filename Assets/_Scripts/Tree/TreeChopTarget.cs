@@ -1,5 +1,6 @@
 
 
+
 using UnityEngine;
 
 // Xử lý chặt cây: trừ HP, spawn FX, tạo gốc cây, và lưu trạng thái đã chặt
@@ -60,28 +61,23 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
 
         if (scatterDir != Vector2.zero) drop?.SetScatterDirection(scatterDir);
 
+        if (plant)
+        {
+            drop?.Drop();
+            plant.ReplaceWithStump(stumpPrefab);
+            return;
+        }
+
         if (stumpPrefab)
         {
-            var parent = plant ? plant.transform.parent : transform.parent;
-            var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, parent);
+            var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, transform.parent);
             var tag = stump.GetComponent<StumpOfTree>() ?? stump.AddComponent<StumpOfTree>();
             if (uid) tag.treeId = uid.Id;
         }
 
         drop?.Drop();
 
-        if (plant)
-        {
-            plant.RemoveFromSave();
-            if (plant.gameObject != gameObject)
-                Destroy(plant.gameObject);
-            else
-                Destroy(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
 
     }
     void SpawnChopFX(Vector3 pos)

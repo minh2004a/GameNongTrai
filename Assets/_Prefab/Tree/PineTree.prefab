@@ -97,8 +97,8 @@ GameObject:
   - component: {fileID: 5806192009882370390}
   - component: {fileID: 2092108020899245305}
   - component: {fileID: 6073621166513563435}
-  - component: {fileID: 6506601577548889661}
   - component: {fileID: 6209674571976452878}
+  - component: {fileID: -7354433032462341341}
   m_Layer: 8
   m_Name: PineTree
   m_TagString: Untagged
@@ -236,21 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: b60e4918-f7f6-4a9b-b74c-533277b0c48c
---- !u!114 &6506601577548889661
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8731117239119827141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b68b6ef936e1264fbf1e7bc452cc5aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stumpPrefab: {fileID: 5888336983269139626, guid: aed8a007881b70947a5ecf653e2f512a, type: 3}
-  spawnStumpOnRemoved: 1
+  id: 
 --- !u!114 &6209674571976452878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,3 +262,17 @@ MonoBehaviour:
     chance: 1
   scatterSpeed: {x: 10, y: 15}
   scatterAngle: 35
+--- !u!114 &-7354433032462341341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8731117239119827141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b68b6ef936e1264fbf1e7bc452cc5aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stumpPrefab: {fileID: 5888336983269139626, guid: aed8a007881b70947a5ecf653e2f512a, type: 3}
+  spawnStumpOnRemoved: 1

@@ -260,7 +260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 15
   stumpPrefab: {fileID: 1816410381763513309, guid: 9f446e3d831fe31499ef53a233fa6888, type: 3}
-  chopFxPrefab: {fileID: 4742017217648415254, guid: 02905dbb90e0c4d49b1cef96a92643d5, type: 3}
+  chopFxPrefab: {fileID: 3141546770626275318, guid: 1cd7de9992a48aa44bedbb3348cc5ec0, type: 3}
 --- !u!114 &2006831098790179750
 MonoBehaviour:
   m_ObjectHideFlags: 0

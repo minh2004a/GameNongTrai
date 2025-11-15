@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2133126461944111307}
   - component: {fileID: -2747061444438533377}
   - component: {fileID: 5453742342244517407}
-  - component: {fileID: -7952653853710687018}
+  - component: {fileID: -7688374462702302305}
   m_Layer: 8
   m_Name: BirchStump
   m_TagString: Untagged
@@ -196,7 +196,7 @@ MonoBehaviour:
     chance: 1
   scatterSpeed: {x: 15, y: 20}
   scatterAngle: 35
---- !u!114 &-7952653853710687018
+--- !u!114 &-7688374462702302305
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -205,7 +205,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1816410381763513309}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
+  m_Script: {fileID: 11500000, guid: 15bbea118468a9b4cb520a6216585796, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 1131f423-697a-476c-b213-067e0b3d5a07
+  treeId: 

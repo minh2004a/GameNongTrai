@@ -21,10 +21,10 @@ MonoBehaviour:
   stageDays: 01000000010000000100000001000000
   growthMode: 1
   stageAdvanceChance:
-  - 0.2
-  - 0.2
-  - 0.2
-  - 0.2
+  - 1
+  - 1
+  - 1
+  - 1
   stageDayRange:
   - {x: 0, y: 0}
   - {x: 0, y: 0}

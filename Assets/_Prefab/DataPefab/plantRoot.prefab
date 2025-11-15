@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6766394613056753902}
   - component: {fileID: 3435165665800571849}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: plantRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,3 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 0}
   stage: 0
+  pickupPrefab: {fileID: 0}

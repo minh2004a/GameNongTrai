@@ -1,5 +1,6 @@
 
 
+
 // PlantSystem.cs
 using System.Collections.Generic;
 using UnityEngine;
@@ -155,6 +156,32 @@ public class PlantSystem : MonoBehaviour
             if (!seed)
             {
                 Debug.LogWarning($"PlantSystem: Không tìm thấy SeedSO với id '{state.seedId}' để khôi phục.");
+                continue;
+            }
+
+            if (state.isStump)
+            {
+                var stumpPrefab = PlantGrowth.ResolveStumpPrefab(seed);
+                if (!stumpPrefab)
+                {
+                    Debug.LogWarning($"PlantSystem: Seed '{state.seedId}' không có stumpPrefab để khôi phục gốc cây.");
+                    if (!string.IsNullOrEmpty(state.id))
+                    {
+                        SaveStore.RemovePlantPending(scene, state.id);
+                    }
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(state.id))
+                {
+                    Debug.LogWarning($"PlantSystem: Plant stump ở scene '{scene}' thiếu id, bỏ qua.");
+                    continue;
+                }
+
+                var stumpPos = new Vector3(state.x, state.y, plantRootPrefab.transform.position.z);
+                var stump = Instantiate(stumpPrefab, stumpPos, Quaternion.identity);
+                var tag = stump.GetComponent<StumpOfTree>() ?? stump.AddComponent<StumpOfTree>();
+                tag.treeId = state.id;
                 continue;
             }
 

@@ -38,9 +38,9 @@ MonoBehaviour:
     amount: 99
     equip: 0
     hotbarSlot: 4
-  - item: {fileID: 0}
+  - item: {fileID: 11400000, guid: 533ff0872f85ce34eb3495758e732ca4, type: 2}
     itemKey: 
-    amount: 1
+    amount: 99
     equip: 0
     hotbarSlot: 5
   - item: {fileID: 11400000, guid: 696b84f441f642048aa01f992ab155fe, type: 2}
