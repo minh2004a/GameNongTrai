@@ -31,6 +31,7 @@ public static class SaveStore
         public int lastUpdatedDay;
         public bool wateredToday;
         public int lastWateredDay;
+        public bool isStump;
     }
     [System.Serializable]
     public struct SoilTileState
@@ -319,6 +320,12 @@ public static class SaveStore
     public static void MarkStumpClearedPending(string scene, string id){
         if (!pendingStumps.TryGetValue(scene, out var s)) pendingStumps[scene] = s = new HashSet<string>();
         s.Add(id);
+        if (!string.IsNullOrEmpty(scene) && !string.IsNullOrEmpty(id))
+        {
+            if (pendingPlants.TryGetValue(scene, out var dict)) dict.Remove(id);
+            if (!pendingRemovedPlants.TryGetValue(scene, out var removed)) pendingRemovedPlants[scene] = removed = new HashSet<string>();
+            removed.Add(id);
+        }
     }
     public static void MarkSoilTilledPending(string scene, Vector2Int cell, int tilledDay, bool hasPlant){
         if (string.IsNullOrEmpty(scene)) return;

@@ -21,6 +21,7 @@ public class PlantGrowth : MonoBehaviour
     int lastWateredDay;
     static readonly HashSet<SeedSO> warnedMissingId = new();
     bool seasonRemovalPending;
+    bool isStump;
 
     public bool IsMature => IsDataValid() && stage >= data.stagePrefabs.Length - 1;
     public bool CanHarvestByHand => IsDataValid() && data.harvestMethod == HarvestMethod.Hand && IsMature;
@@ -45,6 +46,8 @@ public class PlantGrowth : MonoBehaviour
         wasWateredToday = false;
         int today = Mathf.Max(0, CurrentDay);
         lastWateredDay = RequiresWatering ? Mathf.Max(0, today - 1) : today;
+        isStump = false;
+        removeFromSave = false;
 
         if (!IsDataValid())
         {
@@ -71,8 +74,16 @@ public class PlantGrowth : MonoBehaviour
         targetDaysForStage = 0;
         wasWateredToday = state.wateredToday;
         lastWateredDay = Mathf.Max(0, state.lastWateredDay);
+        isStump = state.isStump;
+        removeFromSave = false;
 
         if (!IsDataValid())
+        {
+            PersistState();
+            return;
+        }
+
+        if (isStump)
         {
             PersistState();
             return;
@@ -95,6 +106,7 @@ public class PlantGrowth : MonoBehaviour
     public void Water()
     {
         if (!IsDataValid()) return;
+        if (isStump) return;
         int today = CurrentDay;
         if (wasWateredToday && lastWateredDay == today) return;
         wasWateredToday = true;
@@ -104,6 +116,7 @@ public class PlantGrowth : MonoBehaviour
 
     public bool TryHarvestByHand(PlayerInventory inv)
     {
+        if (isStump) return false;
         if (!CanHarvestByHand) return false;
 
         var item = data.harvestItem;
@@ -161,6 +174,12 @@ public class PlantGrowth : MonoBehaviour
     void TickDay()
     {
         if (!IsDataValid())
+        {
+            PersistState();
+            return;
+        }
+
+        if (isStump)
         {
             PersistState();
             return;
@@ -246,6 +265,7 @@ public class PlantGrowth : MonoBehaviour
         int nextStage = Mathf.Min(stage + 1, maxStage);
         stage = nextStage;
         daysInStage = 0;
+        isStump = false;
         if (data.growthMode == GrowthMode.RandomRange) PickTargetDays();
         if (spawnVisual) SpawnStage();
     }
@@ -268,6 +288,15 @@ public class PlantGrowth : MonoBehaviour
     void SpawnStage()
     {
         if (!IsDataValid()) return;
+        if (isStump)
+        {
+            if (visual)
+            {
+                Destroy(visual);
+                visual = null;
+            }
+            return;
+        }
         if (visual) Destroy(visual);
         var prefab = data.stagePrefabs[Mathf.Clamp(stage, 0, data.stagePrefabs.Length - 1)];
         if (prefab) visual = Instantiate(prefab, transform);
@@ -284,6 +313,7 @@ public class PlantGrowth : MonoBehaviour
 
         stage = 0;
         daysInStage = 0;
+        isStump = false;
         if (data.growthMode == GrowthMode.RandomRange) PickTargetDays();
         wasWateredToday = false;
         int today = Mathf.Max(0, CurrentDay);
@@ -319,7 +349,8 @@ public class PlantGrowth : MonoBehaviour
             targetDaysForStage = targetDaysForStage,
             lastUpdatedDay = CurrentDay,
             wateredToday = wasWateredToday,
-            lastWateredDay = this.lastWateredDay
+            lastWateredDay = this.lastWateredDay,
+            isStump = isStump
         };
     }
 
@@ -380,6 +411,7 @@ public class PlantGrowth : MonoBehaviour
     void ApplyOfflineGrowth(int lastRecordedDay)
     {
         if (!IsDataValid()) return;
+        if (isStump) return;
 
         int now = CurrentDay;
         int last = lastRecordedDay > 0 ? lastRecordedDay : now;
@@ -437,5 +469,49 @@ public class PlantGrowth : MonoBehaviour
         }
 
         wasWateredToday = false;
+    }
+
+    public void ReplaceWithStump(GameObject stumpPrefab)
+    {
+        if (removeFromSave) removeFromSave = false;
+        if (string.IsNullOrEmpty(plantId)) plantId = SaveStore.CreatePlantId();
+
+        if (!IsDataValid())
+        {
+            RemoveFromSave();
+            Destroy(gameObject);
+            return;
+        }
+
+        if (!stumpPrefab)
+        {
+            RemoveFromSave();
+            Destroy(gameObject);
+            return;
+        }
+
+        isStump = true;
+        stage = Mathf.Clamp(data.stagePrefabs.Length - 1, 0, data.stagePrefabs.Length - 1);
+        daysInStage = 0;
+        var parent = transform.parent;
+        var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, parent);
+        var tag = stump.GetComponent<StumpOfTree>() ?? stump.AddComponent<StumpOfTree>();
+        tag.treeId = plantId;
+
+        PersistState();
+        Destroy(gameObject);
+    }
+
+    public static GameObject ResolveStumpPrefab(SeedSO seed)
+    {
+        if (!seed || seed.stagePrefabs == null) return null;
+        for (int i = seed.stagePrefabs.Length - 1; i >= 0; i--)
+        {
+            var prefab = seed.stagePrefabs[i];
+            if (!prefab) continue;
+            var target = prefab.GetComponentInChildren<TreeChopTarget>(true);
+            if (target && target.stumpPrefab) return target.stumpPrefab;
+        }
+        return null;
     }
 }
