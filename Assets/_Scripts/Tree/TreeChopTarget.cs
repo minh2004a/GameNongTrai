@@ -19,49 +19,15 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
         public Sprite sprite;
     }
 
-    [System.Serializable]
-    public struct SeasonFxVariant
-    {
-        public SeasonManager.Season season;
-        public GameObject stumpPrefab;
-        public GameObject chopFxPrefab;
-    }
-
-    [System.Serializable]
-    public struct SeasonPrefabSet
-    {
-        public GameObject spring;
-        public GameObject summer;
-        public GameObject fall;
-        public GameObject winter;
-
-        public GameObject Get(SeasonManager.Season season)
-        {
-            switch (season)
-            {
-                case SeasonManager.Season.Spring:
-                    return spring;
-                case SeasonManager.Season.Summer:
-                    return summer;
-                case SeasonManager.Season.Fall:
-                    return fall;
-                case SeasonManager.Season.Winter:
-                    return winter;
-            }
-            return null;
-        }
-    }
-
     [Header("Seasonal visuals")]
     [SerializeField] SpriteRenderer seasonalSpriteRenderer;
     [SerializeField] Sprite defaultSeasonSprite;
     [SerializeField] SeasonSpriteVariant[] seasonalSprites;
-    [SerializeField] SeasonFxVariant[] seasonalFxVariants;
-    [Header("Seasonal prefab sets")]
-    [Tooltip("Tùy chọn: gốc cây theo mùa, ưu tiên hơn seasonalFxVariants.")]
-    [SerializeField] SeasonPrefabSet seasonalStumpPrefabs;
-    [Tooltip("Tùy chọn: FX chặt theo mùa. Ưu tiên hơn seasonalFxVariants và chopFxPrefab.")]
-    [SerializeField] SeasonPrefabSet seasonalChopFxPrefabs;
+    [Header("Seasonal chop FX")]
+    [SerializeField] GameObject springChopFxPrefab;
+    [SerializeField] GameObject summerChopFxPrefab;
+    [SerializeField] GameObject fallChopFxPrefab;
+    [SerializeField] GameObject winterChopFxPrefab;
 
     int hp;
     SpriteRenderer sr;
@@ -132,7 +98,7 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
 
         if (scatterDir != Vector2.zero) drop?.SetScatterDirection(scatterDir);
 
-        var resolvedStumpPrefab = ResolveStumpPrefabForCurrentSeason();
+        var resolvedStumpPrefab = GetSeasonalStumpPrefab(GetCurrentSeason());
 
         if (plant)
         {
@@ -168,17 +134,6 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
             if (r is ParticleSystemRenderer psr)
                 psr.sortingFudge = +10f;                      // đẩy hạt VỀ SAU
         }
-    }
-
-    public GameObject GetSeasonalStumpPrefab(SeasonManager.Season season)
-    {
-        var prefab = seasonalStumpPrefabs.Get(season);
-        if (prefab) return prefab;
-        if (TryGetSeasonFxVariant(season, out var variant) && variant.stumpPrefab)
-        {
-            return variant.stumpPrefab;
-        }
-        return stumpPrefab;
     }
 
     void EnsureSeasonSubscription()
@@ -250,39 +205,32 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
         return sm ? sm.CurrentSeason : SeasonManager.Season.Spring;
     }
 
-    bool TryGetSeasonFxVariant(SeasonManager.Season season, out SeasonFxVariant variant)
+    public GameObject GetSeasonalStumpPrefab(SeasonManager.Season season)
     {
-        if (seasonalFxVariants != null)
-        {
-            for (int i = 0; i < seasonalFxVariants.Length; i++)
-            {
-                if (seasonalFxVariants[i].season == season)
-                {
-                    variant = seasonalFxVariants[i];
-                    return true;
-                }
-            }
-        }
-
-        variant = default;
-        return false;
-    }
-
-    GameObject ResolveStumpPrefabForCurrentSeason()
-    {
-        var season = GetCurrentSeason();
-        return GetSeasonalStumpPrefab(season);
+        return stumpPrefab;
     }
 
     GameObject ResolveChopFxPrefabForCurrentSeason()
     {
         var season = GetCurrentSeason();
-        var prefab = seasonalChopFxPrefabs.Get(season);
+        var prefab = GetSeasonalChopFxPrefab(season);
         if (prefab) return prefab;
-        if (TryGetSeasonFxVariant(season, out var variant) && variant.chopFxPrefab)
-        {
-            return variant.chopFxPrefab;
-        }
         return chopFxPrefab;
+    }
+
+    GameObject GetSeasonalChopFxPrefab(SeasonManager.Season season)
+    {
+        switch (season)
+        {
+            case SeasonManager.Season.Spring:
+                return springChopFxPrefab;
+            case SeasonManager.Season.Summer:
+                return summerChopFxPrefab;
+            case SeasonManager.Season.Fall:
+                return fallChopFxPrefab;
+            case SeasonManager.Season.Winter:
+                return winterChopFxPrefab;
+        }
+        return null;
     }
 }
