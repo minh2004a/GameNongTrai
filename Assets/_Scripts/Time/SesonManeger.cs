@@ -9,7 +9,7 @@ public class SeasonManager : MonoBehaviour
     public struct SeasonScheduleEntry { public Season season; [Min(1)] public int startDay; }
     [Serializable]
     public struct SeasonTilemapVariant { public Season season; public Tilemap template; }
-
+    public static SeasonManager Instance { get; private set; }
     [Serializable]
     public class SeasonTilemapTarget
     {
@@ -68,13 +68,25 @@ public class SeasonManager : MonoBehaviour
 
     public event Action<Season> OnSeasonChanged;
     public Season CurrentSeason { get; private set; }
+    public int CurrentSeasonIndex => (int)CurrentSeason;  // 0..3
     public int DayInSeason { get; private set; }   // 1..28
     public int DayInYear   { get; private set; }   // 1..(daysPerSeason*4)
 
     TimeManager timeManager;
     bool hasAppliedSeason;
 
-    void Awake()  { AttachTimeManager(FindFirstObjectByType<TimeManager>()); }
+    void Awake()
+        {
+            // Singleton đơn giản
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
+            AttachTimeManager(FindFirstObjectByType<TimeManager>());
+        }
     void OnEnable(){ AttachTimeManager(timeManager ?? FindFirstObjectByType<TimeManager>()); }
     void Start()  { if (applyImmediatelyOnStart) RefreshSeason(force: true); }
     void OnDisable(){ if (timeManager) timeManager.OnNewDay -= HandleNewDay; }

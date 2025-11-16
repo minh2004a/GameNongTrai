@@ -1,6 +1,3 @@
-
-
-
 using UnityEngine;
 
 // Xử lý chặt cây: trừ HP, spawn FX, tạo gốc cây, và lưu trạng thái đã chặt
@@ -11,8 +8,13 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
 
     [Header("Prefabs")]
     public GameObject stumpPrefab;                 // gốc cây
-    [SerializeField] GameObject chopFxPrefab;      // FX chặt
 
+    [SerializeField] GameObject chopFxPrefab;      // FX chặt mặc định
+
+    [Header("FX theo mùa (0: Spring, 1: Summer, 2: Fall, 3: Winter)")]
+    [SerializeField] GameObject[] seasonalChopFxPrefabs = new GameObject[4];
+
+    SeasonManager seasonManager;   // cache cho đỡ Find hoài
     int hp;
     SpriteRenderer sr;
 
@@ -20,8 +22,8 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
     {
         hp = maxHp;
         sr = GetComponentInChildren<SpriteRenderer>();
+        seasonManager = FindFirstObjectByType<SeasonManager>();
     }
-
     public void TakeHit(int damage)
     {
         ApplyDamage(damage, Vector2.zero);
@@ -52,39 +54,43 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
             return;
         }
 
-
         // Lưu đã chặt (nếu có hệ Save)
-        // trong nhánh hp<=0 trước khi Destroy:
         var uid = GetComponent<UniqueId>();
         var plant = GetComponentInParent<PlantGrowth>();
         if (uid) SaveStore.MarkTreeChoppedPending(gameObject.scene.name, uid.Id);
 
         if (scatterDir != Vector2.zero) drop?.SetScatterDirection(scatterDir);
 
-        if (plant)
-        {
-            drop?.Drop();
-            plant.ReplaceWithStump(stumpPrefab);
-            return;
-        }
-
         if (stumpPrefab)
         {
-            var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, transform.parent);
+            var parent = plant ? plant.transform.parent : transform.parent;
+            var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, parent);
             var tag = stump.GetComponent<StumpOfTree>() ?? stump.AddComponent<StumpOfTree>();
             if (uid) tag.treeId = uid.Id;
         }
 
         drop?.Drop();
 
-        Destroy(gameObject);
-
+        if (plant)
+        {
+            plant.RemoveFromSave();
+            if (plant.gameObject != gameObject)
+                Destroy(plant.gameObject);
+            else
+                Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
+
     void SpawnChopFX(Vector3 pos)
     {
-        if (!chopFxPrefab) return;
+        var fxPrefab = GetChopFxPrefabForCurrentSeason();
+        if (!fxPrefab) return;
 
-        var fx = Instantiate(chopFxPrefab, pos, Quaternion.identity);
+        var fx = Instantiate(fxPrefab, pos, Quaternion.identity);
 
         int layerId = SortingLayer.NameToID("FX_Back");        // dưới Characters
         foreach (var r in fx.GetComponentsInChildren<Renderer>(true))
@@ -95,4 +101,36 @@ public class TreeChopTarget : MonoBehaviour, IDamageable
                 psr.sortingFudge = +10f;                      // đẩy hạt VỀ SAU
         }
     }
+     public GameObject GetSeasonalStumpPrefab(SeasonManager.Season season = SeasonManager.Season.Spring)
+        {
+            // hiện tại mình không cần phân biệt mùa cho prefab gốc,
+            // gốc đổi skin bằng SeasonalSprite, nên chỉ trả về stumpPrefab
+            return stumpPrefab;
+        }
+    
+        GameObject GetChopFxPrefabForCurrentSeason()
+        {
+            // Mặc định dùng FX chung
+            GameObject fx = chopFxPrefab;
+
+            if (!seasonManager)
+                seasonManager = FindFirstObjectByType<SeasonManager>();
+
+            if (seasonManager)
+            {
+                // enum Season { Spring = 0, Summer = 1, Fall = 2, Winter = 3 }
+                int idx = (int)seasonManager.CurrentSeason;
+
+                if (seasonalChopFxPrefabs != null &&
+                    idx >= 0 && idx < seasonalChopFxPrefabs.Length &&
+                    seasonalChopFxPrefabs[idx] != null)
+                {
+                    fx = seasonalChopFxPrefabs[idx];
+                }
+            }
+
+            return fx;
+        }
+
+
 }

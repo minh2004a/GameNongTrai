@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
+  m_Name: MahoganyTree
+  m_EditorClassIdentifier: 
+  seedId: 
+  stagePrefabs: []
+  seasonalStagePrefabs: []
+  stageDays: 
+  growthMode: 0
+  stageAdvanceChance: []
+  stageDayRange: []
+  blockCheckRadius: 0.35
+  blockMask:
+    serializedVersion: 2
+    m_Bits: 0
+  snapToGrid: 1
+  gridSize: 1
+  requiresTilledSoil: 0
+  requiresWatering: 0
+  harvestMethod: 0
+  harvestItem: {fileID: 0}
+  harvestItemCount: 1
+  destroyOnHarvest: 1
+  allowedSeasons: 

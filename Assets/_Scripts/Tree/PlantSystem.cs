@@ -187,12 +187,17 @@ public class PlantSystem : MonoBehaviour
 
             if (!IsSeedAllowedInCurrentSeason(seed))
             {
-                if (!string.IsNullOrEmpty(state.id))
+                // Nếu là cây sống qua mùa (ví dụ cây gỗ) thì vẫn cho tồn tại
+                if (!seed.surviveOutOfSeason)
                 {
-                    SaveStore.RemovePlantPending(scene, state.id);
+                    if (!string.IsNullOrEmpty(state.id))
+                    {
+                        SaveStore.RemovePlantPending(scene, state.id);
+                    }
+                    continue;
                 }
-                continue;
             }
+
 
             var prefabPos = plantRootPrefab.transform.position;
             var pos = new Vector3(state.x, state.y, prefabPos.z);

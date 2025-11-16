@@ -2,6 +2,7 @@
 
 
 
+
 // SeedSO.cs
 using UnityEngine;
 
@@ -11,12 +12,22 @@ public enum HarvestMethod { None, Hand, Tool }
 [CreateAssetMenu(menuName = "Plants/Seed")]
 public class SeedSO : ScriptableObject
 {
+    [System.Serializable]
+    public struct SeasonalStagePrefabSet
+    {
+        public SeasonManager.Season season;
+        public GameObject[] stagePrefabs;
+    }
+
     static readonly System.Collections.Generic.Dictionary<string, SeedSO> byId =
         new System.Collections.Generic.Dictionary<string, SeedSO>();
     public string seedId;
 
     [Tooltip("Prefab cho từng giai đoạn, cuối cùng là cây trưởng thành")]
     public GameObject[] stagePrefabs;
+
+    [Tooltip("Tùy chọn: prefab theo mùa cho từng giai đoạn. Bỏ trống để dùng prefab mặc định.")]
+    public SeasonalStagePrefabSet[] seasonalStagePrefabs;
 
     [Header("Cố định theo ngày (giữ nguyên)")]
     [Tooltip("Số ngày cần cho mỗi stage, dài bằng stagePrefabs")]
@@ -56,7 +67,8 @@ public class SeedSO : ScriptableObject
     [Header("Mùa vụ")]
     [Tooltip("Danh sách mùa mà hạt giống có thể trồng và tồn tại. Để trống để cho phép quanh năm." )]
     public SeasonManager.Season[] allowedSeasons;
-
+    [Tooltip("Nếu bật: cây vẫn sống khi qua mùa khác. allowedSeasons chỉ dùng để hạn chế lúc gieo hạt.")]
+    public bool surviveOutOfSeason = false;
     public bool HasSeasonRestrictions => allowedSeasons != null && allowedSeasons.Length > 0;
 
     public bool IsSeasonAllowed(SeasonManager.Season season)
@@ -67,6 +79,72 @@ public class SeedSO : ScriptableObject
             if (allowedSeasons[i] == season) return true;
         }
         return false;
+    }
+
+    public GameObject GetStagePrefabForSeason(int stageIndex, SeasonManager.Season season)
+    {
+        if (stageIndex < 0)
+        {
+            stageIndex = 0;
+        }
+
+        var seasonal = GetSeasonalStageArray(season);
+        if (seasonal != null && stageIndex < seasonal.Length)
+        {
+            var prefab = seasonal[stageIndex];
+            if (prefab) return prefab;
+        }
+
+        return GetDefaultStagePrefab(stageIndex);
+    }
+
+    GameObject[] GetSeasonalStageArray(SeasonManager.Season season)
+    {
+        if (seasonalStagePrefabs == null) return null;
+        for (int i = 0; i < seasonalStagePrefabs.Length; i++)
+        {
+            if (seasonalStagePrefabs[i].season == season)
+            {
+                return seasonalStagePrefabs[i].stagePrefabs;
+            }
+        }
+        return null;
+    }
+
+    public GameObject GetDefaultStagePrefab(int stageIndex)
+    {
+        if (stagePrefabs == null || stagePrefabs.Length == 0) return null;
+        if (stageIndex < stagePrefabs.Length)
+        {
+            return stagePrefabs[Mathf.Clamp(stageIndex, 0, stagePrefabs.Length - 1)];
+        }
+        return stagePrefabs[stagePrefabs.Length - 1];
+    }
+
+    public System.Collections.Generic.IEnumerable<GameObject> EnumerateAllStagePrefabs()
+    {
+        if (stagePrefabs != null)
+        {
+            for (int i = 0; i < stagePrefabs.Length; i++)
+            {
+                var prefab = stagePrefabs[i];
+                if (prefab) yield return prefab;
+            }
+        }
+
+        if (seasonalStagePrefabs != null)
+        {
+            for (int i = 0; i < seasonalStagePrefabs.Length; i++)
+            {
+                var set = seasonalStagePrefabs[i];
+                if (set.stagePrefabs == null) continue;
+                for (int j = 0; j < set.stagePrefabs.Length; j++)
+                {
+                    var prefab = set.stagePrefabs[j];
+                    if (prefab) yield return prefab;
+                }
+            }
+        }
     }
     void OnEnable(){
         if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
@@ -101,6 +179,26 @@ void OnValidate(){
     if (stageDayRange != null && stageDayRange.Length != n){
         System.Array.Resize(ref stageDayRange, n);
     }
+    if (seasonalStagePrefabs != null)
+    {
+        for (int i = 0; i < seasonalStagePrefabs.Length; i++)
+        {
+            var entry = seasonalStagePrefabs[i];
+            if (entry.stagePrefabs == null)
+            {
+                entry.stagePrefabs = new GameObject[n];
+                seasonalStagePrefabs[i] = entry;
+                continue;
+            }
+
+            if (entry.stagePrefabs.Length != n)
+            {
+                System.Array.Resize(ref entry.stagePrefabs, n);
+                seasonalStagePrefabs[i] = entry;
+            }
+        }
+    }
+
     if (!string.IsNullOrEmpty(seedId)) byId[seedId] = this;
 }
 #endif

@@ -224,6 +224,30 @@ MonoBehaviour:
   maxHp: 20
   stumpPrefab: {fileID: 5888336983269139626, guid: aed8a007881b70947a5ecf653e2f512a, type: 3}
   chopFxPrefab: {fileID: 3010065389849468160, guid: b31b0d6f65716594893b523a1cc4886b, type: 3}
+  seasonalSpriteRenderer: {fileID: 0}
+  defaultSeasonSprite: {fileID: 0}
+  seasonalSprites:
+  - season: 0
+    sprite: {fileID: 1017353347, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  - season: 1
+    sprite: {fileID: 1017353347, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  - season: 2
+    sprite: {fileID: 1017353347, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  - season: 3
+    sprite: {fileID: -999080955, guid: e416ea9eccbb1cc4fb9ab02665ca245b, type: 3}
+  seasonalFxVariants:
+  - season: 0
+    stumpPrefab: {fileID: 0}
+    chopFxPrefab: {fileID: 0}
+  - season: 0
+    stumpPrefab: {fileID: 0}
+    chopFxPrefab: {fileID: 0}
+  - season: 0
+    stumpPrefab: {fileID: 0}
+    chopFxPrefab: {fileID: 0}
+  - season: 0
+    stumpPrefab: {fileID: 0}
+    chopFxPrefab: {fileID: 0}
 --- !u!114 &6073621166513563435
 MonoBehaviour:
   m_ObjectHideFlags: 0

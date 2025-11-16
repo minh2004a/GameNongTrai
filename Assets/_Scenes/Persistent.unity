@@ -6393,6 +6393,10 @@ PrefabInstance:
       propertyPath: sleep
       value: 
       objectReference: {fileID: 152460042}
+    - target: {fileID: 1118344859087931616, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
+      propertyPath: blockMask.m_Bits
+      value: 270592
+      objectReference: {fileID: 0}
     - target: {fileID: 1845909153704676813, guid: 09881725e0a451a44a07e39d23b3d97f, type: 3}
       propertyPath: hotbar.Array.data[0].item
       value: 

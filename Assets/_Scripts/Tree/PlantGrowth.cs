@@ -1,7 +1,4 @@
 
-
-
-
 // PlantGrowth.cs
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +10,7 @@ public class PlantGrowth : MonoBehaviour
     int daysInStage;
     int targetDaysForStage;     // dùng khi RandomRange
     GameObject visual;
+    GameObject currentStagePrefab;
     [SerializeField] PickupItem2D pickupPrefab;
     TimeManager time;
     SeasonManager season;
@@ -49,6 +47,7 @@ public class PlantGrowth : MonoBehaviour
         lastWateredDay = RequiresWatering ? Mathf.Max(0, today - 1) : today;
         isStump = false;
         removeFromSave = false;
+        currentStagePrefab = null;
 
         if (!IsDataValid())
         {
@@ -77,6 +76,7 @@ public class PlantGrowth : MonoBehaviour
         lastWateredDay = Mathf.Max(0, state.lastWateredDay);
         isStump = state.isStump;
         removeFromSave = false;
+        currentStagePrefab = null;
 
         if (!IsDataValid())
         {
@@ -268,6 +268,7 @@ public class PlantGrowth : MonoBehaviour
         daysInStage = 0;
         isStump = false;
         if (data.growthMode == GrowthMode.RandomRange) PickTargetDays();
+        currentStagePrefab = null;
         if (spawnVisual) SpawnStage();
     }
 
@@ -296,11 +297,27 @@ public class PlantGrowth : MonoBehaviour
                 Destroy(visual);
                 visual = null;
             }
+            currentStagePrefab = null;
             return;
         }
-        if (visual) Destroy(visual);
-        var prefab = data.stagePrefabs[Mathf.Clamp(stage, 0, data.stagePrefabs.Length - 1)];
-        if (prefab) visual = Instantiate(prefab, transform);
+
+        var prefab = data.GetStagePrefabForSeason(stage, ResolveCurrentSeason());
+        if (prefab == currentStagePrefab && visual)
+        {
+            return;
+        }
+
+        if (visual)
+        {
+            Destroy(visual);
+            visual = null;
+        }
+
+        currentStagePrefab = prefab;
+        if (prefab)
+        {
+            visual = Instantiate(prefab, transform);
+        }
     }
 
     void HandlePostHarvest()
@@ -387,19 +404,33 @@ public class PlantGrowth : MonoBehaviour
     bool EnsureSeasonSurvival()
     {
         if (!data || !data.HasSeasonRestrictions) return true;
-        var sm = season && season.isActiveAndEnabled ? season : FindFirstObjectByType<SeasonManager>();
+        var sm = GetSeasonManager();
         if (!sm) return true;
         if (data.IsSeasonAllowed(sm.CurrentSeason)) return true;
+
+        // Cây đa niên (cây gỗ) vẫn sống dù hết mùa
+        if (data.surviveOutOfSeason) return true;
+
         RemoveForSeason();
         return false;
     }
-
     void HandleSeasonChanged(SeasonManager.Season newSeason)
     {
-        if (!data || !data.HasSeasonRestrictions) return;
-        if (data.IsSeasonAllowed(newSeason)) return;
-        RemoveForSeason();
+        if (!data)
+        {
+            return;
+        }
+
+        if (data.HasSeasonRestrictions && !data.IsSeasonAllowed(newSeason) && !data.surviveOutOfSeason)
+        {
+            RemoveForSeason();
+            return;
+        }
+
+        // Cây gỗ vẫn sống, chỉ refresh hình theo mùa
+        RefreshSeasonVisual();
     }
+
 
     void RemoveForSeason()
     {
@@ -494,6 +525,7 @@ public class PlantGrowth : MonoBehaviour
         isStump = true;
         stage = Mathf.Clamp(data.stagePrefabs.Length - 1, 0, data.stagePrefabs.Length - 1);
         daysInStage = 0;
+        currentStagePrefab = null;
         var parent = transform.parent;
         var stump = Instantiate(stumpPrefab, transform.position, transform.rotation, parent);
         var tag = stump.GetComponent<StumpOfTree>() ?? stump.AddComponent<StumpOfTree>();
@@ -505,14 +537,41 @@ public class PlantGrowth : MonoBehaviour
 
     public static GameObject ResolveStumpPrefab(SeedSO seed)
     {
-        if (!seed || seed.stagePrefabs == null) return null;
-        for (int i = seed.stagePrefabs.Length - 1; i >= 0; i--)
+        if (!seed) return null;
+        var sm = Object.FindFirstObjectByType<SeasonManager>();
+        var season = sm ? sm.CurrentSeason : SeasonManager.Season.Spring;
+
+        foreach (var prefab in seed.EnumerateAllStagePrefabs())
         {
-            var prefab = seed.stagePrefabs[i];
             if (!prefab) continue;
             var target = prefab.GetComponentInChildren<TreeChopTarget>(true);
-            if (target && target.stumpPrefab) return target.stumpPrefab;
+            if (!target) continue;
+            var seasonalStump = target.GetSeasonalStumpPrefab(season);
+            if (seasonalStump) return seasonalStump;
+            if (target.stumpPrefab) return target.stumpPrefab;
         }
         return null;
+    }
+
+    void RefreshSeasonVisual()
+    {
+        if (!IsDataValid()) return;
+        if (isStump) return;
+        currentStagePrefab = null;
+        SpawnStage();
+        PersistState();
+    }
+
+    SeasonManager GetSeasonManager()
+    {
+        if (season && season.isActiveAndEnabled) return season;
+        season = FindFirstObjectByType<SeasonManager>();
+        return season;
+    }
+
+    SeasonManager.Season ResolveCurrentSeason()
+    {
+        var sm = GetSeasonManager();
+        return sm ? sm.CurrentSeason : SeasonManager.Season.Spring;
     }
 }

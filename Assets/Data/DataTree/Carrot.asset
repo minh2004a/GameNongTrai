@@ -15,11 +15,12 @@ MonoBehaviour:
   seedId: Carrot
   stagePrefabs:
   - {fileID: 8047980016238943565, guid: 0e6c3ae58317860499d1b1c1d3f02c15, type: 3}
-  - {fileID: 206236199596652127, guid: e74fdf1cc832d3f4e80db56037864173, type: 3}
+  - {fileID: 3312725592553140325, guid: 98c0efd7c4f659d45adc97117f1a3d54, type: 3}
   - {fileID: 9119173159020786449, guid: 51d00874707bb9641aec17256b4ab80e, type: 3}
-  - {fileID: 6351277451325251780, guid: 77f12202f9905bd43a7bbe47bce05eae, type: 3}
+  - {fileID: 4019022118536406214, guid: bd0312cd2a674c14aaa74b40dfefc283, type: 3}
   - {fileID: 6539389337701898987, guid: e45d76589040beb4288bde91fc12ca4d, type: 3}
   - {fileID: 624509626774247083, guid: c05e9ce1a6590dd4a84fbb694cad6884, type: 3}
+  seasonalStagePrefabs: []
   stageDays: 010000000100000001000000010000000100000001000000
   growthMode: 0
   stageAdvanceChance:
