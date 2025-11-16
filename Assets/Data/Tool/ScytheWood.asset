@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SeedMahogany
+  m_Name: ScytheWood
   m_EditorClassIdentifier: 
-  id: SeedMahogany
-  icon: {fileID: 1329791312, guid: 0b0cebf61d73780428eee4d6577587eb, type: 3}
-  seedData: {fileID: 11400000, guid: f5472710a9f139b4aa0f600cb4a04f0d, type: 2}
-  category: 5
-  stackable: 1
+  id: "R\u1EF1a"
+  icon: {fileID: -109318242, guid: 0aa5aee32af1c79419410c4e0547b04e, type: 3}
+  seedData: {fileID: 0}
+  category: 0
+  stackable: 0
   weaponType: 0
-  toolType: 0
+  toolType: 4
   healthRestore: 0
   staminaRestore: 0
   sellPrice: 0

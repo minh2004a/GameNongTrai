@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SeedMahogany
+  m_Name: DauTay
   m_EditorClassIdentifier: 
-  id: SeedMahogany
-  icon: {fileID: 1329791312, guid: 0b0cebf61d73780428eee4d6577587eb, type: 3}
-  seedData: {fileID: 11400000, guid: f5472710a9f139b4aa0f600cb4a04f0d, type: 2}
-  category: 5
+  id: "D\xE2u T\xE2y"
+  icon: {fileID: 1818305310, guid: 04f4eed6b8d32cc4b8fa5d816d694f1c, type: 3}
+  seedData: {fileID: 0}
+  category: 3
   stackable: 1
   weaponType: 0
   toolType: 0
-  healthRestore: 0
-  staminaRestore: 0
-  sellPrice: 0
+  healthRestore: 5
+  staminaRestore: 20
+  sellPrice: 70
   toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1

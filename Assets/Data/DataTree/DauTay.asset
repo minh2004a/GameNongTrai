@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
+  m_Name: DauTay
+  m_EditorClassIdentifier: 
+  seedId: DauTay
+  stagePrefabs:
+  - {fileID: 8366243954199767791, guid: d30ab8b0cd9f8fa479d89955ab8d4f97, type: 3}
+  - {fileID: 1366832044567619749, guid: cf1217707361b93479c911e4ef7c52e8, type: 3}
+  - {fileID: 3836341568111657902, guid: 109337bfcbe3811489599f758f8749ab, type: 3}
+  - {fileID: 1802374203564291308, guid: cbec80aff786df743b10e117dd577da8, type: 3}
+  - {fileID: 6159339565538515458, guid: e6d37dc3d6901b94da4997d76db908f2, type: 3}
+  - {fileID: 60728051976309383, guid: 25c2767e7ea8b6344ad4a41332262109, type: 3}
+  seasonalStagePrefabs: []
+  stageDays: 010000000100000001000000010000000100000001000000
+  growthMode: 0
+  stageAdvanceChance:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  stageDayRange:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  blockCheckRadius: 0.35
+  blockMask:
+    serializedVersion: 2
+    m_Bits: 131328
+  snapToGrid: 1
+  gridSize: 1
+  requiresTilledSoil: 1
+  requiresWatering: 1
+  harvestMethod: 2
+  harvestItem: {fileID: 11400000, guid: 3043c668698fbd5468bc437c6d8729b4, type: 2}
+  harvestItemCount: 1
+  destroyOnHarvest: 1
+  allowedSeasons: 00000000
+  surviveOutOfSeason: 0

@@ -12,17 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 610536775053218429afe582909fbba6, type: 3}
   m_Name: MahoganyTree
   m_EditorClassIdentifier: 
-  seedId: 
-  stagePrefabs: []
+  seedId: Mahogany Tree
+  stagePrefabs:
+  - {fileID: 6534896232296398169, guid: 7fe74289ccaca844b9d8cce64f774640, type: 3}
+  - {fileID: 7226447976042205553, guid: 9c67d7ab425b2f64abf6cd5f205280ba, type: 3}
+  - {fileID: 2756424896155667677, guid: b38185691d10d3e478e16d79e7194e0b, type: 3}
+  - {fileID: 1198663450485891303, guid: df0c7d3949ab6294a8af0b810033a387, type: 3}
   seasonalStagePrefabs: []
-  stageDays: 
-  growthMode: 0
-  stageAdvanceChance: []
-  stageDayRange: []
+  stageDays: 00000000000000000000000000000000
+  growthMode: 1
+  stageAdvanceChance:
+  - 0.2
+  - 0.2
+  - 0.2
+  - 0.2
+  stageDayRange:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   blockCheckRadius: 0.35
   blockMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 307456
   snapToGrid: 1
   gridSize: 1
   requiresTilledSoil: 0
@@ -31,4 +43,5 @@ MonoBehaviour:
   harvestItem: {fileID: 0}
   harvestItemCount: 1
   destroyOnHarvest: 1
-  allowedSeasons: 
+  allowedSeasons: 00000000
+  surviveOutOfSeason: 1

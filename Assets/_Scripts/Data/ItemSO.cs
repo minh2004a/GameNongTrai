@@ -14,6 +14,11 @@ public enum ToolType
     WateringCan = 5
 }
 public interface IDamageable { void TakeHit(int dmg); }
+public interface IReapable
+{
+    void Reap(int damage, Vector2 hitDir, PlayerInventory inv);
+}
+
 [CreateAssetMenu(menuName = "Items/Item")]
 public class ItemSO : ScriptableObject
 {

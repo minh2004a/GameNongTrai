@@ -24,6 +24,7 @@ public class PlantGrowth : MonoBehaviour
 
     public bool IsMature => IsDataValid() && stage >= data.stagePrefabs.Length - 1;
     public bool CanHarvestByHand => IsDataValid() && data.harvestMethod == HarvestMethod.Hand && IsMature;
+    public bool CanHarvestByTool => IsDataValid() && data.harvestMethod == HarvestMethod.Tool && IsMature;
     bool RequiresWatering => data && data.requiresWatering;
 
     int CurrentDay
@@ -150,7 +151,42 @@ public class PlantGrowth : MonoBehaviour
         HandlePostHarvest();
         return true;
     }
+    public bool TryHarvestByTool(PlayerInventory inv)
+    {
+        Debug.Log($"[Plant] TryHarvestByTool trên {name}, CanHarvestByTool={CanHarvestByTool}");
+        if (isStump) return false;
+        if (!CanHarvestByTool) return false;
 
+        var item = data.harvestItem;
+        int count = item ? Mathf.Max(0, data.harvestItemCount) : 0;
+
+        if (item && count > 0)
+        {
+            InventoryAddResult delivery;
+            if (inv)
+            {
+                delivery = inv.AddItemDetailed(item, count);
+            }
+            else
+            {
+                delivery = new InventoryAddResult
+                {
+                    requested = count,
+                    remaining = count,
+                    addedToBag = 0,
+                    addedToHotbar = 0
+                };
+            }
+
+            if (delivery.remaining > 0)
+            {
+                SpawnPickup(item, delivery.remaining);
+            }
+        }
+
+        HandlePostHarvest();
+        return true;
+    }
     bool IsDataValid()
     {
         return data && data.stagePrefabs != null && data.stagePrefabs.Length > 0;

@@ -36,6 +36,7 @@ public class PlayerUseTool : MonoBehaviour
     static readonly int UseHoeHash = Animator.StringToHash("UseHoe");
     static readonly int UseWateringHash = Animator.StringToHash("UseWatering");
     static readonly int UseAxeHash = Animator.StringToHash("UseAxe");
+    static readonly int UseScytheHash = Animator.StringToHash("UseScythe");
 
     readonly List<Vector2Int> pendingCells = new();
     readonly HashSet<PlantGrowth> wateredPlantsBuffer = new();
@@ -243,23 +244,25 @@ public class PlayerUseTool : MonoBehaviour
                 hitPoint = soil.CellToWorld(targetCell);
                 hasHitPoint = true;
                 return true;
-            case ToolType.Axe:
-            {
-                facing = facingFromMouse;
-
-                float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
-                float maxDistance = Mathf.Max(tileSize, rangeTiles * tileSize);
-                Vector2 clamped = Vector2.ClampMagnitude(worldDelta, maxDistance);
-                if (clamped.sqrMagnitude <= 0.0001f)
+                case ToolType.Axe:
+                case ToolType.Scythe:
                 {
-                    Vector2 fallbackFacing = facing.sqrMagnitude > 0.0001f ? facing : Vector2.down;
-                    clamped = fallbackFacing.normalized * Mathf.Min(maxDistance, tileSize);
+                    facing = facingFromMouse;
+
+                    float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
+                    float maxDistance = Mathf.Max(tileSize, rangeTiles * tileSize);
+                    Vector2 clamped = Vector2.ClampMagnitude(worldDelta, maxDistance);
+                    if (clamped.sqrMagnitude <= 0.0001f)
+                    {
+                        Vector2 fallbackFacing = facing.sqrMagnitude > 0.0001f ? facing : Vector2.down;
+                        clamped = fallbackFacing.normalized * Mathf.Min(maxDistance, tileSize);
+                    }
+
+                    hitPoint = playerWorld + clamped;
+                    hasHitPoint = true;
+                    return true;
                 }
 
-                hitPoint = playerWorld + clamped;
-                hasHitPoint = true;
-                return true;
-            }
             default:
                 if (!IsWithinRange(delta, rangeTiles))
                 {
@@ -378,6 +381,9 @@ public class PlayerUseTool : MonoBehaviour
             case ToolType.WateringCan:
                 cost = stamina.wateringCost;
                 break;
+            case ToolType.Scythe:           // ✨ thêm dòng này
+                cost = stamina.scytheCost;   // dùng cost riêng cho rựa
+                break;
         }
 
         if (cost <= 0f) return true;
@@ -451,30 +457,30 @@ public class PlayerUseTool : MonoBehaviour
                 animator.ResetTrigger(UseAxeHash);
                 animator.ResetTrigger(UseWateringHash);
                 animator.ResetTrigger(UseHoeHash);
+                animator.ResetTrigger(UseScytheHash);
                 animator.SetTrigger(UseAxeHash);
                 break;
+
+            case ToolType.Scythe:
+                animator.ResetTrigger(UseAxeHash);
+                animator.ResetTrigger(UseWateringHash);
+                animator.ResetTrigger(UseHoeHash);
+                animator.ResetTrigger(UseScytheHash);
+                animator.SetTrigger(UseScytheHash);
+                break;
+
             case ToolType.Hoe:
                 animator.ResetTrigger(UseHoeHash);
                 animator.SetTrigger(UseHoeHash);
                 break;
+
             case ToolType.WateringCan:
                 animator.ResetTrigger(UseWateringHash);
-                animator.ResetTrigger(UseHoeHash);
-                if (AnimatorSupportsWateringTrigger())
-                {
-                    animator.SetTrigger(UseWateringHash);
-                }
-                else
-                {
-                    animator.SetTrigger(UseHoeHash);
-                }
-                break;
-            default:
-                animator.ResetTrigger(UseAxeHash);
-                animator.ResetTrigger(UseHoeHash);
+                animator.SetTrigger(UseWateringHash);
                 break;
         }
     }
+
 
     bool AnimatorSupportsWateringTrigger()
     {
@@ -548,6 +554,9 @@ public class PlayerUseTool : MonoBehaviour
                 break;
             case ToolType.Hoe:
                 PerformHoeHit();
+                break;
+                case ToolType.Scythe:
+                PerformScytheHit();
                 break;
             case ToolType.WateringCan:
                 PerformWatering();
@@ -634,6 +643,63 @@ public class PlayerUseTool : MonoBehaviour
             WaterPlantsNearCell(soil, cell);
         }
     }
+    void PerformScytheHit()
+    {
+        if (!activeTool) return;
+
+        float radius = Mathf.Max(0.05f, activeTool.range) * Mathf.Max(0.05f, activeTool.hitboxScale);
+        Vector2 center = activeToolHasHitPoint ? activeToolHitPoint : (Vector2)transform.position;
+
+        if (!activeToolHasHitPoint)
+        {
+            Vector2 forward = activeFacing.sqrMagnitude > 0.0001f ? activeFacing.normalized : Vector2.down;
+            float forwardDist = activeTool.hitboxForward >= 0f ? activeTool.hitboxForward : Mathf.Max(0.1f, radius);
+            center += forward * forwardDist;
+        }
+
+        center += new Vector2(0f, activeTool.hitboxYOffset);
+
+        var hits = Physics2D.OverlapCircleAll(center, radius);
+        if (hits == null || hits.Length == 0) return;
+
+        axeHitBuffer.Clear();
+        int damage = Mathf.Max(1, activeTool.Dame);
+        Vector2 hitDir = activeFacing.sqrMagnitude > 0.0001f ? activeFacing.normalized : Vector2.down;
+
+        foreach (var hit in hits)
+        {
+            if (!hit) continue;
+
+            // 👉 Cho phép dùng cả trigger cho cây trồng
+            var plant = hit.GetComponentInParent<PlantGrowth>();
+            if (plant && axeHitBuffer.Add(plant))
+            {
+                // debug thêm nếu cần:
+                // Debug.Log($"[Scythe] TryHarvestByTool {plant.name}, CanTool={plant.CanHarvestByTool}");
+                if (plant.TryHarvestByTool(inventory))
+                    continue;   // đã xử lý cây rồi thì qua collider khác
+            }
+            
+            // 👉 BỎ cái dòng này đi nếu muốn chém được cỏ trigger
+            // Mấy cái khác (cỏ, bụi…) mới skip trigger
+            // if (hit.isTrigger) continue;
+
+            // 2) Cắt các object khác implement IReapable (cỏ, bụi, hoa dại…)
+            var behaviours = hit.GetComponentsInParent<MonoBehaviour>(true);
+            foreach (var behaviour in behaviours)
+            {
+                if (!behaviour) continue;
+                if (!axeHitBuffer.Add(behaviour)) continue;
+
+                if (behaviour is IReapable reapable)
+                {
+                    reapable.Reap(damage, hitDir, inventory);
+                    break;
+                }
+            }
+        }
+    }
+
 
     void WaterPlantsNearCell(SoilManager soil, Vector2Int cell)
     {

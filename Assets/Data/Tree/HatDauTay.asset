@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: SeedMahogany
+  m_Name: HatDauTay
   m_EditorClassIdentifier: 
-  id: SeedMahogany
-  icon: {fileID: 1329791312, guid: 0b0cebf61d73780428eee4d6577587eb, type: 3}
-  seedData: {fileID: 11400000, guid: f5472710a9f139b4aa0f600cb4a04f0d, type: 2}
+  id: DauTay
+  icon: {fileID: -1204345679, guid: 04f4eed6b8d32cc4b8fa5d816d694f1c, type: 3}
+  seedData: {fileID: 11400000, guid: db79f31e44e8dc64aa4fd25e6691f0eb, type: 2}
   category: 5
   stackable: 1
   weaponType: 0
