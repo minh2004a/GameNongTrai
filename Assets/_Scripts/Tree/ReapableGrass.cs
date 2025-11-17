@@ -37,6 +37,7 @@ public class ReapableGrass : MonoBehaviour, IReapable
         if (uid && !string.IsNullOrEmpty(sceneName))
         {
             SaveStore.MarkGrassReapedPending(sceneName, uid.Id);
+            SaveStore.RemoveGrassInstancePending(sceneName, uid.Id);
         }
 
         Destroy(gameObject);

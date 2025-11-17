@@ -7,6 +7,12 @@ public class UniqueId : MonoBehaviour
     [SerializeField] string id;
     public string Id => id;
 
+    public void ForceId(string newId)
+    {
+        if (string.IsNullOrEmpty(newId)) return;
+        id = newId;
+    }
+
     void Awake(){
         if (string.IsNullOrEmpty(id)) id = System.Guid.NewGuid().ToString();
     }
