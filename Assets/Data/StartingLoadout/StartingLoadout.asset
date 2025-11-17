@@ -38,14 +38,14 @@ MonoBehaviour:
     amount: 1
     equip: 0
     hotbarSlot: 4
-  - item: {fileID: 11400000, guid: dbbcff6029ee4174f9759cebd6e038d2, type: 2}
+  - item: {fileID: 0}
     itemKey: 
     amount: 99
     equip: 0
     hotbarSlot: 5
-  - item: {fileID: 11400000, guid: 72774e75691070741bba051ce1b18a19, type: 2}
+  - item: {fileID: 11400000, guid: 003a037069db267468c06502c480fd5e, type: 2}
     itemKey: 
-    amount: 88
+    amount: 1
     equip: 0
     hotbarSlot: 6
   - item: {fileID: 11400000, guid: 4f19e87cbbc6b864fb786c68ee8ce6f4, type: 2}

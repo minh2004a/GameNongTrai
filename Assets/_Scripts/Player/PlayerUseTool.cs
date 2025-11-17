@@ -1,5 +1,6 @@
 
 
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -36,6 +37,7 @@ public class PlayerUseTool : MonoBehaviour
     static readonly int UseHoeHash = Animator.StringToHash("UseHoe");
     static readonly int UseWateringHash = Animator.StringToHash("UseWatering");
     static readonly int UseAxeHash = Animator.StringToHash("UseAxe");
+    static readonly int UsePickaxeHash = Animator.StringToHash("UsePickaxe");
     static readonly int UseScytheHash = Animator.StringToHash("UseScythe");
 
     readonly List<Vector2Int> pendingCells = new();
@@ -244,10 +246,11 @@ public class PlayerUseTool : MonoBehaviour
                 hitPoint = soil.CellToWorld(targetCell);
                 hasHitPoint = true;
                 return true;
-                case ToolType.Axe:
-                case ToolType.Scythe:
-                {
-                    facing = facingFromMouse;
+            case ToolType.Axe:
+            case ToolType.Pickaxe:
+            case ToolType.Scythe:
+            {
+                facing = facingFromMouse;
 
                     float tileSize = soil ? Mathf.Max(0.01f, soil.GridSize) : 1f;
                     float maxDistance = Mathf.Max(tileSize, rangeTiles * tileSize);
@@ -375,6 +378,9 @@ public class PlayerUseTool : MonoBehaviour
             case ToolType.Axe:
                 cost = stamina.axeCost;
                 break;
+            case ToolType.Pickaxe:
+                cost = stamina.pickaxeCost;
+                break;
             case ToolType.Hoe:
                 cost = stamina.hoeCost;
                 break;
@@ -454,11 +460,22 @@ public class PlayerUseTool : MonoBehaviour
         switch (type)
         {
             case ToolType.Axe:
-                animator.ResetTrigger(UseAxeHash);
+                animator.ResetTrigger(UsePickaxeHash);
                 animator.ResetTrigger(UseWateringHash);
                 animator.ResetTrigger(UseHoeHash);
                 animator.ResetTrigger(UseScytheHash);
                 animator.SetTrigger(UseAxeHash);
+                break;
+
+            case ToolType.Pickaxe:
+                animator.ResetTrigger(UseAxeHash);
+                animator.ResetTrigger(UseWateringHash);
+                animator.ResetTrigger(UseHoeHash);
+                animator.ResetTrigger(UseScytheHash);
+                if (AnimatorHasTrigger(UsePickaxeHash))
+                    animator.SetTrigger(UsePickaxeHash);
+                else
+                    animator.SetTrigger(UseAxeHash);
                 break;
 
             case ToolType.Scythe:
@@ -499,6 +516,17 @@ public class PlayerUseTool : MonoBehaviour
             checkedWateringTrigger = true;
         }
         return hasWateringTrigger;
+    }
+
+    bool AnimatorHasTrigger(int hash)
+    {
+        if (!animator) return false;
+        foreach (var parameter in animator.parameters)
+        {
+            if (parameter.type == AnimatorControllerParameterType.Trigger && parameter.nameHash == hash)
+                return true;
+        }
+        return false;
     }
 
     void LockMove(bool on)
@@ -561,6 +589,9 @@ public class PlayerUseTool : MonoBehaviour
             case ToolType.WateringCan:
                 PerformWatering();
                 break;
+            case ToolType.Pickaxe:
+                PerformPickaxeHit();
+                break;
             default:
                 break;
         }
@@ -618,6 +649,53 @@ public class PlayerUseTool : MonoBehaviour
                 if (behaviour is IChoppable choppable)
                 {
                     choppable.Chop(damage, pushDir);
+                    break;
+                }
+
+                if (behaviour is IDamageable damageable)
+                {
+                    damageable.TakeHit(damage);
+                    break;
+                }
+            }
+        }
+    }
+
+    void PerformPickaxeHit()
+    {
+        if (!activeTool) return;
+
+        float radius = Mathf.Max(0.05f, activeTool.range) * Mathf.Max(0.05f, activeTool.hitboxScale);
+        Vector2 center = activeToolHasHitPoint ? activeToolHitPoint : (Vector2)transform.position;
+        if (!activeToolHasHitPoint)
+        {
+            Vector2 forward = activeFacing.sqrMagnitude > 0.0001f ? activeFacing.normalized : Vector2.down;
+            float forwardDist = activeTool.hitboxForward >= 0f ? activeTool.hitboxForward : Mathf.Max(0.1f, radius);
+            center += forward * forwardDist;
+        }
+        center += new Vector2(0f, activeTool.hitboxYOffset);
+
+        var hits = Physics2D.OverlapCircleAll(center, radius);
+        if (hits == null || hits.Length == 0) return;
+
+        axeHitBuffer.Clear();
+        int damage = Mathf.Max(1, activeTool.Dame);
+        Vector2 hitDir = activeFacing.sqrMagnitude > 0.0001f ? activeFacing.normalized : Vector2.down;
+
+        foreach (var hit in hits)
+        {
+            if (!hit || hit.isTrigger) continue;
+
+            var behaviours = hit.GetComponentsInParent<MonoBehaviour>(true);
+            foreach (var behaviour in behaviours)
+            {
+                if (!behaviour) continue;
+                if (!axeHitBuffer.Add(behaviour)) continue;
+                if (behaviour is TreeChopTarget || behaviour is IChoppable) continue;
+
+                if (behaviour is IMineable mineable)
+                {
+                    mineable.Mine(damage, hitDir);
                     break;
                 }
 

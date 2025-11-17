@@ -26,6 +26,7 @@ GameObject:
   - component: {fileID: 1058324450758781111}
   - component: {fileID: 6297676587867245985}
   - component: {fileID: 1074349766864131868}
+  - component: {fileID: 7759464015838227066}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -325,7 +326,7 @@ MonoBehaviour:
     m_Bits: 64
   blockMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 270592
   defaultForward: 0.6
   minCooldown: 0.15
 --- !u!114 &2944587308785528253
@@ -375,6 +376,9 @@ MonoBehaviour:
   swordCost: 0
   hoeCost: 1.5
   wateringCost: 2
+  axeCost: 1.5
+  pickaxeCost: 6.5
+  scytheCost: 3
   moveDrainPerSecond: 0
   regenPerSecond: 0
   regenDelay: 0
@@ -532,6 +536,22 @@ MonoBehaviour:
   toolFailSafeSeconds: 0.5
   exhaustedActionTimeMult: 1.5
   exhaustedAnimSpeedMult: 0.7
+--- !u!114 &7759464015838227066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936923126784610755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d93c16c78bf418c429c6d90c8d0057e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory: {fileID: 1845909153704676813}
+  health: {fileID: 2944587308785528253}
+  stamina: {fileID: 9196139618529040389}
+  confirmUI: {fileID: 0}
 --- !u!1 &3900807971405855068
 GameObject:
   m_ObjectHideFlags: 0

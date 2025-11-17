@@ -1,7 +1,4 @@
 
-
-
-
 // PlayerStamina.cs
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,7 +11,7 @@ public class PlayerStamina : MonoBehaviour
 
     [Header("Chi phí")]
     public float bowCost = 12f, swordCost = 8f, hoeCost = 4f,
-    wateringCost = 2f, axeCost = 6f, scytheCost = 3f;
+    wateringCost = 2f, axeCost = 6f, pickaxeCost = 6.5f, scytheCost = 3f;
 
     [Header("Tiêu hao/Hồi phục")]
     public float moveDrainPerSecond = 0f;
