@@ -96,13 +96,22 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
             // Raycast tìm ô đích dưới con trỏ rồi hoán đổi/gộp
             var results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(e, results);
-            HotbarSlotUI target = null;
+            HotbarSlotUI targetHotbar = null;
+            InventorySlotUI targetBag = null;
             foreach (var r in results)
             {
-                target = r.gameObject.GetComponentInParent<HotbarSlotUI>();
-                if (target) break;
+                targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
+                if (targetHotbar != null) break;
+                targetBag = r.gameObject.GetComponentInParent<InventorySlotUI>();
+                if (targetBag != null) break;
             }
-            if (target && owner) owner.RequestMoveOrMerge(idx, target.Index);
+            if (owner)
+            {
+                if (targetHotbar)
+                    owner.RequestMoveOrMerge(idx, targetHotbar.Index);
+                else if (targetBag)
+                    owner.RequestMoveHotbarToBag(idx, targetBag.Index);
+            }
             return;
         }
 
