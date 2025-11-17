@@ -10,16 +10,10 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     [SerializeField] Image icon;
     [SerializeField] TextMeshProUGUI countText;
 
-    [Header("Long press drag")]
-    [Tooltip("Giữ bao lâu để bật chế độ kéo")]
-    public float holdSeconds = 2f;
-
     CanvasGroup cg;
     int index;
     InventoryBookUI owner;
     bool locked;
-    bool pointerDown;
-    float pressTime;
     bool dragging;
     bool suppressClick;
     Image ghost;
@@ -92,36 +86,22 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     void Update()
     {
         if (dragging && ghost) ghost.rectTransform.position = Input.mousePosition;
-        if (!pointerDown) return;
-
-        if (!dragging && Time.time - pressTime >= holdSeconds)
-        {
-            if (icon && icon.enabled && icon.sprite)
-            {
-                StartDragGhost();
-                dragging = true;
-                suppressClick = true;
-            }
-            else
-            {
-                pointerDown = false;
-            }
-        }
     }
     public void OnPointerDown(PointerEventData e)
     {
         if (locked) return;
-        pointerDown = true;
-        pressTime = Time.time;
-
         owner?.OnSlotClicked(index);
         UIInputGuard.MarkClick();
         suppressClick = true;
+        if (icon && icon.enabled && icon.sprite)
+        {
+            StartDragGhost();
+            dragging = true;
+        }
     }
     public void OnPointerUp(PointerEventData e)
     {
         if (locked) return;
-        pointerDown = false;
 
         if (dragging)
         {
@@ -159,7 +139,6 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         DestroyGhost();
         dragging = false;
-        pointerDown = false;
         suppressClick = false;
     }
     void StartDragGhost()
