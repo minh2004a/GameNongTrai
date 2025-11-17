@@ -10,10 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 8339773322211225458}
   - component: {fileID: 4034107078279361819}
-  - component: {fileID: 1120872980109237493}
   - component: {fileID: 4516348322758419005}
   - component: {fileID: 6493939507736261574}
   - component: {fileID: -8324112282574972919}
+  - component: {fileID: 3880469791535175820}
+  - component: {fileID: -7293148434148516965}
   m_Layer: 15
   m_Name: CoDai_Spring
   m_TagString: Untagged
@@ -88,22 +89,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 1
---- !u!114 &1120872980109237493
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5971076367894503416}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18f2102ccc5c68442be74899fac4d61f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pickupPrefab: {fileID: 0}
-  dropItem: {fileID: 0}
-  minDrop: 0
-  maxDrop: 1
 --- !u!58 &4516348322758419005
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -172,3 +157,32 @@ MonoBehaviour:
   summerSprite: {fileID: -853683847, guid: cb32118ebd6c7a943a3c8e97ae183f6a, type: 3}
   fallSprite: {fileID: -1236067209, guid: cb32118ebd6c7a943a3c8e97ae183f6a, type: 3}
   winterSprite: {fileID: -1180933738, guid: cb32118ebd6c7a943a3c8e97ae183f6a, type: 3}
+--- !u!114 &3880469791535175820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5971076367894503416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 
+--- !u!114 &-7293148434148516965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5971076367894503416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18f2102ccc5c68442be74899fac4d61f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupPrefab: {fileID: 0}
+  dropItem: {fileID: 0}
+  minDrop: 0
+  maxDrop: 1

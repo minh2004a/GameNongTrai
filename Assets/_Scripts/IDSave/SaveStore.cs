@@ -1,4 +1,5 @@
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,6 +45,13 @@ public static class SaveStore
         public int x;
         public int y;
         public int day;
+    }
+    [System.Serializable]
+    public struct GrassInstanceState
+    {
+        public string id;
+        public float x;
+        public float y;
     }
     [System.Serializable]
 
@@ -133,11 +141,14 @@ public static class SaveStore
     [Serializable] class PlantSceneRecord { public string scene; public List<PlantState> plants = new(); }
     [Serializable] class SoilSceneRecord { public string scene; public List<SoilTileState> tiles = new(); }
     [Serializable] class WateredSoilSceneRecord { public string scene; public List<WateredSoilState> tiles = new(); }
+    [Serializable] class GrassInstanceSceneRecord { public string scene; public List<GrassInstanceState> grasses = new(); }
     [Serializable]
     class SaveData
     {
         public List<SceneRecord> trees = new();
         public List<SceneRecord> stumps = new();
+        public List<SceneRecord> grasses = new();
+        public List<GrassInstanceSceneRecord> grassInstances = new();
         public List<PlantSceneRecord> plants = new();
         public List<SoilSceneRecord> soils = new();
         public List<WateredSoilSceneRecord> wateredSoils = new();
@@ -148,8 +159,13 @@ public static class SaveStore
 
     static readonly Dictionary<string, HashSet<string>> committedTrees  = new();
     static readonly Dictionary<string, HashSet<string>> committedStumps = new();
+    static readonly Dictionary<string, HashSet<string>> committedGrasses = new();
     static readonly Dictionary<string, HashSet<string>> pendingTrees    = new();
     static readonly Dictionary<string, HashSet<string>> pendingStumps   = new();
+    static readonly Dictionary<string, HashSet<string>> pendingGrasses  = new();
+    static readonly Dictionary<string, Dictionary<string, GrassInstanceState>> committedGrassInstances = new();
+    static readonly Dictionary<string, Dictionary<string, GrassInstanceState>> pendingGrassInstances = new();
+    static readonly Dictionary<string, HashSet<string>> pendingRemovedGrassInstances = new();
 
     static readonly Dictionary<string, Dictionary<string, PlantState>> committedPlants = new();
     static readonly Dictionary<string, Dictionary<string, PlantState>> pendingPlants = new();
@@ -177,9 +193,14 @@ public static class SaveStore
         var pendingWateredSnapshot = CloneSoilDayMaps(pendingWateredSoil);
         var pendingDriedSnapshot = CloneSoilSets(pendingDriedSoil);
         var pendingSoilInfoSnapshot = CloneSoilInfoMaps(pendingSoilInfo);
+        var pendingGrassSnapshot = CloneSceneSets(pendingGrasses);
+        var pendingGrassInstanceSnapshot = CloneGrassInstanceScenes(pendingGrassInstances);
+        var pendingRemovedGrassInstanceSnapshot = CloneSceneSets(pendingRemovedGrassInstances);
 
-        committedTrees.Clear(); committedStumps.Clear();
-        pendingTrees.Clear();   pendingStumps.Clear();
+        committedTrees.Clear(); committedStumps.Clear(); committedGrasses.Clear();
+        committedGrassInstances.Clear();
+        pendingTrees.Clear();   pendingStumps.Clear();   pendingGrasses.Clear();
+        pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
         committedSoilInfo.Clear(); pendingSoilInfo.Clear();
@@ -205,6 +226,19 @@ public static class SaveStore
 
         foreach (var r in data.trees  ?? new List<SceneRecord>()) committedTrees[r.scene]  = new HashSet<string>(r.ids);
         foreach (var r in data.stumps ?? new List<SceneRecord>()) committedStumps[r.scene] = new HashSet<string>(r.ids);
+        foreach (var r in data.grasses ?? new List<SceneRecord>()) committedGrasses[r.scene] = new HashSet<string>(r.ids);
+        foreach (var r in data.grassInstances ?? new List<GrassInstanceSceneRecord>())
+        {
+            if (string.IsNullOrEmpty(r.scene)) continue;
+            if (r.grasses == null || r.grasses.Count == 0) continue;
+            var dict = new Dictionary<string, GrassInstanceState>();
+            foreach (var g in r.grasses)
+            {
+                if (string.IsNullOrEmpty(g.id)) continue;
+                dict[g.id] = g;
+            }
+            if (dict.Count > 0) committedGrassInstances[r.scene] = dict;
+        }
         foreach (var r in data.plants ?? new List<PlantSceneRecord>())
         {
             if (string.IsNullOrEmpty(r.scene)) continue;
@@ -253,6 +287,9 @@ public static class SaveStore
 
         RestoreSceneSets(pendingTrees, pendingTreeSnapshot);
         RestoreSceneSets(pendingStumps, pendingStumpSnapshot);
+        RestoreSceneSets(pendingGrasses, pendingGrassSnapshot);
+        RestoreGrassInstanceScenes(pendingGrassInstances, pendingGrassInstanceSnapshot);
+        RestoreSceneSets(pendingRemovedGrassInstances, pendingRemovedGrassInstanceSnapshot);
         RestorePlantScenes(pendingPlants, pendingPlantSnapshot);
         RestoreSceneSets(pendingRemovedPlants, pendingRemovedSnapshot);
         RestoreSoilSets(pendingSoil, pendingSoilSnapshot);
@@ -267,6 +304,13 @@ public static class SaveStore
         var data = new SaveData();
         foreach (var kv in committedTrees) data.trees.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
         foreach (var kv in committedStumps) data.stumps.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
+        foreach (var kv in committedGrasses) data.grasses.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
+        foreach (var kv in committedGrassInstances)
+        {
+            var rec = new GrassInstanceSceneRecord { scene = kv.Key };
+            foreach (var g in kv.Value.Values) rec.grasses.Add(g);
+            data.grassInstances.Add(rec);
+        }
         foreach (var kv in committedPlants)
         {
             var rec = new PlantSceneRecord { scene = kv.Key };
@@ -323,6 +367,32 @@ public static class SaveStore
             if (!pendingRemovedPlants.TryGetValue(scene, out var removed)) pendingRemovedPlants[scene] = removed = new HashSet<string>();
             removed.Add(id);
         }
+    }
+
+    public static void MarkGrassReapedPending(string scene, string id)
+    {
+        if (string.IsNullOrEmpty(scene) || string.IsNullOrEmpty(id)) return;
+        if (!pendingGrasses.TryGetValue(scene, out var set)) pendingGrasses[scene] = set = new HashSet<string>();
+        set.Add(id);
+        if (pendingGrassInstances.TryGetValue(scene, out var dict)) dict.Remove(id);
+        if (!pendingRemovedGrassInstances.TryGetValue(scene, out var removed)) pendingRemovedGrassInstances[scene] = removed = new HashSet<string>();
+        removed.Add(id);
+    }
+
+    public static void SetGrassInstancePending(string scene, GrassInstanceState state)
+    {
+        if (string.IsNullOrEmpty(scene) || string.IsNullOrEmpty(state.id)) return;
+        if (!pendingGrassInstances.TryGetValue(scene, out var dict)) pendingGrassInstances[scene] = dict = new Dictionary<string, GrassInstanceState>();
+        dict[state.id] = state;
+        if (pendingRemovedGrassInstances.TryGetValue(scene, out var removed)) removed.Remove(state.id);
+    }
+
+    public static void RemoveGrassInstancePending(string scene, string id)
+    {
+        if (string.IsNullOrEmpty(scene) || string.IsNullOrEmpty(id)) return;
+        if (!pendingRemovedGrassInstances.TryGetValue(scene, out var removed)) pendingRemovedGrassInstances[scene] = removed = new HashSet<string>();
+        removed.Add(id);
+        if (pendingGrassInstances.TryGetValue(scene, out var dict)) dict.Remove(id);
     }
     public static void MarkSoilTilledPending(string scene, Vector2Int cell, int tilledDay, bool hasPlant){
         if (string.IsNullOrEmpty(scene)) return;
@@ -409,6 +479,40 @@ public static class SaveStore
         (committedStumps.TryGetValue(scene, out var c) && c.Contains(id)) ||
         (pendingStumps.TryGetValue(scene, out var p) && p.Contains(id));
 
+    public static bool IsGrassReapedInSession(string scene, string id) =>
+        (committedGrasses.TryGetValue(scene, out var c) && c.Contains(id)) ||
+        (pendingGrasses.TryGetValue(scene, out var p) && p.Contains(id));
+
+    public static IEnumerable<GrassInstanceState> GetGrassInstancesInScene(string scene)
+    {
+        if (string.IsNullOrEmpty(scene)) yield break;
+
+        pendingRemovedGrassInstances.TryGetValue(scene, out var removed);
+        var emitted = new HashSet<string>();
+
+        if (pendingGrassInstances.TryGetValue(scene, out var pending))
+        {
+            foreach (var kv in pending)
+            {
+                if (removed != null && removed.Contains(kv.Key)) continue;
+                if (IsGrassReapedInSession(scene, kv.Key)) continue;
+                emitted.Add(kv.Key);
+                yield return kv.Value;
+            }
+        }
+
+        if (committedGrassInstances.TryGetValue(scene, out var committed))
+        {
+            foreach (var kv in committed)
+            {
+                if (emitted.Contains(kv.Key)) continue;
+                if (removed != null && removed.Contains(kv.Key)) continue;
+                if (IsGrassReapedInSession(scene, kv.Key)) continue;
+                yield return kv.Value;
+            }
+        }
+    }
+
     public static bool IsSoilTilledInSession(string scene, Vector2Int cell)
     {
         if (string.IsNullOrEmpty(scene)) return false;
@@ -426,6 +530,24 @@ public static class SaveStore
         foreach (var kv in pendingStumps){
             if (!committedStumps.TryGetValue(kv.Key, out var set)) committedStumps[kv.Key] = set = new HashSet<string>();
             set.UnionWith(kv.Value);
+        }
+        foreach (var kv in pendingGrasses)
+        {
+            if (!committedGrasses.TryGetValue(kv.Key, out var set)) committedGrasses[kv.Key] = set = new HashSet<string>();
+            set.UnionWith(kv.Value);
+        }
+        foreach (var kv in pendingGrassInstances)
+        {
+            if (!committedGrassInstances.TryGetValue(kv.Key, out var dict)) committedGrassInstances[kv.Key] = dict = new Dictionary<string, GrassInstanceState>();
+            foreach (var entry in kv.Value) dict[entry.Key] = entry.Value;
+        }
+        foreach (var kv in pendingRemovedGrassInstances)
+        {
+            if (committedGrassInstances.TryGetValue(kv.Key, out var dict))
+            {
+                foreach (var id in kv.Value) dict.Remove(id);
+                if (dict.Count == 0) committedGrassInstances.Remove(kv.Key);
+            }
         }
         foreach (var kv in pendingPlants)
         {
@@ -496,7 +618,8 @@ public static class SaveStore
                 dict[entry.Key] = entry.Value;
             }
         }
-        pendingTrees.Clear(); pendingStumps.Clear();
+        pendingTrees.Clear(); pendingStumps.Clear(); pendingGrasses.Clear();
+        pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
         pendingSoilInfo.Clear();
@@ -507,7 +630,8 @@ public static class SaveStore
 
     public static void DiscardPending()
     {
-        pendingTrees.Clear(); pendingStumps.Clear();
+        pendingTrees.Clear(); pendingStumps.Clear(); pendingGrasses.Clear();
+        pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
         pendingSoilInfo.Clear();
@@ -538,8 +662,10 @@ public static class SaveStore
     public static void NewGame(string startScene)
     {
         // xoá trạng thái cũ trong bộ nhớ
-        committedTrees.Clear(); committedStumps.Clear();
-        pendingTrees.Clear();   pendingStumps.Clear();
+        committedTrees.Clear(); committedStumps.Clear(); committedGrasses.Clear();
+        committedGrassInstances.Clear();
+        pendingTrees.Clear();   pendingStumps.Clear();   pendingGrasses.Clear();
+        pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
         committedSoilInfo.Clear(); pendingSoilInfo.Clear();
@@ -768,6 +894,16 @@ public static class SaveStore
         return clone;
     }
 
+    static Dictionary<string, Dictionary<string, GrassInstanceState>> CloneGrassInstanceScenes(Dictionary<string, Dictionary<string, GrassInstanceState>> source)
+    {
+        var clone = new Dictionary<string, Dictionary<string, GrassInstanceState>>();
+        foreach (var kv in source)
+        {
+            clone[kv.Key] = new Dictionary<string, GrassInstanceState>(kv.Value);
+        }
+        return clone;
+    }
+
     static Dictionary<string, Dictionary<Vector2Int, int>> CloneSoilDayMaps(Dictionary<string, Dictionary<Vector2Int, int>> source)
     {
         var clone = new Dictionary<string, Dictionary<Vector2Int, int>>();
@@ -826,6 +962,19 @@ public static class SaveStore
         {
             if (target.TryGetValue(kv.Key, out var set)) set.UnionWith(kv.Value);
             else target[kv.Key] = new HashSet<Vector2Int>(kv.Value);
+        }
+    }
+
+    static void RestoreGrassInstanceScenes(Dictionary<string, Dictionary<string, GrassInstanceState>> target,
+                                           Dictionary<string, Dictionary<string, GrassInstanceState>> snapshot)
+    {
+        foreach (var kv in snapshot)
+        {
+            if (!target.TryGetValue(kv.Key, out var dict)) target[kv.Key] = dict = new Dictionary<string, GrassInstanceState>();
+            foreach (var entry in kv.Value)
+            {
+                dict[entry.Key] = entry.Value;
+            }
         }
     }
 

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c779848d9dd029409ca676b49e10a18, type: 3}
+  m_Name: CoTT_Winter
+  m_EditorClassIdentifier: 
+  m_Tile: {fileID: 11400000, guid: b3743cbc2b98298438a2a0f545c68fbb, type: 2}
+  m_Sprites:
+  - m_OriginalSprite: {fileID: 911057705, guid: cb32118ebd6c7a943a3c8e97ae183f6a, type: 3}
+    m_OverrideSprite: {fileID: 1820281999, guid: cb32118ebd6c7a943a3c8e97ae183f6a, type: 3}
+  m_GameObjects: []
+  m_InstanceTile: {fileID: 3897175257789953498}
+--- !u!114 &3897175257789953498
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
+  m_Name: CoTT_Sprng (Override)
+  m_EditorClassIdentifier: 
+  m_DefaultSprite: {fileID: 1820281999, guid: cb32118ebd6c7a943a3c8e97ae183f6a, type: 3}
+  m_DefaultGameObject: {fileID: 0}
+  m_DefaultColliderType: 1
+  m_TilingRules: []
