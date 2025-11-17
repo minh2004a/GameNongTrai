@@ -676,13 +676,14 @@ public class PlayerUseTool : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (!hit) continue;
+            if (!hit || hit.isTrigger) continue;
 
             var behaviours = hit.GetComponentsInParent<MonoBehaviour>(true);
             foreach (var behaviour in behaviours)
             {
                 if (!behaviour) continue;
                 if (!axeHitBuffer.Add(behaviour)) continue;
+                if (behaviour is TreeChopTarget || behaviour is IChoppable) continue;
 
                 if (behaviour is IMineable mineable)
                 {
@@ -690,7 +691,7 @@ public class PlayerUseTool : MonoBehaviour
                     break;
                 }
 
-                if (!hit.isTrigger && behaviour is IDamageable damageable)
+                if (behaviour is IDamageable damageable)
                 {
                     damageable.TakeHit(damage);
                     break;
