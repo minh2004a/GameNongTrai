@@ -459,6 +459,13 @@ public class PlayerUseTool : MonoBehaviour
         switch (type)
         {
             case ToolType.Axe:
+                animator.ResetTrigger(UsePickaxeHash);
+                animator.ResetTrigger(UseWateringHash);
+                animator.ResetTrigger(UseHoeHash);
+                animator.ResetTrigger(UseScytheHash);
+                animator.SetTrigger(UseAxeHash);
+                break;
+
             case ToolType.Pickaxe:
                 animator.ResetTrigger(UseAxeHash);
                 animator.ResetTrigger(UseWateringHash);
