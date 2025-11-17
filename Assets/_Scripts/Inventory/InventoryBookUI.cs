@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class InventoryBookUI : MonoBehaviour
@@ -65,5 +66,17 @@ public class InventoryBookUI : MonoBehaviour
     {
         Debug.Log($"Clicked bag slot {index}");
         // sau này show info bên phải, drag drop,... ở đây
+    }
+
+    public void RequestMoveOrMergeBag(int from, int to)
+    {
+        if (!inv) return;
+        inv.MoveOrMergeBagSlot(from, to);
+    }
+
+    public void RequestMoveBagToHotbar(int bagIndex, int hotbarIndex)
+    {
+        if (!inv) return;
+        inv.MoveOrMergeBagToHotbar(bagIndex, hotbarIndex);
     }
 }

@@ -225,6 +225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 1694293093944399386}
   countText: {fileID: 2878118610609727521}
+  holdSeconds: 2
 --- !u!225 &3863482099734359576
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -312,7 +313,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

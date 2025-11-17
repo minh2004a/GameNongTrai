@@ -1,3 +1,4 @@
+
 // PlayerInventory.cs
 using System;
 using UnityEngine;
@@ -116,21 +117,79 @@ public class PlayerInventory : MonoBehaviour
         HotbarChanged?.Invoke();
         if (to == selected || from == selected) SelectedChanged?.Invoke(selected);
     }
+    void MergeOrSwap(ref ItemStack source, ref ItemStack target)
+    {
+        if (source.item == null) return;
+
+        // Gộp nếu cùng item và cho phép stack
+        if (target.item != null && source.item == target.item && source.item.stackable)
+        {
+            int cap = Mathf.Max(1, source.item.maxStack);
+            int space = cap - target.count;
+            if (space > 0)
+            {
+                int move = Mathf.Min(source.count, space);
+                target.count += move;
+                source.count -= move;
+                if (source.count <= 0) source = default;
+            }
+            return;
+        }
+
+        // Trống -> di chuyển
+        if (target.item == null)
+        {
+            target = source;
+            source = default;
+            return;
+        }
+
+        // Khác loại hoặc không stack được -> hoán đổi
+        (source, target) = (target, source);
+    }
+    public void MoveOrMergeBagSlot(int from, int to)
+    {
+        if ((uint)from >= (uint)bag.Length || (uint)to >= (uint)bag.Length || from == to) return;
+        if (from >= UnlockedBagSlots || to >= UnlockedBagSlots) return;
+
+        ref ItemStack a = ref bag[from];
+        ref ItemStack b = ref bag[to];
+        if (a.item == null) return;
+
+        MergeOrSwap(ref a, ref b);
+        BagChanged?.Invoke();
+    }
     public void MoveOrSwapHotbarBag(int hotbarIndex, int bagIndex)
     {
         // an toàn index
         if ((uint)hotbarIndex >= (uint)hotbar.Length) return;
         if ((uint)bagIndex >= (uint)bag.Length) return;
+        if (bagIndex >= UnlockedBagSlots) return;
 
-        var h = hotbar[hotbarIndex];
-        var b = bag[bagIndex];
+        ref ItemStack h = ref hotbar[hotbarIndex];
+        ref ItemStack b = ref bag[bagIndex];
 
-        // nếu hotbar trống thì khỏi làm gì
-        if (h.item == null && b.item == null) return;
+        if (h.item == null) return;
 
-        // SIMPLE VERSION: chỉ swap
-        hotbar[hotbarIndex] = b;
-        bag[bagIndex] = h;
+        MergeOrSwap(ref h, ref b);
+
+        HotbarChanged?.Invoke();
+        BagChanged?.Invoke();
+
+        if (hotbarIndex == selected)
+            SelectedChanged?.Invoke(selected);
+    }
+    public void MoveOrMergeBagToHotbar(int bagIndex, int hotbarIndex)
+    {
+        if ((uint)hotbarIndex >= (uint)hotbar.Length) return;
+        if ((uint)bagIndex >= (uint)bag.Length) return;
+        if (bagIndex >= UnlockedBagSlots) return;
+
+        ref ItemStack b = ref bag[bagIndex];
+        ref ItemStack h = ref hotbar[hotbarIndex];
+        if (b.item == null) return;
+
+        MergeOrSwap(ref b, ref h);
 
         HotbarChanged?.Invoke();
         BagChanged?.Invoke();

@@ -1,4 +1,5 @@
 
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,15 +14,9 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     [SerializeField] TextMeshProUGUI countText;
     [SerializeField] GameObject selectedFrame;
 
-    [Header("Long press drag")]
-    [Tooltip("Giữ bao lâu để bật chế độ kéo")]
-    public float holdSeconds = 2f;
-
     int idx; HotbarUI owner;
 
     // state
-    bool pointerDown;
-    float pressTime;
     bool dragging;
     bool suppressClick;
     Image ghost;
@@ -36,17 +31,6 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
    void Update(){
     if (dragging && ghost) ghost.rectTransform.position = Input.mousePosition;
-    if (!pointerDown) return;
-
-    if (!dragging && Time.time - pressTime >= holdSeconds){
-        if (icon && icon.enabled && icon.sprite){
-            StartDragGhost();
-            dragging = true;
-            suppressClick = true;
-        } else {
-            pointerDown = false;
-        }
-    }
 }
 
 
@@ -71,23 +55,23 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     public void OnPointerDown(PointerEventData e)
     {
-         pointerDown = true;
-        pressTime = Time.time;
-
         // Chọn ngay trên Down để không lỡ bắn bằng item cũ
         owner?.OnClickSlot(idx);
 
         // Chặn hành động dùng item trong frame click UI
         UIInputGuard.MarkClick();
 
-        // Không cần onClick trên Up nữa
         suppressClick = true;
+        if (e.button == PointerEventData.InputButton.Left && icon && icon.enabled && icon.sprite)
+        {
+            StartDragGhost();
+            dragging = true;
+            // Không cần onClick trên Up nữa
+        }
     }
 
     public void OnPointerUp(PointerEventData e)
     {
-        pointerDown = false;
-
         if (dragging)
         {
             dragging = false;
@@ -96,13 +80,22 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
             // Raycast tìm ô đích dưới con trỏ rồi hoán đổi/gộp
             var results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(e, results);
-            HotbarSlotUI target = null;
+            HotbarSlotUI targetHotbar = null;
+            InventorySlotUI targetBag = null;
             foreach (var r in results)
             {
-                target = r.gameObject.GetComponentInParent<HotbarSlotUI>();
-                if (target) break;
+                targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
+                if (targetHotbar != null) break;
+                targetBag = r.gameObject.GetComponentInParent<InventorySlotUI>();
+                if (targetBag != null) break;
             }
-            if (target && owner) owner.RequestMoveOrMerge(idx, target.Index);
+            if (owner)
+            {
+                if (targetHotbar)
+                    owner.RequestMoveOrMerge(idx, targetHotbar.Index);
+                else if (targetBag)
+                    owner.RequestMoveHotbarToBag(idx, targetBag.Index);
+            }
             return;
         }
 
@@ -121,7 +114,7 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     void OnDisable()
     {
         if (ghost) Destroy(ghost.gameObject);
-        dragging = false; pointerDown = false; suppressClick = false;
+        dragging = false; suppressClick = false;
     }
 
     void StartDragGhost()
