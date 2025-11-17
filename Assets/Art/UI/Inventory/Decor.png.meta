@@ -3,7 +3,7 @@ guid: 3a9a75dd79476ec44a69a98ddfff35d3
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
-  serializedVersion: 12
+  serializedVersion: 13
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -127,9 +127,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 30
-        height: 32
+        y: 16
+        width: 96
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -147,10 +147,10 @@ TextureImporter:
       name: Decor_1
       rect:
         serializedVersion: 2
-        x: 30
+        x: 0
         y: 0
-        width: 34
-        height: 32
+        width: 96
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -160,27 +160,6 @@ TextureImporter:
       bones: []
       spriteID: 44f4550fb3c04a340be12bbd75746814
       internalID: 428475456
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Decor_2
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 0
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 747d9ebabb46aa74f8e9ec20d6d63499
-      internalID: -1738686706
       vertices: []
       indices: 
       edges: []
@@ -198,7 +177,6 @@ TextureImporter:
     nameFileIdTable:
       Decor_0: 1819876215
       Decor_1: 428475456
-      Decor_2: -1738686706
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

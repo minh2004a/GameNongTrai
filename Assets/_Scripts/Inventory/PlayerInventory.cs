@@ -8,9 +8,17 @@ public class PlayerInventory : MonoBehaviour
 {
     public ItemStack[] hotbar = new ItemStack[8];
     public int selected;
-    public ItemStack[] bag = new ItemStack[24];
-    public event System.Action BagChanged;
 
+    // tối đa 20 ô
+    public ItemStack[] bag = new ItemStack[20];
+
+    // số ô đang mở (set trong Inspector)
+    [SerializeField, Min(0)] int unlockedBagSlots = 8;
+
+    // property cho code khác xài
+    public int UnlockedBagSlots => Mathf.Clamp(unlockedBagSlots, 0, bag.Length);
+
+    public event System.Action BagChanged;
     public event Action<int> SelectedChanged;   // báo UI khi đổi ô
     public event Action HotbarChanged;          // báo UI khi nội dung ô đổi
     public event Action<ItemSO, InventoryAddResult> ItemAdded;
@@ -107,6 +115,38 @@ public class PlayerInventory : MonoBehaviour
 
         HotbarChanged?.Invoke();
         if (to == selected || from == selected) SelectedChanged?.Invoke(selected);
+    }
+    public void MoveOrSwapHotbarBag(int hotbarIndex, int bagIndex)
+    {
+        // an toàn index
+        if ((uint)hotbarIndex >= (uint)hotbar.Length) return;
+        if ((uint)bagIndex >= (uint)bag.Length) return;
+
+        var h = hotbar[hotbarIndex];
+        var b = bag[bagIndex];
+
+        // nếu hotbar trống thì khỏi làm gì
+        if (h.item == null && b.item == null) return;
+
+        // SIMPLE VERSION: chỉ swap
+        hotbar[hotbarIndex] = b;
+        bag[bagIndex] = h;
+
+        HotbarChanged?.Invoke();
+        BagChanged?.Invoke();
+
+        if (hotbarIndex == selected)
+            SelectedChanged?.Invoke(selected);
+    }
+    public void UnlockBagSlots(int extra)
+    {
+        int before = unlockedBagSlots;
+        unlockedBagSlots = Mathf.Clamp(unlockedBagSlots + extra, 0, bag.Length);
+
+        if (unlockedBagSlots != before)
+        {
+            BagChanged?.Invoke();
+        }
     }
     public bool ConsumeSelected(int n = 1)
     {

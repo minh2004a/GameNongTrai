@@ -300,6 +300,27 @@ MonoBehaviour:
     count: 0
   - item: {fileID: 0}
     count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
+  unlockedBagSlots: 8
 --- !u!114 &1118344859087931616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -377,7 +398,7 @@ MonoBehaviour:
   hoeCost: 1.5
   wateringCost: 2
   axeCost: 1.5
-  pickaxeCost: 6.5
+  pickaxeCost: 1.5
   scytheCost: 3
   moveDrainPerSecond: 0
   regenPerSecond: 0

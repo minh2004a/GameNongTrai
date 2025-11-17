@@ -114,9 +114,9 @@ public static class InventoryUtil
 
         int afterHotbar = remaining;
         result.addedToHotbar = count - afterHotbar;
-
-        // bag: gộp vào stack sẵn có
-        for (int i = 0; i < inv.bag.Length && remaining > 0; i++)
+        int max = inv.UnlockedBagSlots;
+        // gộp vào stack sẵn có
+        for (int i = 0; i < max && remaining > 0; i++)
         {
             var s = inv.bag[i];
             if (s.item != item || s.count >= cap) continue;
@@ -126,8 +126,8 @@ public static class InventoryUtil
             remaining -= move;
         }
 
-        // bag: đổ vào ô trống
-        for (int i = 0; i < inv.bag.Length && remaining > 0; i++)
+        // đổ vào ô trống
+        for (int i = 0; i < max && remaining > 0; i++)
         {
             if (inv.bag[i].item != null) continue;
             int move = Mathf.Min(remaining, cap);
@@ -135,7 +135,6 @@ public static class InventoryUtil
             inv.SetBag(i, item, move);
             remaining -= move;
         }
-
         result.addedToBag = afterHotbar - remaining;
         result.remaining = remaining;
         return result;

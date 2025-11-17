@@ -67,7 +67,13 @@ public class HotbarUI : MonoBehaviour
         inv.MoveOrMergeHotbarSlot(a, b);
         Refresh();
     }
+    public void RequestMoveHotbarToBag(int hotbarIndex, int bagIndex)
+    {
+        if (!inv) return;
+        inv.MoveOrSwapHotbarBag(hotbarIndex, bagIndex);
+        Refresh(); // cập nhật hotbar
 
-
-
+        // Bag UI sẽ tự Refresh nếu đang lắng nghe BagChanged
+        // (InventoryBookUI.OnEnable đã sub event BagChanged rồi)
+    }
 }
