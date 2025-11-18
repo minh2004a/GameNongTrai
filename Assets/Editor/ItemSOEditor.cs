@@ -154,5 +154,7 @@ public class ItemSOEditor : Editor
             EditorGUILayout.PropertyField(maxStackProp);
             EditorGUI.indentLevel--;
         }
+
+        EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
     }
 }
