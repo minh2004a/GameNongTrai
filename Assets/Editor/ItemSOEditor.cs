@@ -28,6 +28,7 @@ public class ItemSOEditor : Editor
     SerializedProperty staminaRestoreProp;
     SerializedProperty sellPriceProp;
     SerializedProperty equipSlotProp;
+    SerializedProperty backpackSlotBonusProp;
     void OnEnable()
     {
         idProp = serializedObject.FindProperty("id");
@@ -53,6 +54,7 @@ public class ItemSOEditor : Editor
         staminaRestoreProp = serializedObject.FindProperty("staminaRestore");
         sellPriceProp = serializedObject.FindProperty("sellPrice");
         equipSlotProp = serializedObject.FindProperty("equipSlot");
+        backpackSlotBonusProp = serializedObject.FindProperty("backpackSlotBonus");
     }
 
     public override void OnInspectorGUI()
@@ -165,6 +167,11 @@ public class ItemSOEditor : Editor
         EditorGUILayout.HelpBox("Trang bị (mũ/áo/giày...) là item đơn, không stack.", MessageType.Info);
 
         EditorGUILayout.PropertyField(equipSlotProp); // chọn slot: Hat, Armor,...
+
+        if ((EquipSlotType)equipSlotProp.enumValueIndex == EquipSlotType.Backpack)
+        {
+            EditorGUILayout.PropertyField(backpackSlotBonusProp, new GUIContent("Backpack Slot Bonus"));
+        }
 
         // cho phép chỉnh giá bán
         EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
