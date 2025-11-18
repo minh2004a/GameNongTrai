@@ -1,4 +1,5 @@
 
+
 // PlayerInventory.cs
 using System;
 using UnityEngine;
@@ -14,10 +15,11 @@ public class PlayerInventory : MonoBehaviour
     public ItemStack[] bag = new ItemStack[20];
 
     // số ô đang mở (set trong Inspector)
-    [SerializeField, Min(0)] int unlockedBagSlots = 8;
+    [SerializeField, Min(0)] int baseUnlockedBagSlots = 8;
+    int extraUnlockedBagSlots;
 
     // property cho code khác xài
-    public int UnlockedBagSlots => Mathf.Clamp(unlockedBagSlots, 0, bag.Length);
+    public int UnlockedBagSlots => Mathf.Clamp(baseUnlockedBagSlots + extraUnlockedBagSlots, 0, bag.Length);
 
     public event System.Action BagChanged;
     public event Action<int> SelectedChanged;   // báo UI khi đổi ô
@@ -199,11 +201,22 @@ public class PlayerInventory : MonoBehaviour
     }
     public void UnlockBagSlots(int extra)
     {
-        int before = unlockedBagSlots;
-        unlockedBagSlots = Mathf.Clamp(unlockedBagSlots + extra, 0, bag.Length);
+        int before = baseUnlockedBagSlots;
+        baseUnlockedBagSlots = Mathf.Clamp(baseUnlockedBagSlots + extra, 0, bag.Length);
 
-        if (unlockedBagSlots != before)
+        if (baseUnlockedBagSlots != before)
         {
+            BagChanged?.Invoke();
+        }
+    }
+
+    public void SetBagSlotBonus(int bonus)
+    {
+        int clamped = Mathf.Clamp(bonus, 0, bag.Length);
+
+        if (clamped != extraUnlockedBagSlots)
+        {
+            extraUnlockedBagSlots = clamped;
             BagChanged?.Invoke();
         }
     }
