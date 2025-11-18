@@ -77,28 +77,40 @@ public class HotbarSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
             dragging = false;
             if (ghost) Destroy(ghost.gameObject);
 
-            // Raycast tìm ô đích dưới con trỏ rồi hoán đổi/gộp
             var results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(e, results);
+
             HotbarSlotUI targetHotbar = null;
             InventorySlotUI targetBag = null;
+            EquipmentSlotUI targetEquip = null;
+
             foreach (var r in results)
             {
-                targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
-                if (targetHotbar != null) break;
-                targetBag = r.gameObject.GetComponentInParent<InventorySlotUI>();
-                if (targetBag != null) break;
+                if (!targetEquip)
+                    targetEquip = r.gameObject.GetComponentInParent<EquipmentSlotUI>();
+                if (!targetHotbar)
+                    targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
+                if (!targetBag)
+                    targetBag = r.gameObject.GetComponentInParent<InventorySlotUI>();
             }
+
             if (owner)
             {
-                if (targetHotbar)
+                if (targetEquip)
+                {
+                    EquipmentUI.Instance?.EquipFromHotbar(idx, targetEquip.SlotType);
+                }
+                else if (targetHotbar)
+                {
                     owner.RequestMoveOrMerge(idx, targetHotbar.Index);
+                }
                 else if (targetBag)
+                {
                     owner.RequestMoveHotbarToBag(idx, targetBag.Index);
+                }
             }
             return;
         }
-
         if (e.button == PointerEventData.InputButton.Right)
         {
             owner?.OnRightClickSlot(idx);

@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: Mu01
+  m_Name: Balo01
   m_EditorClassIdentifier: 
-  id: "M\u0169 G\u1ED7"
-  icon: {fileID: -6314522, guid: 475e04379a921dc44a312b2dfc0809f4, type: 3}
+  id: 'Balo '
+  icon: {fileID: 826784386, guid: 31504eb8b38760e438e56464a1faaea2, type: 3}
   seedData: {fileID: 0}
   category: 6
-  equipSlot: 1
+  equipSlot: 7
   stackable: 0
   weaponType: 0
   toolType: 0

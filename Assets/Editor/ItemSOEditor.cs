@@ -27,6 +27,7 @@ public class ItemSOEditor : Editor
     SerializedProperty healthRestoreProp;
     SerializedProperty staminaRestoreProp;
     SerializedProperty sellPriceProp;
+    SerializedProperty equipSlotProp;
     void OnEnable()
     {
         idProp = serializedObject.FindProperty("id");
@@ -51,6 +52,7 @@ public class ItemSOEditor : Editor
         healthRestoreProp = serializedObject.FindProperty("healthRestore");
         staminaRestoreProp = serializedObject.FindProperty("staminaRestore");
         sellPriceProp = serializedObject.FindProperty("sellPrice");
+        equipSlotProp = serializedObject.FindProperty("equipSlot");
     }
 
     public override void OnInspectorGUI()
@@ -77,6 +79,9 @@ public class ItemSOEditor : Editor
                 break;
             case ItemCategory.Seed:
                 DrawSeedFields();
+                break;
+            case ItemCategory.Equipment:
+                DrawEquipmentFields();   // <- THÊM DÒNG NÀY
                 break;
             default:
                 DrawStackableFields();
@@ -139,7 +144,6 @@ public class ItemSOEditor : Editor
         EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
         DrawStackableFields();
     }
-
     void DrawStackableFields()
     {
         EditorGUILayout.Space();
@@ -151,6 +155,18 @@ public class ItemSOEditor : Editor
             EditorGUILayout.PropertyField(maxStackProp);
             EditorGUI.indentLevel--;
         }
+        EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
+    }
+     void DrawEquipmentFields()
+    {
+        stackableProp.boolValue = false; // trang bị là item đơn
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Equipment Settings", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox("Trang bị (mũ/áo/giày...) là item đơn, không stack.", MessageType.Info);
+
+        EditorGUILayout.PropertyField(equipSlotProp); // chọn slot: Hat, Armor,...
+
+        // cho phép chỉnh giá bán
         EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
     }
 }

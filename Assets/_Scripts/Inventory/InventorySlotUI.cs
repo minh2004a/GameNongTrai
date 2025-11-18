@@ -111,23 +111,39 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
             var results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(e, results);
+
             InventorySlotUI targetBag = null;
             HotbarSlotUI targetHotbar = null;
+            EquipmentSlotUI targetEquip = null;
+
             foreach (var r in results)
             {
-                targetBag = r.gameObject.GetComponentInParent<InventorySlotUI>();
-                if (targetBag != null) break;
-                targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
-                if (targetHotbar != null) break;
+                if (!targetEquip)
+                    targetEquip = r.gameObject.GetComponentInParent<EquipmentSlotUI>();
+                if (!targetBag)
+                    targetBag = r.gameObject.GetComponentInParent<InventorySlotUI>();
+                if (!targetHotbar)
+                    targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
             }
 
+            // 🔥 PHẦN QUAN TRỌNG BỊ THIẾU
             if (owner != null)
             {
-                if (targetBag)
+                if (targetEquip)
+                {
+                    // kéo từ túi sang slot trang bị
+                    EquipmentUI.Instance?.EquipFromBag(index, targetEquip.SlotType);
+                }
+                else if (targetBag)
+                {
                     owner.RequestMoveOrMergeBag(index, targetBag.Index);
+                }
                 else if (targetHotbar)
+                {
                     owner.RequestMoveBagToHotbar(index, targetHotbar.Index);
+                }
             }
+
             return;
         }
 
@@ -136,6 +152,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
             if (!locked) owner?.OnSlotClicked(index);
         }
     }
+
     void OnDisable()
     {
         DestroyGhost();
