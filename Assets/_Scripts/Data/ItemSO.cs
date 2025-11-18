@@ -6,11 +6,15 @@ public enum ItemCategory { Tool, Weapon, Resource, Consumable, Minerals, Seed,Eq
 public enum WeaponType { None, Sword, Bow }
 public enum EquipSlotType
 {
-    None,
-    Hat,
-    Armor,
-    Boots,
-    Ring
+    None = 0,
+    Hat = 1,
+    Armor = 2,
+    Boots = 3,
+    Ring = 4,
+    Pants = 5,
+    Gloves = 6,
+    Backpack = 7,
+    Potion = 8
 }
 public enum ToolType
 {
@@ -34,6 +38,8 @@ public class ItemSO : ScriptableObject
     public Sprite icon;
     public SeedSO seedData; // dùng khi type == Seed
     public ItemCategory category;
+    [Header("Equipment Settings")]
+    public EquipSlotType equipSlot = EquipSlotType.None;
     public bool stackable = true;
     public WeaponType weaponType;
     public ToolType toolType = ToolType.None;

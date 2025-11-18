@@ -11,10 +11,12 @@ public static class SaveStore
 {
     [System.Serializable] public struct ItemStackDTO { public string key; public string id; public int count; }
     [System.Serializable] public class InventoryDTO {
-    public ItemStackDTO[] hotbar;
-    public ItemStackDTO[] bag;
-    public int selected;
-}
+        public ItemStackDTO[] hotbar;
+        public ItemStackDTO[] bag;
+        public ItemStackDTO[] equipment;
+        public int selected;
+        public int unlockedBagSlots;
+    }
     static Meta meta = new Meta();
     [System.Serializable]
     public struct PlantState
@@ -70,7 +72,9 @@ public static class SaveStore
         {
             hotbar = new ItemStackDTO[inv.hotbar.Length],
             bag = new ItemStackDTO[inv.bag.Length],
-            selected = inv.selected
+            equipment = new ItemStackDTO[inv.equipment.Length],
+            selected = inv.selected,
+            unlockedBagSlots = inv.UnlockedBagSlots
         };
         for (int i = 0; i < inv.hotbar.Length; i++)
         {
@@ -87,6 +91,14 @@ public static class SaveStore
             var id = s.item ? s.item.id : null;
             if (string.IsNullOrEmpty(key)) key = id;
             dto.bag[i] = new ItemStackDTO { key = key, id = id, count = s.count };
+        }
+        for (int i = 0; i < inv.equipment.Length; i++)
+        {
+            var s = inv.equipment[i];
+            var key = db.GetKey(s.item);
+            var id = s.item ? s.item.id : null;
+            if (string.IsNullOrEmpty(key)) key = id;
+            dto.equipment[i] = new ItemStackDTO { key = key, id = id, count = s.count };
         }
         meta.inventory = dto;
         SaveToDisk();
@@ -120,6 +132,24 @@ public static class SaveStore
             inv.SetBag(i, it, Mathf.Max(0, d.count));
         }
         for (int i = m; i < inv.bag.Length; i++) inv.SetBag(i, null, 0);
+
+        // Equipment
+        if (meta.inventory.equipment != null)
+        {
+            int e = Mathf.Min(inv.equipment.Length, meta.inventory.equipment.Length);
+            for (int i = 0; i < e; i++)
+            {
+                var d = meta.inventory.equipment[i];
+                var it = db.Find(d.key);
+                if (!it && !string.IsNullOrEmpty(d.id))
+                    it = db.Find(d.id);
+                inv.SetEquipment(i, it, Mathf.Max(0, d.count));
+            }
+            for (int i = e; i < inv.equipment.Length; i++) inv.SetEquipment(i, null, 0);
+        }
+
+        if (meta.inventory.unlockedBagSlots > 0)
+            inv.SetUnlockedBagSlots(meta.inventory.unlockedBagSlots);
 
         // Selected
         int sel = Mathf.Clamp(meta.inventory.selected, 0, inv.hotbar.Length - 1);

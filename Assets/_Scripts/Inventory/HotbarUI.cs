@@ -76,4 +76,10 @@ public class HotbarUI : MonoBehaviour
         // Bag UI sẽ tự Refresh nếu đang lắng nghe BagChanged
         // (InventoryBookUI.OnEnable đã sub event BagChanged rồi)
     }
+    public void RequestMoveHotbarToEquipment(int hotbarIndex, int equipIndex)
+    {
+        if (!inv) return;
+        inv.MoveOrSwapHotbarEquipment(hotbarIndex, equipIndex);
+        Refresh();
+    }
 }

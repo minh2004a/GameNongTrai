@@ -79,4 +79,9 @@ public class InventoryBookUI : MonoBehaviour
         if (!inv) return;
         inv.MoveOrMergeBagToHotbar(bagIndex, hotbarIndex);
     }
+    public void RequestMoveBagToEquipment(int bagIndex, int equipIndex)
+    {
+        if (!inv) return;
+        inv.MoveOrSwapBagEquipment(bagIndex, equipIndex);
+    }
 }

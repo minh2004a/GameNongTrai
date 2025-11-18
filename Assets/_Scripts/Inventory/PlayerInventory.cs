@@ -1,6 +1,7 @@
 
 // PlayerInventory.cs
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 // Quản lý kho đồ của người chơi, bao gồm hotbar và túi đồ
 [Serializable] public struct ItemStack { public ItemSO item; public int count; }
@@ -9,6 +10,19 @@ public class PlayerInventory : MonoBehaviour
 {
     public ItemStack[] hotbar = new ItemStack[8];
     public int selected;
+
+    [SerializeField] EquipSlotType[] equipmentSlotOrder = new[]
+    {
+        EquipSlotType.Hat,
+        EquipSlotType.Armor,
+        EquipSlotType.Pants,
+        EquipSlotType.Gloves,
+        EquipSlotType.Boots,
+        EquipSlotType.Ring,
+        EquipSlotType.Backpack,
+        EquipSlotType.Potion
+    };
+    public ItemStack[] equipment = new ItemStack[8];
 
     // tối đa 20 ô
     public ItemStack[] bag = new ItemStack[20];
@@ -23,9 +37,61 @@ public class PlayerInventory : MonoBehaviour
     public event Action<int> SelectedChanged;   // báo UI khi đổi ô
     public event Action HotbarChanged;          // báo UI khi nội dung ô đổi
     public event Action<ItemSO, InventoryAddResult> ItemAdded;
+    public event Action EquipmentChanged;
 
     public ItemSO CurrentItem =>
         (selected >= 0 && selected < hotbar.Length) ? hotbar[selected].item : null;
+
+    void Awake()
+    {
+        EnsureEquipmentSize();
+    }
+
+    void EnsureEquipmentSize()
+    {
+        int n = equipmentSlotOrder?.Length ?? 0;
+        if (n <= 0) n = 0;
+        if (equipment == null || equipment.Length != n)
+            equipment = new ItemStack[n];
+    }
+
+    public IReadOnlyList<EquipSlotType> EquipmentSlotOrder => equipmentSlotOrder;
+    public ItemStack GetEquipmentSlot(int i)
+    {
+        EnsureEquipmentSize();
+        if ((uint)i >= (uint)equipment.Length) return default;
+        return equipment[i];
+    }
+    public bool CanEquip(ItemSO item, int slotIndex)
+    {
+        if ((uint)slotIndex >= (uint)equipmentSlotOrder.Length) return false;
+        if (!item) return true;
+        return item.category == ItemCategory.Equipment && item.equipSlot == equipmentSlotOrder[slotIndex];
+    }
+    public void SetEquipment(int index, ItemSO item, int count = 1)
+    {
+        EnsureEquipmentSize();
+        if ((uint)index >= (uint)equipment.Length) return;
+        if (item && !CanEquip(item, index)) return;
+        if (item && count <= 0)
+        {
+            equipment[index] = default;
+            EquipmentChanged?.Invoke();
+            return;
+        }
+        equipment[index] = new ItemStack { item = item, count = count };
+        EquipmentChanged?.Invoke();
+    }
+    void SetEquipment(int index, ItemStack stack)
+    {
+        EnsureEquipmentSize();
+        if ((uint)index >= (uint)equipment.Length) return;
+        if (stack.item && !CanEquip(stack.item, index)) return;
+        if (stack.count <= 0)
+            stack = default;
+        equipment[index] = stack;
+        EquipmentChanged?.Invoke();
+    }
 
     public void SelectSlot(int i)
     {
@@ -197,6 +263,58 @@ public class PlayerInventory : MonoBehaviour
         if (hotbarIndex == selected)
             SelectedChanged?.Invoke(selected);
     }
+    public void MoveOrSwapBagEquipment(int bagIndex, int equipIndex)
+    {
+        EnsureEquipmentSize();
+        if ((uint)bagIndex >= (uint)bag.Length) return;
+        if ((uint)equipIndex >= (uint)equipment.Length) return;
+        if (bagIndex >= UnlockedBagSlots) return;
+
+        ref ItemStack bagSlot = ref bag[bagIndex];
+        ref ItemStack equipSlot = ref equipment[equipIndex];
+
+        if (bagSlot.item && !CanEquip(bagSlot.item, equipIndex)) return;
+
+        (bagSlot, equipSlot) = (equipSlot, bagSlot);
+
+        BagChanged?.Invoke();
+        EquipmentChanged?.Invoke();
+    }
+    public void MoveOrSwapHotbarEquipment(int hotbarIndex, int equipIndex)
+    {
+        EnsureEquipmentSize();
+        if ((uint)hotbarIndex >= (uint)hotbar.Length) return;
+        if ((uint)equipIndex >= (uint)equipment.Length) return;
+
+        ref ItemStack hot = ref hotbar[hotbarIndex];
+        ref ItemStack equipSlot = ref equipment[equipIndex];
+
+        if (hot.item && !CanEquip(hot.item, equipIndex)) return;
+
+        (hot, equipSlot) = (equipSlot, hot);
+
+        HotbarChanged?.Invoke();
+        EquipmentChanged?.Invoke();
+
+        if (hotbarIndex == selected)
+            SelectedChanged?.Invoke(selected);
+    }
+    public void MoveOrSwapEquipmentSlot(int from, int to)
+    {
+        EnsureEquipmentSize();
+        if ((uint)from >= (uint)equipment.Length || (uint)to >= (uint)equipment.Length || from == to) return;
+
+        ref ItemStack source = ref equipment[from];
+        ref ItemStack target = ref equipment[to];
+        if (source.item == null) return;
+
+        if (!CanEquip(source.item, to)) return;
+        if (target.item && !CanEquip(target.item, from)) return;
+
+        (source, target) = (target, source);
+
+        EquipmentChanged?.Invoke();
+    }
     public void UnlockBagSlots(int extra)
     {
         int before = unlockedBagSlots;
@@ -206,6 +324,13 @@ public class PlayerInventory : MonoBehaviour
         {
             BagChanged?.Invoke();
         }
+    }
+    public void SetUnlockedBagSlots(int unlocked)
+    {
+        int clamped = Mathf.Clamp(unlocked, 0, bag.Length);
+        if (clamped == unlockedBagSlots) return;
+        unlockedBagSlots = clamped;
+        BagChanged?.Invoke();
     }
     public bool ConsumeSelected(int n = 1)
     {
