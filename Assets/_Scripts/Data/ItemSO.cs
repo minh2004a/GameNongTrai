@@ -2,6 +2,7 @@
 
 
 using UnityEngine;
+using UnityEngine.Serialization;
 // Dữ liệu ScriptableObject cho một loại vật phẩm trong trò chơi
 public enum ItemCategory { Tool, Weapon, Resource, Consumable, Minerals, Seed,Equipment } // thêm loại
 public enum WeaponType { None, Sword, Bow }
@@ -51,6 +52,10 @@ public class ItemSO : ScriptableObject
     public float staminaRestore;
     [Tooltip("Giá bán mỗi vật phẩm khi bán.")]
     public int sellPrice;
+    [Header("Backpack Settings")]
+    [FormerlySerializedAs("bagSlotBonus")]
+    [Tooltip("Số ô túi được mở thêm khi trang bị balo này.")]
+    public int backpackSlotBonus;
     [Header("Tool Settings")]
     [Tooltip("Số ô tối đa tính từ người chơi đến mục tiêu khi dùng công cụ này")]
     [Min(1)] public int toolRangeTiles = 1;

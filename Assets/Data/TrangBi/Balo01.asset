@@ -23,6 +23,7 @@ MonoBehaviour:
   healthRestore: 0
   staminaRestore: 0
   sellPrice: 0
+  backpackSlotBonus: 4
   toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
