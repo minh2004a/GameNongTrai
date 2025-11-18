@@ -77,11 +77,12 @@ public class EquipmentSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     public void OnPointerDown(PointerEventData e)
     {
         UIInputGuard.MarkClick();
-        suppressClick = true;
+        suppressClick = false;
         if (icon && icon.enabled && icon.sprite)
         {
             StartDragGhost();
             dragging = ghost != null;
+            suppressClick = dragging;
         }
     }
 
