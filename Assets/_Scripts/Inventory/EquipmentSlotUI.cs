@@ -28,6 +28,7 @@ public class EquipmentSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         cg = GetComponent<CanvasGroup>();
         if (!rootCanvas) rootCanvas = GetComponentInParent<Canvas>();
         if (rootCanvas) rootCanvas = rootCanvas.rootCanvas;
+        else rootCanvas = FindObjectOfType<Canvas>();
     }
 
     public void Init(int index, EquipSlotType slotType, string label, EquipmentUI owner)
@@ -80,7 +81,7 @@ public class EquipmentSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         if (icon && icon.enabled && icon.sprite)
         {
             StartDragGhost();
-            dragging = true;
+            dragging = ghost != null;
         }
     }
 
@@ -133,6 +134,12 @@ public class EquipmentSlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     void StartDragGhost()
     {
+        if (rootCanvas == null)
+        {
+            Debug.LogWarning("Equip drag ghost skipped because no Canvas was found in parents.", this);
+            return;
+        }
+
         ghost = new GameObject("EquipDragGhost", typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
         ghost.transform.SetParent(rootCanvas.transform, false);
         ghost.transform.SetAsLastSibling();

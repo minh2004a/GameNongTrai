@@ -26,6 +26,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         cg = GetComponent<CanvasGroup>();
         if (!rootCanvas) rootCanvas = GetComponentInParent<Canvas>();
         if (rootCanvas) rootCanvas = rootCanvas.rootCanvas;
+        else rootCanvas = FindObjectOfType<Canvas>();
     }
 
     public void Init(int index, InventoryBookUI owner)
@@ -97,7 +98,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         if (icon && icon.enabled && icon.sprite)
         {
             StartDragGhost();
-            dragging = true;
+            dragging = ghost != null;
         }
     }
     public void OnPointerUp(PointerEventData e)
@@ -149,6 +150,12 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     }
     void StartDragGhost()
     {
+        if (rootCanvas == null)
+        {
+            Debug.LogWarning("Bag drag ghost skipped because no Canvas was found in parents.", this);
+            return;
+        }
+
         ghost = new GameObject("BagDragGhost", typeof(CanvasRenderer), typeof(Image)).GetComponent<Image>();
         ghost.transform.SetParent(rootCanvas.transform, false);
         ghost.transform.SetAsLastSibling();
