@@ -2,8 +2,16 @@
 
 using UnityEngine;
 // Dữ liệu ScriptableObject cho một loại vật phẩm trong trò chơi
-public enum ItemCategory { Tool, Weapon, Resource, Consumable, Minerals, Seed } // thêm loại
+public enum ItemCategory { Tool, Weapon, Resource, Consumable, Minerals, Seed,Equipment } // thêm loại
 public enum WeaponType { None, Sword, Bow }
+public enum EquipSlotType
+{
+    None,
+    Hat,
+    Armor,
+    Boots,
+    Ring
+}
 public enum ToolType
 {
     None = 0,

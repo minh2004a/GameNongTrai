@@ -27,7 +27,6 @@ public class ItemSOEditor : Editor
     SerializedProperty healthRestoreProp;
     SerializedProperty staminaRestoreProp;
     SerializedProperty sellPriceProp;
-
     void OnEnable()
     {
         idProp = serializedObject.FindProperty("id");
@@ -83,10 +82,8 @@ public class ItemSOEditor : Editor
                 DrawStackableFields();
                 break;
         }
-
         serializedObject.ApplyModifiedProperties();
     }
-
     void DrawWeaponFields()
     {
         stackableProp.boolValue = false;
@@ -154,5 +151,6 @@ public class ItemSOEditor : Editor
             EditorGUILayout.PropertyField(maxStackProp);
             EditorGUI.indentLevel--;
         }
+        EditorGUILayout.PropertyField(sellPriceProp, new GUIContent("Sell Price"));
     }
 }
