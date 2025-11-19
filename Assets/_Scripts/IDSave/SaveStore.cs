@@ -15,6 +15,10 @@ public static class SaveStore
     public ItemStackDTO[] bag;
     public int selected;
 }
+    [System.Serializable] public class EquipmentDTO {
+    public string[] keys;
+    public string[] ids;
+}
     static Meta meta = new Meta();
     [System.Serializable]
     public struct PlantState
@@ -62,6 +66,7 @@ public static class SaveStore
         public int day = 1, hour = 6, minute = 0;
         public float hp01 = 1f, sta01 = 1f;
         public InventoryDTO inventory = new InventoryDTO();
+        public EquipmentDTO equipment = new EquipmentDTO();
     }
     public static void CaptureInventory(PlayerInventory inv, ItemDB db)
     {
@@ -89,6 +94,30 @@ public static class SaveStore
             dto.bag[i] = new ItemStackDTO { key = key, id = id, count = s.count };
         }
         meta.inventory = dto;
+        SaveToDisk();
+    }
+    public static void CaptureEquipment(PlayerEquipment equip, ItemDB db)
+    {
+        if (!equip || !db) return;
+
+        int slotCount = Enum.GetValues(typeof(EquipSlotType)).Length;
+        var dto = new EquipmentDTO
+        {
+            keys = new string[slotCount],
+            ids = new string[slotCount]
+        };
+
+        for (int i = 0; i < slotCount; i++)
+        {
+            var item = equip.Get((EquipSlotType)i);
+            var key = db.GetKey(item);
+            var id = item ? item.id : null;
+            if (string.IsNullOrEmpty(key)) key = id;
+            dto.keys[i] = key;
+            dto.ids[i] = id;
+        }
+
+        meta.equipment = dto;
         SaveToDisk();
     }
     public static bool JustStartedNewGame { get; set; }
@@ -124,6 +153,32 @@ public static class SaveStore
         // Selected
         int sel = Mathf.Clamp(meta.inventory.selected, 0, inv.hotbar.Length - 1);
         inv.SelectSlot(sel);
+    }
+    public static void ApplyEquipment(PlayerEquipment equip, ItemDB db)
+    {
+        if (!equip || !db || meta.equipment == null) return;
+
+        int slotCount = Enum.GetValues(typeof(EquipSlotType)).Length;
+        int keysLength = meta.equipment.keys?.Length ?? 0;
+        int idsLength = meta.equipment.ids?.Length ?? 0;
+        int n = Mathf.Min(slotCount, Mathf.Max(keysLength, idsLength));
+
+        for (int i = 0; i < n; i++)
+        {
+            var key = i < keysLength ? meta.equipment.keys[i] : null;
+            var id = i < idsLength ? meta.equipment.ids[i] : null;
+            var item = db.Find(key);
+            if (!item && !string.IsNullOrEmpty(id))
+            {
+                item = db.Find(id);
+            }
+            equip.Set((EquipSlotType)i, item);
+        }
+
+        for (int i = n; i < slotCount; i++)
+        {
+            equip.Set((EquipSlotType)i, null);
+        }
     }
     public static void SetTime(int d,int h,int m){ meta.day=d; meta.hour=h; meta.minute=m; SaveToDisk(); }
     public static void GetTime(out int d,out int h,out int m){ d=meta.day; h=meta.hour; m=meta.minute; }
