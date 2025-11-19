@@ -6,6 +6,7 @@ public class PlayerEquipment : MonoBehaviour
 {
     ItemSO[] equipped; // index = (int)EquipSlotType
     [SerializeField] PlayerInventory inventory;
+    [SerializeField] PlayerStamina stamina;
 
     public event Action<EquipSlotType> EquipmentChanged;
 
@@ -13,7 +14,9 @@ public class PlayerEquipment : MonoBehaviour
     {
         EnsureInit();
         if (!inventory) inventory = GetComponent<PlayerInventory>();
+        if (!stamina) stamina = GetComponent<PlayerStamina>();
         UpdateBagSlotBonus();
+        UpdateStaminaBonus();
     }
 
     public ItemSO Get(EquipSlotType slot)
@@ -40,6 +43,10 @@ public class PlayerEquipment : MonoBehaviour
         {
             UpdateBagSlotBonus();
         }
+        else if (slot == EquipSlotType.Boots)
+        {
+            UpdateStaminaBonus();
+        }
     }
     void EnsureInit()
     {
@@ -62,5 +69,19 @@ public class PlayerEquipment : MonoBehaviour
         }
 
         inventory.SetBagSlotBonus(bonus);
+    }
+
+    void UpdateStaminaBonus()
+    {
+        if (!stamina) return;
+
+        float bonus = 0f;
+        var boots = Get(EquipSlotType.Boots);
+        if (boots)
+        {
+            bonus = Mathf.Max(0f, boots.staminaMaxBonus);
+        }
+
+        stamina.ApplyMaxBonus(bonus);
     }
 }

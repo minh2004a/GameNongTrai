@@ -50,6 +50,9 @@ public class ItemSO : ScriptableObject
     public float staminaRestore;
     [Tooltip("Giá bán mỗi vật phẩm khi bán.")]
     public int sellPrice;
+    [Header("Boots Settings")]
+    [Tooltip("Tăng thể lực tối đa khi mang giày.")]
+    public float staminaMaxBonus;
     [Header("Backpack Settings")]
     [FormerlySerializedAs("bagSlotBonus")]
     [Tooltip("Số ô túi được mở thêm khi trang bị balo này.")]

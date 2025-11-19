@@ -6,6 +6,7 @@ using UnityEngine.Events;
 public class PlayerStamina : MonoBehaviour
 {
     [Header("Chỉ số")]
+    [SerializeField] float baseMax = 100f;
     public float max = 100f;
     [SerializeField] float current = 100f;
 
@@ -26,6 +27,8 @@ public class PlayerStamina : MonoBehaviour
     float regenTimer;
 
     void Awake(){
+        baseMax = Mathf.Max(1f, max);
+        max = baseMax;
         current = Mathf.Clamp(current, -999f, max);
         OnStamina01?.Invoke(Mathf.Clamp01(current / max));
     }
@@ -78,6 +81,19 @@ public class PlayerStamina : MonoBehaviour
     public void SetPercent(float p){ p = Mathf.Clamp01(p); current = max * p; OnStamina01?.Invoke(p); }
     public void RecoverMissingPercent(float p){ p = Mathf.Clamp01(p); current = Mathf.Min(max, current + (max - current)*p); OnStamina01?.Invoke(Mathf.Clamp01(current/max)); }
     public void ClearExhaustionFlag() => exhaustedSinceLastSleep = false;
+
+    public void ApplyMaxBonus(float bonus)
+    {
+        float oldMax = Mathf.Max(1f, max);
+        float newMax = Mathf.Max(1f, baseMax + Mathf.Max(0f, bonus));
+
+        if (Mathf.Approximately(oldMax, newMax)) return;
+
+        float percent = current / oldMax;
+        max = newMax;
+        current = Mathf.Clamp(percent * max, -999f, max);
+        OnStamina01?.Invoke(Mathf.Clamp01(current / max));
+    }
 
     public float Restore(float amount)
     {
