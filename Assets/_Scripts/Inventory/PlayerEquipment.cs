@@ -75,13 +75,16 @@ public class PlayerEquipment : MonoBehaviour
     {
         if (!stamina) return;
 
-        float bonus = 0f;
+        float maxBonus = 0f;
+        float regenBonus = 0f;
         var boots = Get(EquipSlotType.Boots);
         if (boots)
         {
-            bonus = Mathf.Max(0f, boots.staminaMaxBonus);
+            maxBonus = Mathf.Max(0f, boots.staminaMaxBonus);
+            regenBonus = Mathf.Max(0f, boots.staminaRegenBonus);
         }
 
-        stamina.ApplyMaxBonus(bonus);
+        stamina.ApplyMaxBonus(maxBonus);
+        stamina.ApplyRegenBonus(regenBonus);
     }
 }

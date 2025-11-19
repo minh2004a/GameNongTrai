@@ -9,6 +9,7 @@ public class PlayerStamina : MonoBehaviour
     [SerializeField] float baseMax = 100f;
     public float max = 100f;
     [SerializeField] float current = 100f;
+    [SerializeField] float baseRegenPerSecond = 0.1f;
 
     [Header("Chi phí")]
     public float bowCost = 12f, swordCost = 8f, hoeCost = 4f,
@@ -29,6 +30,8 @@ public class PlayerStamina : MonoBehaviour
     void Awake(){
         baseMax = Mathf.Max(1f, max);
         max = baseMax;
+        baseRegenPerSecond = Mathf.Max(0f, regenPerSecond);
+        regenPerSecond = baseRegenPerSecond;
         current = Mathf.Clamp(current, -999f, max);
         OnStamina01?.Invoke(Mathf.Clamp01(current / max));
     }
@@ -103,5 +106,15 @@ public class PlayerStamina : MonoBehaviour
         regenTimer = 0f;
         OnStamina01?.Invoke(Mathf.Clamp01(current / max));
         return current - before;
+    }
+
+    public void ApplyRegenBonus(float bonus)
+    {
+        float oldRegen = Mathf.Max(0f, regenPerSecond);
+        float newRegen = Mathf.Max(0f, baseRegenPerSecond + Mathf.Max(0f, bonus));
+
+        if (Mathf.Approximately(oldRegen, newRegen)) return;
+
+        regenPerSecond = newRegen;
     }
 }

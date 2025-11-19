@@ -53,6 +53,8 @@ public class ItemSO : ScriptableObject
     [Header("Boots Settings")]
     [Tooltip("Tăng thể lực tối đa khi mang giày.")]
     public float staminaMaxBonus;
+    [Tooltip("Tăng tốc độ hồi thể lực khi mang giày (đơn vị thể lực/giây).")]
+    public float staminaRegenBonus;
     [Header("Backpack Settings")]
     [FormerlySerializedAs("bagSlotBonus")]
     [Tooltip("Số ô túi được mở thêm khi trang bị balo này.")]
