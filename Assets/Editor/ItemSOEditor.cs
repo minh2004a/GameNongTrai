@@ -181,7 +181,7 @@ public class ItemSOEditor : Editor
         if ((EquipSlotType)equipSlotProp.enumValueIndex == EquipSlotType.Boots)
         {
             EditorGUILayout.PropertyField(staminaMaxBonusProp, new GUIContent("Stamina Max Bonus"));
-            EditorGUILayout.PropertyField(staminaRegenBonusProp, new GUIContent("Stamina Regen Bonus"));
+            EditorGUILayout.PropertyField(staminaRegenBonusProp, new GUIContent("Stamina Regen Bonus (per game hour)"));
         }
 
         // cho phép chỉnh giá bán

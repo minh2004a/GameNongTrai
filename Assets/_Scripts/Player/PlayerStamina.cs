@@ -9,7 +9,7 @@ public class PlayerStamina : MonoBehaviour
     [SerializeField] float baseMax = 100f;
     public float max = 100f;
     [SerializeField] float current = 100f;
-    [SerializeField] float baseRegenPerSecond = 0.1f;
+    [SerializeField] float baseRegenPerGameHour = 6f;
 
     [Header("Chi phí")]
     public float bowCost = 12f, swordCost = 8f, hoeCost = 4f,
@@ -17,8 +17,13 @@ public class PlayerStamina : MonoBehaviour
 
     [Header("Tiêu hao/Hồi phục")]
     public float moveDrainPerSecond = 0f;
-    public float regenPerSecond = 0.1f;
+    public float regenPerGameHour = 6f;
     public float regenDelay = 3f;
+    float regenPerSecond;
+    float lastMinutesPerRealSecond = -1f;
+
+    [Header("Thời gian game")]
+    [SerializeField] TimeManager timeManager;
 
     [Header("Kiệt sức")]
     public float faintThreshold = -15f;            // ngất khi ≤ -15
@@ -28,14 +33,25 @@ public class PlayerStamina : MonoBehaviour
     float regenTimer;
 
     void Awake(){
+        if (!timeManager) timeManager = FindObjectOfType<TimeManager>(true);
+
         baseMax = Mathf.Max(1f, max);
         max = baseMax;
-        baseRegenPerSecond = Mathf.Max(0f, regenPerSecond);
-        regenPerSecond = baseRegenPerSecond;
+        baseRegenPerGameHour = Mathf.Max(0f, regenPerGameHour);
+        regenPerGameHour = baseRegenPerGameHour;
+        regenPerSecond = ConvertRegenToPerSecond(regenPerGameHour);
+        lastMinutesPerRealSecond = GetMinutesPerRealSecond();
+
         current = Mathf.Clamp(current, -999f, max);
         OnStamina01?.Invoke(Mathf.Clamp01(current / max));
     }
     void Update(){
+        float minutesPerRS = GetMinutesPerRealSecond();
+        if (!Mathf.Approximately(minutesPerRS, lastMinutesPerRealSecond))
+        {
+            lastMinutesPerRealSecond = minutesPerRS;
+            regenPerSecond = ConvertRegenToPerSecond(regenPerGameHour);
+        }
         if (regenTimer > 0f){ regenTimer -= Time.deltaTime; return; }
         if (current < max){
             current = Mathf.Min(max, current + regenPerSecond * Time.deltaTime);
@@ -110,11 +126,21 @@ public class PlayerStamina : MonoBehaviour
 
     public void ApplyRegenBonus(float bonus)
     {
-        float oldRegen = Mathf.Max(0f, regenPerSecond);
-        float newRegen = Mathf.Max(0f, baseRegenPerSecond + Mathf.Max(0f, bonus));
+        float oldRegen = Mathf.Max(0f, regenPerGameHour);
+        float newRegen = Mathf.Max(0f, baseRegenPerGameHour + Mathf.Max(0f, bonus));
 
         if (Mathf.Approximately(oldRegen, newRegen)) return;
 
-        regenPerSecond = newRegen;
+        regenPerGameHour = newRegen;
+        regenPerSecond = ConvertRegenToPerSecond(regenPerGameHour);
     }
+
+    float ConvertRegenToPerSecond(float regenPerHour)
+    {
+        float minutesPerRealSecond = Mathf.Max(0.001f, GetMinutesPerRealSecond());
+        float secondsPerGameHour = 60f / minutesPerRealSecond;
+        return regenPerHour / Mathf.Max(0.001f, secondsPerGameHour);
+    }
+
+    float GetMinutesPerRealSecond() => timeManager ? timeManager.minutesPerRealSecond : 1f;
 }
