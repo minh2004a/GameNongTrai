@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "NongTraiVuiVe.slnx"
+    "dotnet.defaultSolution": "DoAnThucTap.slnx"
 }
