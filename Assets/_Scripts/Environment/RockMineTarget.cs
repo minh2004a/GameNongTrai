@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 /// <summary>
@@ -5,6 +6,7 @@ using UnityEngine;
 /// Quản lý HP, FX và rơi loot khi bị phá.
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(UniqueId))]
 public class RockMineTarget : MonoBehaviour, IMineable
 {
     [Header("HP")]
@@ -18,11 +20,22 @@ public class RockMineTarget : MonoBehaviour, IMineable
     [SerializeField] DropLootOnDeath dropOnBreak;
 
     int hp;
+    UniqueId uid;
+    string sceneName;
 
     void Awake()
     {
         hp = Mathf.Max(1, maxHp);
         if (!dropOnBreak) dropOnBreak = GetComponent<DropLootOnDeath>();
+
+        uid = GetComponent<UniqueId>();
+        sceneName = gameObject.scene.IsValid() ? gameObject.scene.name : null;
+
+        if (uid && !string.IsNullOrEmpty(sceneName) && SaveStore.IsRockMinedInSession(sceneName, uid.Id))
+        {
+            Destroy(gameObject);
+            return;
+        }
     }
 
     public bool IsDepleted => hp <= 0;
@@ -35,6 +48,11 @@ public class RockMineTarget : MonoBehaviour, IMineable
         SpawnFx(hitFxPrefab);
 
         if (hp > 0) return;
+
+        if (uid && !string.IsNullOrEmpty(sceneName))
+        {
+            SaveStore.MarkRockMinedPending(sceneName, uid.Id);
+        }
 
         if (dropOnBreak)
         {

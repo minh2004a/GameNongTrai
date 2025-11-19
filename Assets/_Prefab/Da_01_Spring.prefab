@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7174573094674538018}
   - component: {fileID: 1178819851017951906}
   - component: {fileID: -5068066376364089194}
+  - component: {fileID: 6555091232211887035}
   m_Layer: 18
   m_Name: Da_01_Spring
   m_TagString: Untagged
@@ -160,3 +161,16 @@ MonoBehaviour:
     chance: 1
   scatterSpeed: {x: 0.8, y: 1.4}
   scatterAngle: 35
+--- !u!114 &6555091232211887035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1559559962467882664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2cf980f678f8a2439a482996934aecb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 

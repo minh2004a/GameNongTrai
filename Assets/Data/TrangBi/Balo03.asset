@@ -10,16 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
-  m_Name: Fishing Rod
+  m_Name: Balo03
   m_EditorClassIdentifier: 
   id: 
-  icon: {fileID: -1400563832, guid: 0aa5aee32af1c79419410c4e0547b04e, type: 3}
+  icon: {fileID: 0}
   seedData: {fileID: 0}
   category: 0
+  equipSlot: 0
   stackable: 0
   weaponType: 0
-  toolType: 6
-  toolRangeTiles: 3
+  toolType: 0
+  healthRestore: 0
+  staminaRestore: 0
+  sellPrice: 0
+  staminaMaxBonus: 0
+  staminaRegenBonus: 0
+  backpackSlotBonus: 0
+  toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1
   hitboxYOffset: 0

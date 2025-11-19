@@ -1,6 +1,6 @@
 
 using UnityEngine;
-
+// UI quản lý giao diện cuốn sách hành trang
 public class InventoryBookUI : MonoBehaviour
 {
     [SerializeField] PlayerInventory inv;

@@ -1,4 +1,5 @@
 
+
 using UnityEngine;
 using UnityEngine.Serialization;
 // Dữ liệu ScriptableObject cho một loại vật phẩm trong trò chơi
@@ -50,6 +51,11 @@ public class ItemSO : ScriptableObject
     public float staminaRestore;
     [Tooltip("Giá bán mỗi vật phẩm khi bán.")]
     public int sellPrice;
+    [Header("Boots Settings")]
+    [Tooltip("Tăng thể lực tối đa khi mang giày.")]
+    public float staminaMaxBonus;
+    [Tooltip("Tăng tốc độ hồi thể lực khi mang giày (đơn vị thể lực/giờ trong game).")]
+    public float staminaRegenBonus;
     [Header("Backpack Settings")]
     [FormerlySerializedAs("bagSlotBonus")]
     [Tooltip("Số ô túi được mở thêm khi trang bị balo này.")]

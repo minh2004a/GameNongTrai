@@ -1,3 +1,4 @@
+
 using System.Collections;
 using UnityEngine;
 
@@ -5,6 +6,7 @@ public class StartingInventoryApplier : MonoBehaviour
 {
     public StartingLoadout loadout;
     public ItemDB itemDB;  // để tra bằng itemKey
+    public PlayerEquipment equipment;
 
     IEnumerator Start()
     {
@@ -12,6 +14,7 @@ public class StartingInventoryApplier : MonoBehaviour
 
         var inv = FindObjectOfType<PlayerInventory>(true);
         while (!inv) { yield return null; inv = FindObjectOfType<PlayerInventory>(true); }
+        if (!equipment && inv) equipment = inv.GetComponent<PlayerEquipment>();
 
         foreach (var e in loadout.items)
         {
@@ -49,6 +52,7 @@ public class StartingInventoryApplier : MonoBehaviour
 
         // Ghi inventory vào save (đúng chuẩn)
         SaveStore.CaptureInventory(inv, itemDB);
+        SaveStore.CaptureEquipment(equipment, itemDB);
         SaveStore.JustStartedNewGame = false;
     }
 }

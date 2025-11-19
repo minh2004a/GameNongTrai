@@ -1,3 +1,4 @@
+
 // SaveOnSleep.cs
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class SaveOnSleep : MonoBehaviour
     [SerializeField] PlayerHealth hp;
     [SerializeField] PlayerStamina stamina;
     [SerializeField] PlayerInventory inv;
+    [SerializeField] PlayerEquipment equipment;
     [SerializeField] ItemDB itemDB;
 
     void Awake(){
@@ -16,6 +18,7 @@ public class SaveOnSleep : MonoBehaviour
         if (!hp)      hp      = FindObjectOfType<PlayerHealth>(true);
         if (!stamina) stamina = FindObjectOfType<PlayerStamina>(true);
         if (!inv)     inv     = FindObjectOfType<PlayerInventory>(true);
+        if (!equipment && inv) equipment = inv.GetComponent<PlayerEquipment>();
     }
     void OnEnable(){ if (sleep) sleep.OnSaveRequested += Handle; }
     void OnDisable(){ if (sleep) sleep.OnSaveRequested -= Handle; }
@@ -29,6 +32,7 @@ public class SaveOnSleep : MonoBehaviour
 
         // inventory
         SaveStore.CaptureInventory(inv, itemDB);
+        SaveStore.CaptureEquipment(equipment, itemDB);
 
         SaveStore.SetLastScene("House");
         SaveStore.CommitPendingAndSave();

@@ -1,5 +1,5 @@
 using UnityEngine;
-
+// UI quản lý toàn bộ giao diện trang bị
 public class EquipmentUI : MonoBehaviour
 {
     [SerializeField] PlayerInventory inv;

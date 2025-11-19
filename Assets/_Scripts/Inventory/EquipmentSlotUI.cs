@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-
+// UI hiển thị 1 ô trang bị (ví dụ: mũ, áo giáp, balo, v.v...)
 public class EquipmentSlotUI : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] EquipSlotType slotType = EquipSlotType.Hat;

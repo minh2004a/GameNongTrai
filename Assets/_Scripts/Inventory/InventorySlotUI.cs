@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
-
+// UI hiển thị 1 ô trong cuốn sách hành trang
 public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     [Header("Refs")]
@@ -126,7 +126,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerDownHandler, IPointerUpHan
                     targetHotbar = r.gameObject.GetComponentInParent<HotbarSlotUI>();
             }
 
-            // 🔥 PHẦN QUAN TRỌNG BỊ THIẾU
+            
             if (owner != null)
             {
                 if (targetEquip)
