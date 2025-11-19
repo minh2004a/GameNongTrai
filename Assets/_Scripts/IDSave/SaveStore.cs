@@ -148,6 +148,7 @@ public static class SaveStore
         public List<SceneRecord> trees = new();
         public List<SceneRecord> stumps = new();
         public List<SceneRecord> grasses = new();
+        public List<SceneRecord> rocks = new();
         public List<GrassInstanceSceneRecord> grassInstances = new();
         public List<PlantSceneRecord> plants = new();
         public List<SoilSceneRecord> soils = new();
@@ -160,9 +161,11 @@ public static class SaveStore
     static readonly Dictionary<string, HashSet<string>> committedTrees  = new();
     static readonly Dictionary<string, HashSet<string>> committedStumps = new();
     static readonly Dictionary<string, HashSet<string>> committedGrasses = new();
+    static readonly Dictionary<string, HashSet<string>> committedRocks = new();
     static readonly Dictionary<string, HashSet<string>> pendingTrees    = new();
     static readonly Dictionary<string, HashSet<string>> pendingStumps   = new();
     static readonly Dictionary<string, HashSet<string>> pendingGrasses  = new();
+    static readonly Dictionary<string, HashSet<string>> pendingRocks    = new();
     static readonly Dictionary<string, Dictionary<string, GrassInstanceState>> committedGrassInstances = new();
     static readonly Dictionary<string, Dictionary<string, GrassInstanceState>> pendingGrassInstances = new();
     static readonly Dictionary<string, HashSet<string>> pendingRemovedGrassInstances = new();
@@ -194,12 +197,13 @@ public static class SaveStore
         var pendingDriedSnapshot = CloneSoilSets(pendingDriedSoil);
         var pendingSoilInfoSnapshot = CloneSoilInfoMaps(pendingSoilInfo);
         var pendingGrassSnapshot = CloneSceneSets(pendingGrasses);
+        var pendingRockSnapshot = CloneSceneSets(pendingRocks);
         var pendingGrassInstanceSnapshot = CloneGrassInstanceScenes(pendingGrassInstances);
         var pendingRemovedGrassInstanceSnapshot = CloneSceneSets(pendingRemovedGrassInstances);
 
-        committedTrees.Clear(); committedStumps.Clear(); committedGrasses.Clear();
+        committedTrees.Clear(); committedStumps.Clear(); committedGrasses.Clear(); committedRocks.Clear();
         committedGrassInstances.Clear();
-        pendingTrees.Clear();   pendingStumps.Clear();   pendingGrasses.Clear();
+        pendingTrees.Clear();   pendingStumps.Clear();   pendingGrasses.Clear();   pendingRocks.Clear();
         pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
@@ -227,6 +231,7 @@ public static class SaveStore
         foreach (var r in data.trees  ?? new List<SceneRecord>()) committedTrees[r.scene]  = new HashSet<string>(r.ids);
         foreach (var r in data.stumps ?? new List<SceneRecord>()) committedStumps[r.scene] = new HashSet<string>(r.ids);
         foreach (var r in data.grasses ?? new List<SceneRecord>()) committedGrasses[r.scene] = new HashSet<string>(r.ids);
+        foreach (var r in data.rocks   ?? new List<SceneRecord>()) committedRocks[r.scene]   = new HashSet<string>(r.ids);
         foreach (var r in data.grassInstances ?? new List<GrassInstanceSceneRecord>())
         {
             if (string.IsNullOrEmpty(r.scene)) continue;
@@ -288,6 +293,7 @@ public static class SaveStore
         RestoreSceneSets(pendingTrees, pendingTreeSnapshot);
         RestoreSceneSets(pendingStumps, pendingStumpSnapshot);
         RestoreSceneSets(pendingGrasses, pendingGrassSnapshot);
+        RestoreSceneSets(pendingRocks, pendingRockSnapshot);
         RestoreGrassInstanceScenes(pendingGrassInstances, pendingGrassInstanceSnapshot);
         RestoreSceneSets(pendingRemovedGrassInstances, pendingRemovedGrassInstanceSnapshot);
         RestorePlantScenes(pendingPlants, pendingPlantSnapshot);
@@ -305,6 +311,7 @@ public static class SaveStore
         foreach (var kv in committedTrees) data.trees.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
         foreach (var kv in committedStumps) data.stumps.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
         foreach (var kv in committedGrasses) data.grasses.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
+        foreach (var kv in committedRocks) data.rocks.Add(new SceneRecord { scene = kv.Key, ids = new List<string>(kv.Value) });
         foreach (var kv in committedGrassInstances)
         {
             var rec = new GrassInstanceSceneRecord { scene = kv.Key };
@@ -377,6 +384,13 @@ public static class SaveStore
         if (pendingGrassInstances.TryGetValue(scene, out var dict)) dict.Remove(id);
         if (!pendingRemovedGrassInstances.TryGetValue(scene, out var removed)) pendingRemovedGrassInstances[scene] = removed = new HashSet<string>();
         removed.Add(id);
+    }
+
+    public static void MarkRockMinedPending(string scene, string id)
+    {
+        if (string.IsNullOrEmpty(scene) || string.IsNullOrEmpty(id)) return;
+        if (!pendingRocks.TryGetValue(scene, out var set)) pendingRocks[scene] = set = new HashSet<string>();
+        set.Add(id);
     }
 
     public static void SetGrassInstancePending(string scene, GrassInstanceState state)
@@ -483,6 +497,10 @@ public static class SaveStore
         (committedGrasses.TryGetValue(scene, out var c) && c.Contains(id)) ||
         (pendingGrasses.TryGetValue(scene, out var p) && p.Contains(id));
 
+    public static bool IsRockMinedInSession(string scene, string id) =>
+        (committedRocks.TryGetValue(scene, out var c) && c.Contains(id)) ||
+        (pendingRocks.TryGetValue(scene, out var p) && p.Contains(id));
+
     public static IEnumerable<GrassInstanceState> GetGrassInstancesInScene(string scene)
     {
         if (string.IsNullOrEmpty(scene)) yield break;
@@ -534,6 +552,11 @@ public static class SaveStore
         foreach (var kv in pendingGrasses)
         {
             if (!committedGrasses.TryGetValue(kv.Key, out var set)) committedGrasses[kv.Key] = set = new HashSet<string>();
+            set.UnionWith(kv.Value);
+        }
+        foreach (var kv in pendingRocks)
+        {
+            if (!committedRocks.TryGetValue(kv.Key, out var set)) committedRocks[kv.Key] = set = new HashSet<string>();
             set.UnionWith(kv.Value);
         }
         foreach (var kv in pendingGrassInstances)
@@ -618,7 +641,7 @@ public static class SaveStore
                 dict[entry.Key] = entry.Value;
             }
         }
-        pendingTrees.Clear(); pendingStumps.Clear(); pendingGrasses.Clear();
+        pendingTrees.Clear(); pendingStumps.Clear(); pendingGrasses.Clear(); pendingRocks.Clear();
         pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
@@ -630,7 +653,7 @@ public static class SaveStore
 
     public static void DiscardPending()
     {
-        pendingTrees.Clear(); pendingStumps.Clear(); pendingGrasses.Clear();
+        pendingTrees.Clear(); pendingStumps.Clear(); pendingGrasses.Clear(); pendingRocks.Clear();
         pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         pendingPlants.Clear(); pendingRemovedPlants.Clear();
         pendingSoil.Clear(); pendingClearedSoil.Clear();
@@ -662,9 +685,9 @@ public static class SaveStore
     public static void NewGame(string startScene)
     {
         // xoá trạng thái cũ trong bộ nhớ
-        committedTrees.Clear(); committedStumps.Clear(); committedGrasses.Clear();
+        committedTrees.Clear(); committedStumps.Clear(); committedGrasses.Clear(); committedRocks.Clear();
         committedGrassInstances.Clear();
-        pendingTrees.Clear();   pendingStumps.Clear();   pendingGrasses.Clear();
+        pendingTrees.Clear();   pendingStumps.Clear();   pendingGrasses.Clear();   pendingRocks.Clear();
         pendingGrassInstances.Clear(); pendingRemovedGrassInstances.Clear();
         committedPlants.Clear(); pendingPlants.Clear(); pendingRemovedPlants.Clear();
         committedSoil.Clear(); pendingSoil.Clear(); pendingClearedSoil.Clear();
