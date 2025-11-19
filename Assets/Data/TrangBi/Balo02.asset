@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Balo02
   m_EditorClassIdentifier: 
   id: "Balo V\u1EA3i"
-  icon: {fileID: -1621169704, guid: 31504eb8b38760e438e56464a1faaea2, type: 3}
+  icon: {fileID: 1138810212, guid: 31504eb8b38760e438e56464a1faaea2, type: 3}
   seedData: {fileID: 0}
   category: 6
   equipSlot: 7
@@ -24,6 +24,7 @@ MonoBehaviour:
   staminaRestore: 0
   sellPrice: 0
   staminaMaxBonus: 0
+  staminaRegenBonus: 0
   backpackSlotBonus: 8
   toolRangeTiles: 1
   maxStack: 999

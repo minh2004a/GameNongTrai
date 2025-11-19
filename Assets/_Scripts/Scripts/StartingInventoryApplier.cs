@@ -24,7 +24,7 @@ public class StartingInventoryApplier : MonoBehaviour
                 it = itemDB.Find(e.itemKey);
 
             if (!it || e.amount <= 0) continue;
-
+            //
             // Nếu có chỉ định slot hotbar -> đặt thẳng vào hotbar
             if (e.hotbarSlot >= 0)
             {

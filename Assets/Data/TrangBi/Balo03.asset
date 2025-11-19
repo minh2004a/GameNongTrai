@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f32939fd5046c40ac26e4f8a5f218e, type: 3}
   m_Name: Balo03
   m_EditorClassIdentifier: 
-  id: 
-  icon: {fileID: 0}
+  id: "Balo x\u1ECBn"
+  icon: {fileID: 265892939, guid: 31504eb8b38760e438e56464a1faaea2, type: 3}
   seedData: {fileID: 0}
-  category: 0
-  equipSlot: 0
+  category: 6
+  equipSlot: 7
   stackable: 0
   weaponType: 0
-  toolType: 0
+  toolType: 5
   healthRestore: 0
   staminaRestore: 0
   sellPrice: 0
   staminaMaxBonus: 0
   staminaRegenBonus: 0
-  backpackSlotBonus: 0
+  backpackSlotBonus: 12
   toolRangeTiles: 1
   maxStack: 999
   hitboxScale: 1

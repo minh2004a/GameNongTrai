@@ -24,6 +24,7 @@ MonoBehaviour:
   staminaRestore: 0
   sellPrice: 0
   staminaMaxBonus: 30
+  staminaRegenBonus: 5
   backpackSlotBonus: 0
   toolRangeTiles: 1
   maxStack: 999
