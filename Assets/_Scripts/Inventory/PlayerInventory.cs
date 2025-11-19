@@ -8,6 +8,7 @@ using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
+    // Test Commit
     public ItemStack[] hotbar = new ItemStack[8];
     public int selected;
 
